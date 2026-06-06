@@ -19,9 +19,13 @@ type WelcomeMessageArgs = {
   department: string
   position: string
   password?: string
+  appUrl?: string
 }
 
-function getAppUrl() {
+function getAppUrl(appUrl?: string) {
+  if (appUrl) {
+    return appUrl.replace(/\/$/, "")
+  }
   return (
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
     process.env.APP_URL?.replace(/\/$/, "") ||
@@ -29,8 +33,8 @@ function getAppUrl() {
   )
 }
 
-function getLoginUrl() {
-  return `${getAppUrl()}/sign-in`
+function getLoginUrl(appUrl?: string) {
+  return `${getAppUrl(appUrl)}/sign-in`
 }
 
 function escapeHtml(value: string) {
@@ -57,7 +61,7 @@ function companyBrandBlock() {
 function buildLoginDetails(args: WelcomeMessageArgs) {
   const lines = [
     `Login Email: ${args.email}`,
-    `Sign-in URL: ${getLoginUrl()}`,
+    `Sign-in URL: ${getLoginUrl(args.appUrl)}`,
   ]
 
   if (args.password) {
@@ -89,7 +93,7 @@ function buildWelcomeHtml(args: WelcomeMessageArgs) {
   const safeDepartment = escapeHtml(args.department || "N/A")
   const safePosition = escapeHtml(args.position || "N/A")
   const safeJoiningDate = escapeHtml(args.joiningDate)
-  const safeLoginUrl = escapeHtml(getLoginUrl())
+  const safeLoginUrl = escapeHtml(getLoginUrl(args.appUrl))
   const safeEmail = escapeHtml(args.email)
   const safePassword = args.password ? escapeHtml(args.password) : null
 
@@ -188,6 +192,7 @@ export const sendWelcomeEmail = internalAction({
     employeeId: v.string(),
     joiningDate: v.string(),
     password: v.optional(v.string()),
+    appUrl: v.optional(v.string()),
   },
   handler: async (_ctx, args) => {
     return await sendResendEmail({
@@ -200,6 +205,7 @@ export const sendWelcomeEmail = internalAction({
         `Employee ID: ${args.employeeId}`,
         `Login Email: ${args.email}`,
         `Joining Date: ${args.joiningDate}`,
+        ...(args.appUrl ? [`Sign-in URL: ${getLoginUrl(args.appUrl)}`] : []),
         ...(args.password ? [`Temporary Password: ${args.password}`] : []),
         args.password
           ? "You can update your password later from your account settings when that option is available."
@@ -215,6 +221,7 @@ export const sendWelcomeEmail = internalAction({
           <ul>
             <li><strong>Employee ID:</strong> ${args.employeeId}</li>
             <li><strong>Login Email:</strong> ${args.email}</li>
+            ${args.appUrl ? `<li><strong>Sign-in URL:</strong> ${escapeHtml(getLoginUrl(args.appUrl))}</li>` : ''}
             <li><strong>Joining Date:</strong> ${args.joiningDate}</li>
             ${args.password ? `<li><strong>Temporary Password:</strong> ${escapeHtml(args.password)}</li>` : ''}
           </ul>
@@ -235,9 +242,10 @@ export const sendEmployeeOnboarding = internalAction({
     department: v.string(),
     position: v.string(),
     password: v.optional(v.string()),
+    appUrl: v.optional(v.string()),
   },
   handler: async (_ctx, args) => {
-    const loginUrl = getLoginUrl()
+    const loginUrl = getLoginUrl(args.appUrl)
     const emailResult = await sendResendEmail({
       email: args.email,
       subject: `Welcome to SAM MARKET, ${args.fullName}`,

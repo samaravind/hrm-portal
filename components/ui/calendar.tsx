@@ -74,14 +74,15 @@ function CalendarMonthCaption({
 
   const months = Array.from({ length: 12 }, (_, index) => ({
     label: new Intl.DateTimeFormat(undefined, { month: "long" }).format(new Date(2026, index, 1)),
-    value: String(index),
+    value: index,
+    disabled: false,
   }))
 
   const startYear = startMonth.getFullYear()
   const endYear = endMonth.getFullYear()
   const years = Array.from(
     { length: endYear - startYear + 1 },
-    (_, index) => String(startYear + index),
+    (_, index) => startYear + index,
   )
   if (dayPickerProps.reverseYears) {
     years.reverse()
@@ -129,7 +130,7 @@ function CalendarMonthCaption({
           name="year"
           value={yearValue}
           disabled={false}
-          options={years.map((year) => ({ label: year, value: year }))}
+          options={years.map((year) => ({ label: String(year), value: year, disabled: false }))}
           onChange={(event) => goTo(currentMonth.getMonth(), Number(event.target.value))}
         />
       </div>

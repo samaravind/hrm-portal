@@ -16,6 +16,7 @@ export const create = mutation({
     dateOfBirth: v.optional(v.string()),
     address: v.optional(v.string()),
     password: v.optional(v.string()),
+    appUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { password, ...employeeData } = args
@@ -41,6 +42,7 @@ export const create = mutation({
       department: args.department,
       position: args.position,
       password,
+      appUrl: args.appUrl,
     })
 
     return await ctx.db.get(id)

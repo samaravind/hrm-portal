@@ -192,6 +192,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
         employeeType: 'Employee',
         dateOfBirth: form.dateOfBirth || undefined,
         password: form.password,
+        appUrl: window.location.origin,
       })
 
       let notificationWarning: string | null = null
@@ -203,6 +204,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
             fullName: form.fullName.trim(),
             email: form.email.trim(),
             password: form.password,
+            baseUrl: window.location.origin,
           }),
         })
 

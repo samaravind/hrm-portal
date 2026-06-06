@@ -109,7 +109,11 @@ export default function StaffDashboardPage() {
   )
 
   const weekHours = useMemo(
-    () => completedSessionsThisWeek.reduce((total, session) => total + (session.punchOutAt - session.punchInAt), 0),
+    () =>
+      completedSessionsThisWeek.reduce(
+        (total, session) => total + ((session.punchOutAt ?? session.punchInAt) - session.punchInAt),
+        0,
+      ),
     [completedSessionsThisWeek],
   )
 

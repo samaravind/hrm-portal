@@ -29,6 +29,7 @@ type EmployeeInput = {
 export async function POST(req: NextRequest) {
   try {
     const { employees } = await req.json() as { employees: EmployeeInput[] }
+    const appUrl = req.nextUrl.origin
 
     if (!Array.isArray(employees) || employees.length === 0) {
       return NextResponse.json({ error: 'No employees provided.' }, { status: 400 })
@@ -123,6 +124,7 @@ export async function POST(req: NextRequest) {
             dateOfBirth: emp.dateOfBirth,
             address: emp.address,
             password: emp.password,
+            appUrl,
           })
           r.convexRecordCreated = true
         } catch {

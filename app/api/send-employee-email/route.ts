@@ -5,6 +5,7 @@ type Payload = {
   fullName?: string
   email?: string
   password?: string
+  baseUrl?: string
 }
 
 function escapeHtml(value: string) {
@@ -16,7 +17,25 @@ function escapeHtml(value: string) {
     .replace(/'/g, '&#39;')
 }
 
-function getAppUrl() {
+function getAppUrl(baseUrl?: string, req?: NextRequest) {
+  if (baseUrl) {
+    return baseUrl.replace(/\/$/, '')
+  }
+
+  const origin = req?.headers.get('origin')?.trim()
+  if (origin) {
+    return origin.replace(/\/$/, '')
+  }
+
+  const referer = req?.headers.get('referer')?.trim()
+  if (referer) {
+    try {
+      return new URL(referer).origin.replace(/\/$/, '')
+    } catch {
+      // Ignore invalid referer values and fall back to env vars.
+    }
+  }
+
   return (
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ||
     process.env.APP_URL?.replace(/\/$/, '') ||
@@ -110,6 +129,7 @@ export async function POST(req: NextRequest) {
     const email = body.email?.trim()
     const fullName = body.fullName?.trim() || 'there'
     const password = body.password?.trim() || undefined
+    const loginUrl = `${getAppUrl(body.baseUrl, req)}/sign-in`
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required.' }, { status: 400 })
@@ -129,7 +149,6 @@ export async function POST(req: NextRequest) {
     }
 
     const resend = new Resend(apiKey)
-    const loginUrl = `${getAppUrl()}/sign-in`
     const subject = 'Welcome to SAM MARKET'
     const text = [
       `Hello ${fullName},`,
