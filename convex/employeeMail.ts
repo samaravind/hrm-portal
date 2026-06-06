@@ -14,7 +14,6 @@ type ResendEmailArgs = {
 type WelcomeMessageArgs = {
   fullName: string
   email: string
-  phone?: string
   employeeId: string
   joiningDate: string
   department: string
@@ -43,14 +42,6 @@ function escapeHtml(value: string) {
     .replace(/'/g, "&#39;")
 }
 
-function normalizePhoneNumber(phone: string) {
-  const trimmed = phone.trim()
-  if (!trimmed) return null
-  const digits = trimmed.replace(/\D/g, "")
-  if (!digits) return null
-  return `+${digits}`
-}
-
 function companyBrandBlock() {
   return `
     <div style="display:flex;align-items:center;gap:12px;font-family:Arial,Helvetica,sans-serif;">
@@ -71,6 +62,7 @@ function buildLoginDetails(args: WelcomeMessageArgs) {
 
   if (args.password) {
     lines.push(`Temporary Password: ${args.password}`)
+    lines.push(`Password updates: Use the password change option in your account settings when it is available.`)
   }
 
   return lines
@@ -189,74 +181,13 @@ async function sendResendEmail(args: ResendEmailArgs) {
   return { sent: true, messageId: data?.id ?? null }
 }
 
-async function sendWhatsAppMessage(args: WelcomeMessageArgs) {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID
-  const authToken = process.env.TWILIO_AUTH_TOKEN
-  const fromNumber = process.env.TWILIO_WHATSAPP_FROM_NUMBER
-
-  if (!accountSid || !authToken || !fromNumber) {
-    return {
-      sent: false,
-      error:
-        "WhatsApp sending is not configured. Add TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_WHATSAPP_FROM_NUMBER to .env.local.",
-    }
-  }
-
-  const toNumber = args.phone ? normalizePhoneNumber(args.phone) : null
-  if (!toNumber) {
-    return { sent: false, error: "A valid phone number is required for WhatsApp messaging." }
-  }
-
-  const body = [
-    `Hello ${args.fullName},`,
-    "",
-    "Welcome to SAM MARKET. Your employee account is ready.",
-    `Employee ID: ${args.employeeId}`,
-    `Department: ${args.department || "N/A"}`,
-    `Position: ${args.position || "N/A"}`,
-    `Joining Date: ${args.joiningDate}`,
-    `Login Email: ${args.email}`,
-    `Sign-in URL: ${getLoginUrl()}`,
-    args.password ? `Temporary Password: ${args.password}` : "",
-    "",
-    "Please sign in and reach out to the team if you need any help getting started.",
-  ]
-    .filter(Boolean)
-    .join("\n")
-
-  const response = await fetch(
-    `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString("base64")}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        From: `whatsapp:${fromNumber}`,
-        To: `whatsapp:${toNumber}`,
-        Body: body,
-      }).toString(),
-    },
-  )
-
-  const data = await response.json().catch(() => null as null | { message?: string })
-  if (!response.ok) {
-    return {
-      sent: false,
-      error: data?.message ?? "Failed to send WhatsApp message.",
-    }
-  }
-
-  return { sent: true, id: data?.sid ?? null }
-}
-
 export const sendWelcomeEmail = internalAction({
   args: {
     fullName: v.string(),
     email: v.string(),
     employeeId: v.string(),
     joiningDate: v.string(),
+    password: v.optional(v.string()),
   },
   handler: async (_ctx, args) => {
     return await sendResendEmail({
@@ -267,7 +198,12 @@ export const sendWelcomeEmail = internalAction({
         "",
         "Welcome aboard! Your employee record has been created successfully.",
         `Employee ID: ${args.employeeId}`,
+        `Login Email: ${args.email}`,
         `Joining Date: ${args.joiningDate}`,
+        ...(args.password ? [`Temporary Password: ${args.password}`] : []),
+        args.password
+          ? "You can update your password later from your account settings when that option is available."
+          : "A password will be shared separately if required.",
         "",
         "We're excited to have you with us.",
       ].join("\n"),
@@ -278,8 +214,11 @@ export const sendWelcomeEmail = internalAction({
           <p>Your employee record has been created successfully. Here are your onboarding details:</p>
           <ul>
             <li><strong>Employee ID:</strong> ${args.employeeId}</li>
+            <li><strong>Login Email:</strong> ${args.email}</li>
             <li><strong>Joining Date:</strong> ${args.joiningDate}</li>
+            ${args.password ? `<li><strong>Temporary Password:</strong> ${escapeHtml(args.password)}</li>` : ''}
           </ul>
+          <p>You can update your password later from your account settings when that option is available.</p>
           <p>We're excited to have you with us.</p>
         </div>
       `,
@@ -291,7 +230,6 @@ export const sendEmployeeOnboarding = internalAction({
   args: {
     fullName: v.string(),
     email: v.string(),
-    phone: v.optional(v.string()),
     employeeId: v.string(),
     joiningDate: v.string(),
     department: v.string(),
@@ -307,23 +245,15 @@ export const sendEmployeeOnboarding = internalAction({
       html: buildWelcomeHtml(args),
     })
 
-    const whatsappResult = args.phone
-      ? await sendWhatsAppMessage(args)
-      : { sent: false, error: "WhatsApp message skipped because no phone number was provided." }
-
     const warnings: string[] = []
     if (!emailResult.sent) {
       warnings.push("Email was skipped because email service is not configured.")
-    }
-    if (!whatsappResult.sent) {
-      warnings.push(whatsappResult.error)
     }
 
     return {
       ok: true,
       loginUrl,
       emailSent: Boolean(emailResult.sent),
-      whatsappSent: Boolean(whatsappResult.sent),
       warnings: warnings.length ? warnings : undefined,
     }
   },
@@ -333,22 +263,33 @@ export const sendEmployeeEmail = action({
   args: {
     fullName: v.union(v.string(), v.null()),
     email: v.string(),
+    password: v.optional(v.string()),
   },
   handler: async (_ctx, args) => {
+    const passwordLine = args.password ? `Temporary Password: ${args.password}` : null
     return await sendResendEmail({
       email: args.email,
-      subject: `Hello from SAM MARKET`,
+      subject: `Welcome to SAM MARKET`,
       text: [
         `Hi ${args.fullName || "there"},`,
         "",
-        "You received this email from the employee form.",
+        "Your employee account has been created successfully.",
+        `Login Email: ${args.email}`,
+        ...(passwordLine ? [passwordLine] : []),
+        "You can update your password later from your account settings when that option is available.",
+        "",
         "If this was unexpected, you can ignore it.",
       ].join("\n"),
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
-          <h2 style="margin-bottom: 16px;">Hello from SAM MARKET</h2>
+          <h2 style="margin-bottom: 16px;">Welcome to SAM MARKET</h2>
           <p>Hi ${args.fullName || "there"},</p>
-          <p>You received this email from the employee form.</p>
+          <p>Your employee account has been created successfully.</p>
+          <ul>
+            <li><strong>Login Email:</strong> ${args.email}</li>
+            ${passwordLine ? `<li><strong>Temporary Password:</strong> ${escapeHtml(args.password ?? "")}</li>` : ""}
+          </ul>
+          <p>You can update your password later from your account settings when that option is available.</p>
           <p>If this was unexpected, you can ignore it.</p>
         </div>
       `,

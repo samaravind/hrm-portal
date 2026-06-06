@@ -4,7 +4,7 @@ import { Resend } from 'resend'
 type Payload = {
   fullName?: string
   email?: string
-  phone?: string
+  password?: string
 }
 
 function escapeHtml(value: string) {
@@ -24,75 +24,11 @@ function getAppUrl() {
   )
 }
 
-function normalizePhoneNumber(phone: string) {
-  const trimmed = phone.trim()
-  if (!trimmed) return null
-  const digits = trimmed.replace(/\D/g, '')
-  if (!digits) return null
-  return `+${digits}`
-}
-
-async function sendWhatsAppMessage(args: {
-  fullName: string
-  phone?: string
-  loginUrl: string
-}) {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID
-  const authToken = process.env.TWILIO_AUTH_TOKEN
-  const fromNumber = process.env.TWILIO_WHATSAPP_FROM_NUMBER
-
-  if (!accountSid || !authToken || !fromNumber) {
-    return {
-      sent: false,
-      error:
-        'WhatsApp sending is not configured. Add TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_WHATSAPP_FROM_NUMBER to .env.local.',
-    }
-  }
-
-  const toNumber = args.phone ? normalizePhoneNumber(args.phone) : null
-  if (!toNumber) {
-    return { sent: false, error: 'A valid phone number is required for WhatsApp messaging.' }
-  }
-
-  const body = [
-    `Hello ${args.fullName},`,
-    '',
-    'Your joining with SAM MARKET has been confirmed.',
-    `Join now: ${args.loginUrl}`,
-    '',
-    'If you need help, reply to this email and our team will assist you.',
-  ].join('\n')
-
-  const response = await fetch(
-    `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${accountSid}:${authToken}`).toString('base64')}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        From: `whatsapp:${fromNumber}`,
-        To: `whatsapp:${toNumber}`,
-        Body: body,
-      }).toString(),
-    },
-  )
-
-  const data = await response.json().catch(() => null as null | { message?: string })
-  if (!response.ok) {
-    return {
-      sent: false,
-      error: data?.message ?? 'Failed to send WhatsApp message.',
-    }
-  }
-
-  return { sent: true, id: data?.sid ?? null }
-}
-
-function buildWelcomeEmailHtml(fullName: string, loginUrl: string) {
+function buildWelcomeEmailHtml(fullName: string, email: string, loginUrl: string, password?: string) {
   const safeName = escapeHtml(fullName)
+  const safeEmail = escapeHtml(email)
   const safeLoginUrl = escapeHtml(loginUrl)
+  const safePassword = password ? escapeHtml(password) : null
   return `
     <div style="margin:0; padding:0; background:#f4f6fb;">
       <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">
@@ -132,6 +68,9 @@ function buildWelcomeEmailHtml(fullName: string, loginUrl: string) {
                       <p style="margin:0 0 10px; font-size:14px; line-height:1.6; color:#6b7280;">
                         Use the button below to join now and get started.
                       </p>
+                      <p style="margin:0 0 10px; font-size:14px; line-height:1.6; color:#6b7280;"><strong>Login Email:</strong> ${safeEmail}</p>
+                      ${safePassword ? `<p style="margin:0 0 10px; font-size:14px; line-height:1.6; color:#6b7280;"><strong>Temporary Password:</strong> ${safePassword}</p>` : ''}
+                      ${safePassword ? `<p style="margin:0; font-size:14px; line-height:1.6; color:#6b7280;">You can update your password later from your account settings when that option is available.</p>` : ''}
                       <p style="margin:0; font-size:14px; line-height:1.6; color:#6b7280;">
                         If you need help accessing your account, reply to this email and our team will assist you.
                       </p>
@@ -170,7 +109,7 @@ export async function POST(req: NextRequest) {
     const body = (await req.json()) as Payload
     const email = body.email?.trim()
     const fullName = body.fullName?.trim() || 'there'
-    const phone = body.phone?.trim()
+    const password = body.password?.trim() || undefined
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required.' }, { status: 400 })
@@ -196,6 +135,9 @@ export async function POST(req: NextRequest) {
       `Hello ${fullName},`,
       '',
       'Your joining with SAM MARKET has been confirmed.',
+      `Login Email: ${email}`,
+      ...(password ? [`Temporary Password: ${password}`] : []),
+      ...(password ? ['You can update your password later from your account settings when that option is available.'] : []),
       `Join here: ${loginUrl}`,
       '',
       'If you need help, reply to this email and our team will assist you.',
@@ -206,34 +148,22 @@ export async function POST(req: NextRequest) {
       to: [email],
       subject,
       text,
-      html: buildWelcomeEmailHtml(fullName, loginUrl),
+      html: buildWelcomeEmailHtml(fullName, email, loginUrl, password),
     })
 
-    const warnings: string[] = []
     let emailSent = true
     const emailId: string | null = emailResult.data?.id ?? null
 
     if (emailResult.error) {
       emailSent = false
-      warnings.push(emailResult.error.message ?? 'Failed to send email.')
     }
 
-    const whatsappResult = phone
-      ? await sendWhatsAppMessage({ fullName, phone, loginUrl })
-      : { sent: false, error: 'WhatsApp message skipped because no phone number was provided.' }
-
-    if (!whatsappResult.sent) {
-      warnings.push(whatsappResult.error)
-    }
-
-    if (!emailSent && !whatsappResult.sent) {
+    if (!emailSent) {
       return NextResponse.json(
         {
           ok: false,
           emailSent: false,
-          whatsappSent: false,
-          error: warnings[0] ?? 'Failed to send notifications.',
-          warnings,
+          error: emailResult.error?.message ?? 'Failed to send email.',
         },
         { status: 500 },
       )
@@ -243,8 +173,6 @@ export async function POST(req: NextRequest) {
       ok: true,
       emailSent,
       emailId,
-      whatsappSent: whatsappResult.sent,
-      warnings: warnings.length > 0 ? warnings : undefined,
     })
   } catch (err) {
     return NextResponse.json(

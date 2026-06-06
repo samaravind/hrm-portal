@@ -85,7 +85,7 @@ export default function DashboardPage() {
   const [punching, setPunching] = useState(false)
   const [punchError, setPunchError] = useState<string | null>(null)
 
-  const isAdmin = viewer?.role === 'admin'
+  const isAdmin = viewer?.role === 'admin' || user?.publicMetadata?.role === 'admin'
 
   useEffect(() => {
     if (viewer !== undefined && isLoaded && !isAdmin) {

@@ -30,8 +30,8 @@ export function AppHeader() {
     window.location.href = '/sign-in'
   }
   
-  const title = pathname === '/' && !isAdmin
-    ? 'Staff Dashboard'
+  const title = pathname === '/'
+    ? (isAdmin ? 'Admin Dashboard' : 'Staff Dashboard')
     : pathTitles[pathname] ?? pathname.split('/').pop()?.replace(/-/g, ' ') ?? 'Dashboard'
 
   return (

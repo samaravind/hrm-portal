@@ -36,7 +36,6 @@ export const create = mutation({
     ctx.scheduler.runAfter(0, internal.employeeMail.sendEmployeeOnboarding, {
       fullName: args.fullName,
       email: args.email,
-      phone: args.phone,
       employeeId: args.employeeId,
       joiningDate: args.joiningDate,
       department: args.department,
@@ -60,6 +59,7 @@ export const updateEmployee = mutation({
     id: v.id("employees"),
     fullName: v.string(),
     email: v.string(),
+    employeeId: v.string(),
     phone: v.string(),
     department: v.string(),
     position: v.string(),
@@ -96,6 +96,25 @@ export const remove = mutation({
     const employee = await ctx.db.get(args.id)
     if (!employee) throw new Error("Employee not found")
     await ctx.db.delete(args.id)
+    return { deleted: true, email: employee.email }
+  },
+})
+
+export const removeByEmail = mutation({
+  args: {
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const employee = await ctx.db
+      .query("employees")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .unique()
+
+    if (!employee) {
+      return { deleted: false, email: args.email }
+    }
+
+    await ctx.db.delete(employee._id)
     return { deleted: true, email: employee.email }
   },
 })

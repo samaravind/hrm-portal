@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { ConvexHttpClient } from 'convex/browser'
+import { api } from '@/convex/_generated/api'
+import { clerkClient } from '@clerk/nextjs/server'
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,38 +11,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email is required.' }, { status: 400 })
     }
 
-    const CLERK_API = 'https://api.clerk.com/v1'
-    const headers = {
-      Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
-      'Content-Type': 'application/json',
+    const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL
+    if (!convexUrl) {
+      return NextResponse.json(
+        { error: 'NEXT_PUBLIC_CONVEX_URL is not configured.' },
+        { status: 500 }
+      )
     }
 
-    // Look up user by email
-    const lookupRes = await fetch(`${CLERK_API}/users?email_address=${encodeURIComponent(email)}`, { headers })
-    const lookupData = await lookupRes.json()
+    const convex = new ConvexHttpClient(convexUrl)
+    const client = await clerkClient()
 
-    if (!lookupRes.ok) {
-      return NextResponse.json({ error: 'Failed to look up user in Clerk.' }, { status: lookupRes.status })
+    let clerkDeleted = false
+    let clerkMessage = 'User not found in Clerk, skipping.'
+
+    const lookupRes = await client.users.getUserList({ emailAddress: [email] })
+    if (lookupRes.data.length > 0) {
+      const userId = lookupRes.data[0].id
+      await client.users.deleteUser(userId)
+      clerkDeleted = true
+      clerkMessage = 'User deleted from Clerk.'
     }
 
-    if (!lookupData?.data?.length) {
-      return NextResponse.json({ message: 'User not found in Clerk, skipping.' })
-    }
+    const convexResult = await convex.mutation(api.employees.removeByEmail, { email })
 
-    // Delete the user
-    const userId = lookupData.data[0].id
-    const deleteRes = await fetch(`${CLERK_API}/users/${userId}`, {
-      method: 'DELETE',
-      headers,
+    return NextResponse.json({
+      ok: true,
+      clerkDeleted,
+      clerkMessage,
+      employeeDeleted: convexResult.deleted,
     })
-
-    if (!deleteRes.ok) {
-      const errData = await deleteRes.json()
-      const msg = errData?.errors?.[0]?.long_message ?? errData?.errors?.[0]?.message ?? 'Failed to delete user.'
-      return NextResponse.json({ error: msg }, { status: deleteRes.status })
-    }
-
-    return NextResponse.json({ message: 'User deleted from Clerk.' })
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Internal server error' },

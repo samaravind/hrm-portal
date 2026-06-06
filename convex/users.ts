@@ -15,16 +15,11 @@ export const viewer = query({
       )
       .unique()
 
-    const metaRole =
-  (identity.publicMetadata as {
-    role?: "admin" | "staff"
-  })?.role
-
     return {
       name: identity.name ?? null,
       email: identity.email ?? null,
       tokenIdentifier: identity.tokenIdentifier,
-      role: (user?.role === 'admin' || metaRole === 'admin') ? 'admin' : 'staff',
+      role: user?.role === 'admin' ? 'admin' : 'staff',
     }
   },
 })

@@ -3,7 +3,7 @@ import { getPasswordStrength } from '@/lib/password'
 
 export async function POST(req: NextRequest) {
   try {
-    const { fullName, email, password, dateOfBirth, role } = await req.json()
+    const { fullName, email, password, dateOfBirth, role, employeeId } = await req.json()
 
     if (!fullName || !email) {
       return NextResponse.json({ error: 'fullName and email are required.' }, { status: 400 })
@@ -39,11 +39,13 @@ export async function POST(req: NextRequest) {
     if (lookupRes.ok && lookupData?.data?.length > 0) {
       // User exists — update their metadata instead
       const existingUser = lookupData.data[0]
+      const nextRole = role ?? existingUser.public_metadata?.role
       const updateRes = await fetch(`${CLERK_API}/users/${existingUser.id}`, {
         method: 'PATCH',
         headers,
         body: JSON.stringify({
-          public_metadata: { ...(existingUser.public_metadata ?? {}), role },
+          ...(employeeId ? { external_id: employeeId } : {}),
+          ...(nextRole ? { public_metadata: { ...(existingUser.public_metadata ?? {}), role: nextRole } } : {}),
         }),
       })
 
@@ -64,7 +66,8 @@ export async function POST(req: NextRequest) {
       first_name: firstName,
       last_name: lastName,
       email_address: [email],
-      public_metadata: { role },
+      ...(employeeId ? { external_id: employeeId } : {}),
+      ...(role ? { public_metadata: { role } } : {}),
       skip_password_checks: true,
       skip_password_requirement: !password,
     }

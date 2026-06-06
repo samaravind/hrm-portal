@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { ClerkProvider } from '@clerk/nextjs'
 import { ConvexClientProvider } from './convex-client-provider'
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -18,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{
+        <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{
           __html: `
             try {
               var t = localStorage.getItem('theme');

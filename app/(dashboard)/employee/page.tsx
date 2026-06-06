@@ -194,8 +194,34 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
         password: form.password,
       })
 
+      let notificationWarning: string | null = null
+      try {
+        const notificationRes = await fetch('/api/send-employee-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullName: form.fullName.trim(),
+            email: form.email.trim(),
+            password: form.password,
+          }),
+        })
+
+        const notificationData = await notificationRes.json().catch(() => null)
+        if (!notificationRes.ok) {
+          notificationWarning =
+            notificationData?.error ?? 'Employee created, but the welcome email could not be sent.'
+        }
+      } catch {
+        notificationWarning = 'Employee created, but the welcome email could not be sent.'
+      }
+
       setForm(EMPTY_FORM)
-      toast.success('Employee created. Welcome email and WhatsApp message are being sent automatically.')
+      if (notificationWarning) {
+        toast.success('Employee created successfully.')
+        toast.warning(notificationWarning)
+      } else {
+        toast.success('Employee created. Welcome email sent successfully.')
+      }
       onSuccess()
       onClose()
     } catch (err) {
@@ -425,7 +451,6 @@ function EmployeeRow({ employee, sno, role, formatDate, onView, onEdit }: {
 }) {
   const [blocking, setBlocking] = useState(false)
   const toggleBlock = useMutation(api.employees.toggleBlockEmployee)
-  const deleteEmployee = useMutation(api.employees.remove)
   const initials = employee.fullName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
 
   const isBlocked = employee.blocked ?? false
@@ -446,12 +471,25 @@ function EmployeeRow({ employee, sno, role, formatDate, onView, onEdit }: {
 
   const handleDelete = async () => {
     if (!window.confirm(`Are you sure you want to delete ${employee.fullName}?`)) return
-    await fetch('/api/delete-employee', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: employee.email }),
-    })
-    await deleteEmployee({ id: employee._id })
+
+    try {
+      const res = await fetch('/api/delete-employee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: employee.email }),
+      })
+
+      const data = await res.json().catch(() => null)
+      if (!res.ok) {
+        throw new Error(data?.error ?? 'Failed to delete employee.')
+      }
+
+      toast.success(data?.employeeDeleted
+        ? 'Employee deleted from Clerk and the employee list.'
+        : 'Employee deleted from Clerk. No matching employee record was found.')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete employee.')
+    }
   }
 
   return (
@@ -657,13 +695,16 @@ function EditEmployeePanel({ employee, onClose }: {
 }) {
   const updateEmployee = useMutation(api.employees.updateEmployee)
   const [saving, setSaving] = useState(false)
+  const [syncingLogin, setSyncingLogin] = useState(false)
   const [phoneError, setPhoneError] = useState<string | null>(null)
+  const [securityWarning, setSecurityWarning] = useState<string | null>(null)
   const parsedPhone = parseStoredPhone(employee.phone ?? '')
   const initialCountry = COUNTRY_CODES.find((c) => c.value === parsedPhone.code) ?? COUNTRY_CODES[0]
   const [selectedCountryCode, setSelectedCountryCode] = useState(initialCountry.code)
   const [form, setForm] = useState({
     fullName: employee.fullName,
     email: employee.email,
+    employeeId: employee.employeeId,
     phone: parsedPhone.number,
     department: employee.department ?? '',
     position: employee.position,
@@ -671,6 +712,7 @@ function EditEmployeePanel({ employee, onClose }: {
     salary: employee.salary ?? undefined,
     dateOfBirth: employee.dateOfBirth ?? '',
     address: employee.address ?? '',
+    newPassword: '',
   })
 
   const handlePhoneChange = (value: string) => {
@@ -693,12 +735,42 @@ function EditEmployeePanel({ employee, onClose }: {
     const fullPhone = form.phone ? `${selectedCountry.value} ${form.phone}` : ''
     setSaving(true)
     try {
+      const { newPassword, ...profile } = form
       await updateEmployee({
         id: employee._id,
-        ...form,
+        ...profile,
+        employeeId: form.employeeId.trim(),
         phone: fullPhone,
         salary: form.salary ? Number(form.salary) : undefined,
       })
+
+      setSyncingLogin(true)
+      try {
+        const syncRes = await fetch('/api/create-employee', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullName: form.fullName.trim(),
+            email: form.email.trim(),
+            employeeId: form.employeeId.trim(),
+          }),
+        })
+        const syncData = await syncRes.json().catch(() => null)
+        if (!syncRes.ok) {
+          setSecurityWarning(syncData?.error ?? 'User ID saved, but Clerk sync could not be completed.')
+        } else {
+          setSecurityWarning(null)
+        }
+      } catch {
+        setSecurityWarning('User ID saved, but Clerk sync could not be completed.')
+      } finally {
+        setSyncingLogin(false)
+      }
+
+      if (newPassword.trim()) {
+        setSecurityWarning('Password reset flow is ready for the next backend step.')
+      }
+
       onClose()
     } finally {
       setSaving(false)
@@ -720,6 +792,49 @@ function EditEmployeePanel({ employee, onClose }: {
         </div>
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-semibold text-zinc-900">Login & Security</h3>
+                <p className="mt-1 text-xs text-zinc-500">
+                  User ID is editable now. Password reset wiring can plug into this section next.
+                </p>
+              </div>
+              {syncingLogin && (
+                <span className="text-[11px] font-medium text-zinc-500">Syncing...</span>
+              )}
+            </div>
+            <div className="mt-4 space-y-3">
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">User ID</label>
+                <input
+                  type="text"
+                  value={form.employeeId}
+                  onChange={(e) => setForm({ ...form, employeeId: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Password</label>
+                <input
+                  type="password"
+                  value={form.newPassword}
+                  onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
+                  placeholder="Ready for reset flow"
+                  className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-950/20"
+                />
+                <p className="mt-1 text-[11px] text-zinc-400">
+                  This field is in place for the future reset action, so we can connect it to Clerk next.
+                </p>
+              </div>
+            </div>
+            {securityWarning && (
+              <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                {securityWarning}
+              </p>
+            )}
+          </div>
+
           {([
             { label: 'Full Name', key: 'fullName', type: 'text' },
             { label: 'Email', key: 'email', type: 'email' },
@@ -1164,6 +1279,7 @@ export default function EmployeesPage() {
       )}
 
       <AddEmployeePanel
+        key={panelOpen ? 'employee-create-open' : 'employee-create-closed'}
         open={panelOpen}
         onClose={() => setPanelOpen(false)}
         onSuccess={() => {

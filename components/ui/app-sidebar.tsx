@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useQuery } from 'convex/react'
 import { useUser } from '@clerk/nextjs'
+import { useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import {
   Sidebar,
@@ -32,12 +32,13 @@ const staffNavItems = [
   { title: "Dashboard", url: "/staff-dashboard", icon: House },
   { title: "My Attendance", url: "/my-attendance", icon: CalendarCheck2 },
   { title: "Profile", url: "/profile", icon: User },
+  { title: "Settings", url: "/settings", icon: Cog },
 ]
 
 export function AppSidebar() {
   const pathname = usePathname()
-  const viewer = useQuery(api.users.viewer)
   const { user } = useUser()
+  const viewer = useQuery(api.users.viewer)
   const isAdmin = viewer?.role === 'admin' || user?.publicMetadata?.role === 'admin'
 
   const navItems = isAdmin ? adminNavItems : staffNavItems
@@ -49,7 +50,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href={isAdmin ? "/my-attendance" : "/staff-dashboard"}>
+              <Link href={isAdmin ? "/" : "/staff-dashboard"}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <SquareTerminal className="size-4" />
                 </div>

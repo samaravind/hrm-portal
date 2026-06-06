@@ -66,6 +66,7 @@ export default function ProfilePage() {
           id: employee._id,
           fullName: form.fullName,
           email: employee.email,
+          employeeId: employee.employeeId,
           phone: form.phone,
           position: employee.position,
           employeeType: employee.employeeType,
