@@ -17,6 +17,7 @@ import {
 import type { Doc } from '@/convex/_generated/dataModel'
 import { api } from '@/convex/_generated/api'
 import { Pagination } from '@/components/ui/pagination'
+import { DatePicker } from '@/components/ui/date-picker'
 
 const DATE_LOCALE = 'en-US'
 
@@ -440,12 +441,12 @@ function MyAttendanceContent() {
 
             <div className="mt-4 flex items-center gap-4">
               <Calendar className="size-4 text-zinc-400 shrink-0" />
-              <input
-                type="date"
-                value={from}
-                onChange={(e) => setFrom(e.target.value)}
-                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-zinc-400 focus:outline-none"
-              />
+              <div className="w-full max-w-[220px]">
+                <DatePicker
+                  value={from}
+                  onChange={setFrom}
+                />
+              </div>
               {from && (
                 <button
                   onClick={() => setFrom('')}

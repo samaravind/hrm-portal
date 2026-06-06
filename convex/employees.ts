@@ -19,7 +19,7 @@ export const create = mutation({
     appUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { password, ...employeeData } = args
+    const { password, appUrl, ...employeeData } = args
     const existing = await ctx.db
       .query("employees")
       .withIndex("by_employeeId", (q) => q.eq("employeeId", args.employeeId))
@@ -42,7 +42,7 @@ export const create = mutation({
       department: args.department,
       position: args.position,
       password,
-      appUrl: args.appUrl,
+      appUrl,
     })
 
     return await ctx.db.get(id)

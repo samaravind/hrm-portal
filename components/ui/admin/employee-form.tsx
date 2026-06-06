@@ -43,6 +43,14 @@ export default function EmployeeForm({
     })
   }
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 10)
+    setFormData({
+      ...formData,
+      phone: digits,
+    })
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const strength = getPasswordStrength(formData.password)
@@ -163,14 +171,16 @@ export default function EmployeeForm({
                 Phone Number
               </label>
 
-              <Input
-                name="phone"
-                placeholder="+1 234 567 890"
-                value={formData.phone}
-                onChange={handleChange}
-                className="mt-2 h-14 rounded-2xl"
-              />
-            </div>
+            <Input
+              name="phone"
+              placeholder="Enter 10-digit number"
+              value={formData.phone}
+              onChange={handlePhoneChange}
+              inputMode="numeric"
+              maxLength={10}
+              className="mt-2 h-14 rounded-2xl"
+            />
+          </div>
 
             <div>
               <label className="text-sm font-semibold tracking-widest uppercase">

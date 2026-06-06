@@ -32,13 +32,15 @@ function DatePicker({
           variant="outline"
           data-empty={!value}
           className={cn(
-            "w-full justify-start font-normal",
+            "w-full justify-between gap-3 rounded-xl border-zinc-200 bg-white px-3 py-2.5 text-left font-normal text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800",
             "data-[empty=true]:text-muted-foreground",
             className,
           )}
         >
-          <CalendarIcon />
-          {date ? format(date, "PPP") : <span>Pick a date</span>}
+          <span className="flex items-center gap-2">
+            <CalendarIcon className="size-4 shrink-0 text-zinc-500 dark:text-zinc-400" />
+            <span>{date ? format(date, "PPP") : "dd-mm-yyyy"}</span>
+          </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

@@ -16,8 +16,10 @@ export const viewer = query({
       .unique()
 
     return {
-      name: identity.name ?? null,
-      email: identity.email ?? null,
+      name: user?.userName ?? identity.name ?? null,
+      email: identity.email ?? user?.userEmail ?? null,
+      phone: user?.phone ?? null,
+      github: user?.github ?? null,
       tokenIdentifier: identity.tokenIdentifier,
       role: user?.role === 'admin' ? 'admin' : 'staff',
     }
@@ -228,6 +230,92 @@ export const syncNewUser = mutation({
     }
 
     return true
+  },
+})
+
+// Update the current user's editable profile fields.
+export const updateCurrentProfile = mutation({
+  args: {
+    fullName: v.string(),
+    phone: v.string(),
+    github: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) return null
+
+    const sanitizePhone = (value: string) => {
+      const digits = value.replace(/\D/g, '')
+      return digits.length > 10 ? digits.slice(-10) : digits
+    }
+    const phone = sanitizePhone(args.phone)
+
+    let user = await ctx.db
+      .query('users')
+      .withIndex('by_userTokenIdentifier', (q) =>
+        q.eq('userTokenIdentifier', identity.tokenIdentifier)
+      )
+      .unique()
+
+    if (!user && identity.email) {
+      user = await ctx.db
+        .query('users')
+        .withIndex('by_userEmail', (q) => q.eq('userEmail', identity.email!))
+        .unique()
+    }
+
+    const patch: {
+      userTokenIdentifier?: string
+      userName: string
+      userEmail?: string
+      phone?: string
+      github?: string
+    } = {
+      userName: args.fullName,
+    }
+
+    if (!user) {
+      patch.userTokenIdentifier = identity.tokenIdentifier
+      if (identity.email) patch.userEmail = identity.email
+    } else if (user.userTokenIdentifier !== identity.tokenIdentifier) {
+      patch.userTokenIdentifier = identity.tokenIdentifier
+    }
+
+    if (phone) patch.phone = phone
+    if (args.github.trim()) patch.github = args.github.trim()
+
+    if (user) {
+      await ctx.db.patch(user._id, patch)
+    } else {
+      await ctx.db.insert('users', {
+        userTokenIdentifier: identity.tokenIdentifier,
+        userName: args.fullName,
+        userEmail: identity.email ?? null,
+        phone: phone || undefined,
+        github: args.github.trim() || undefined,
+        role: 'staff',
+      })
+    }
+
+    if (identity.email) {
+      const employee = await ctx.db
+        .query('employees')
+        .withIndex('by_email', (q) => q.eq('email', identity.email!))
+        .unique()
+
+      if (employee) {
+        await ctx.db.patch(employee._id, {
+          fullName: args.fullName,
+          phone,
+        })
+      }
+    }
+
+    return {
+      fullName: args.fullName,
+      phone,
+      github: args.github,
+    }
   },
 })
 

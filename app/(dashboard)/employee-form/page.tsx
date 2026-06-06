@@ -268,6 +268,7 @@ export default function EmployeeFormPage() {
                     name="phone"
                     type="text"
                     inputMode="numeric"
+                    maxLength={10}
                     required
                     value={form.phone}
                     onChange={handlePhoneChange}

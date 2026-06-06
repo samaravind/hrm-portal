@@ -11,6 +11,8 @@ export default defineSchema({
 
   phone: v.optional(v.string()),
 
+  github: v.optional(v.string()),
+
   dob: v.optional(v.string()),
 
   role: v.union(
@@ -45,6 +47,7 @@ export default defineSchema({
     dateOfBirth: v.optional(v.string()),
     address: v.optional(v.string()),
     blocked: v.optional(v.boolean()),
+    appUrl: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_email", ["email"])

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
+import { BrandMark } from '@/components/ui/brand-mark'
 import {
   Sidebar,
   SidebarContent,
@@ -16,24 +17,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
 } from "@/components/ui/sidebar"
-import { House, Cog, CalendarCheck2, SquareTerminal, Users, User, UserCheck2 } from "lucide-react"
-
-const adminNavItems = [
-  { title: "Dashboard", url: "/", icon: House },
-  { title: "Employees", url: "/employee", icon: Users },
-  { title: "My Attendance", url: "/my-attendance", icon: UserCheck2 },
-  { title: "Employee Attendance", url: "/attendance", icon: CalendarCheck2 },
-  { title: "Settings", url: "/settings", icon: Cog },
-]
-
-const staffNavItems = [
-  { title: "Dashboard", url: "/staff-dashboard", icon: House },
-  { title: "My Attendance", url: "/my-attendance", icon: CalendarCheck2 },
-  { title: "Profile", url: "/profile", icon: User },
-  { title: "Settings", url: "/settings", icon: Cog },
-]
+import { Cog } from "lucide-react"
+import { getNavItems } from "@/components/ui/navigation-items"
 
 export function AppSidebar() {
   const pathname = usePathname()
@@ -41,20 +27,17 @@ export function AppSidebar() {
   const viewer = useQuery(api.users.viewer)
   const isAdmin = viewer?.role === 'admin' || user?.publicMetadata?.role === 'admin'
 
-  const navItems = isAdmin ? adminNavItems : staffNavItems
-  const showAccountSection = isAdmin
+  const navItems = getNavItems(isAdmin)
 
   return (
     <Sidebar variant="inset" collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className="border-b border-white/5 md:border-b-0">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href={isAdmin ? "/" : "/staff-dashboard"}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <SquareTerminal className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
+                <BrandMark className="size-8" />
+                <div className="hidden grid flex-1 text-left text-sm leading-tight md:grid">
                   <span className="truncate font-semibold">SAM MARKET</span>
                   <span className="truncate text-xs">Description Provided</span>
                 </div>
@@ -64,7 +47,7 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="hidden md:flex">
         <SidebarGroup>
           <SidebarGroupLabel>{isAdmin ? 'Navigation' : 'Menu'}</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -87,30 +70,10 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {showAccountSection && (
-          <>
-            <SidebarSeparator />
-            <SidebarGroup>
-              <SidebarGroupLabel>Account</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild tooltip="Profile">
-                      <Link href="/profile">
-                        <House />
-                        <span>Profile</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
-        )}
       </SidebarContent>
 
       {isAdmin && (
-        <SidebarFooter>
+        <SidebarFooter className="hidden md:flex">
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>

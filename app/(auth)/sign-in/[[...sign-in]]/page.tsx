@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { SignIn } from '@clerk/nextjs'
-import { Store } from 'lucide-react'
+import { BrandMark } from '@/components/ui/brand-mark'
 
 function createSeededRandom(seed: number) {
   return () => {
@@ -56,9 +56,7 @@ export default function SignInPage() {
       <div className="relative w-full max-w-sm animate-in fade-in duration-500">
         {/* Brand */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 shadow-lg shadow-violet-500/30 animate-[float_6s_ease-in-out_infinite]">
-            <Store className="size-8 text-white" />
-          </div>
+          <BrandMark className="mx-auto mb-4 size-16 shadow-lg shadow-black/30 animate-[float_6s_ease-in-out_infinite]" />
           <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-violet-200 via-fuchsia-200 to-pink-200 bg-clip-text text-transparent">
             SAM MARKET
           </h1>

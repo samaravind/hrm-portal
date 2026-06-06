@@ -16,6 +16,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const publishableKey =
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -30,7 +33,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <ThemeProvider>
-          <ClerkProvider>
+          <ClerkProvider publishableKey={publishableKey}>
             <ConvexClientProvider>
               <TooltipProvider>
                 {children}

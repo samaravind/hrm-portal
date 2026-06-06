@@ -8,6 +8,7 @@ import { api } from '@/convex/_generated/api'
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/ui/app-sidebar"
 import { AppHeader } from "@/components/ui/app-header"
+import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav"
 import { CartProvider } from '@/lib/cart-context'
 import { Toaster } from '@/components/ui/sonner'
 
@@ -27,9 +28,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <AppSidebar />
         <SidebarInset>
           <AppHeader />
-          <main className="flex-1 overflow-y-auto p-6">
+          <main className="flex-1 overflow-y-auto p-4 pb-24 md:p-6 md:pb-6">
             {children}
           </main>
+          <MobileBottomNav />
           <Toaster richColors />
         </SidebarInset>
       </SidebarProvider>

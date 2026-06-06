@@ -356,6 +356,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                     name="phone"
                     type="text"
                     inputMode="numeric"
+                    maxLength={10}
                     value={form.phone}
                     onChange={(e) => {
                       const value = e.target.value.replace(/\D/g, "")
@@ -892,6 +893,7 @@ function EditEmployeePanel({ employee, onClose }: {
                     <input
                       type="text"
                       inputMode="numeric"
+                      maxLength={10}
                       value={form.phone}
                       onChange={(e) => handlePhoneChange(e.target.value)}
                       className={`flex-1 rounded-lg border px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-950/20 ${phoneError ? 'border-rose-300' : 'border-zinc-200'}`}
