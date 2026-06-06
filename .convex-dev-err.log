@@ -1,0 +1,38 @@
+- Preparing Convex functions...
+
+[36mA minor update is available for Convex[39m [2m(1.39.1 → 1.40.0)[22m
+[2mChangelog:[22m [4mhttps://github.com/get-convex/convex-js/blob/main/CHANGELOG.md#changelog[24m
+[32m√[39m 12:14:30 Convex functions ready! (4.45s)
+4/6/2026, 12:14:36 pm [CONVEX M(users:setUserRoleByEmail)] Uncaught Error: Not authenticated
+    at handler (../convex/users.ts:134:29)
+
+- Preparing Convex functions...
+
+[32m√[39m 12:25:57 Convex functions ready! (4.79s)
+4/6/2026, 12:32:24 pm [CONVEX M(users:setUserRoleByEmail)] Uncaught Error: Not authenticated
+    at handler (../convex/users.ts:134:29)
+
+4/6/2026, 1:03:04 pm [CONVEX M(users:setUserRoleByEmail)] Uncaught Error: Not authenticated
+    at handler (../convex/users.ts:134:29)
+
+4/6/2026, 2:02:07 pm [CONVEX M(users:setUserRoleByEmail)] Uncaught Error: Not authenticated
+    at handler (../convex/users.ts:134:29)
+
+4/6/2026, 2:02:10 pm [CONVEX M(users:setUserRoleByEmail)] Uncaught Error: Not authenticated
+    at handler (../convex/users.ts:134:29)
+
+4/6/2026, 2:02:13 pm [CONVEX M(users:setUserRoleByEmail)] Uncaught Error: Not authenticated
+    at handler (../convex/users.ts:134:29)
+
+4/6/2026, 2:02:16 pm [CONVEX M(users:setUserRoleByEmail)] Uncaught Error: Not authenticated
+    at handler (../convex/users.ts:134:29)
+
+4/6/2026, 2:02:24 pm [CONVEX M(users:setUserRoleByEmail)] Uncaught Error: Not authenticated
+    at handler (../convex/users.ts:134:29)
+
+- Preparing Convex functions...
+
+[32m√[39m 15:40:34 Convex functions ready! (6.27s)
+- Preparing Convex functions...
+
+[32m√[39m 17:15:41 Convex functions ready! (5.52s)

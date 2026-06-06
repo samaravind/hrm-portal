@@ -1,0 +1,52 @@
+import { defineSchema, defineTable } from "convex/server"
+import { v } from "convex/values"
+
+export default defineSchema({
+  users: defineTable({
+  userTokenIdentifier: v.string(),
+
+  userName: v.union(v.string(), v.null()),
+
+  userEmail: v.union(v.string(), v.null()),
+
+  phone: v.optional(v.string()),
+
+  dob: v.optional(v.string()),
+
+  role: v.union(
+    v.literal("admin"),
+    v.literal("staff")
+  ),
+}).index("by_userTokenIdentifier", ["userTokenIdentifier"])
+  .index("by_userEmail", ["userEmail"]),
+
+  attendanceSessions: defineTable({
+    userTokenIdentifier: v.string(),
+    userName: v.union(v.string(), v.null()),
+    userEmail: v.union(v.string(), v.null()),
+    dateKey: v.string(),
+    punchInAt: v.number(),
+    punchOutAt: v.union(v.number(), v.null()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_userTokenIdentifier_and_dateKey", ["userTokenIdentifier", "dateKey"])
+    .index("by_userEmail", ["userEmail"]),
+
+  employees: defineTable({
+    fullName: v.string(),
+    email: v.string(),
+    phone: v.string(),
+    department: v.string(),
+    position: v.string(),
+    employeeId: v.string(),
+    joiningDate: v.string(),
+    employeeType: v.string(),
+    salary: v.optional(v.number()),
+    dateOfBirth: v.optional(v.string()),
+    address: v.optional(v.string()),
+    blocked: v.optional(v.boolean()),
+    createdAt: v.number(),
+  })
+    .index("by_email", ["email"])
+    .index("by_employeeId", ["employeeId"]),
+})

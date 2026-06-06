@@ -1,0 +1,216 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { getPasswordStrength } from "@/lib/password"
+
+type EmployeeFormProps = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+export default function EmployeeForm({
+  open,
+  onOpenChange,
+}: EmployeeFormProps) {
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    phone: "",
+    dob: "",
+    address: "",
+  })
+
+  useEffect(() => {
+    if (!open) {
+      setPasswordError(null)
+    }
+  }, [open])
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (e.target.name === "password") {
+      setPasswordError(null)
+    }
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    })
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const strength = getPasswordStrength(formData.password)
+    if (!strength.isStrong) {
+      setPasswordError("Password is weak. Use uppercase, lowercase, numbers, and symbols.")
+      return
+    }
+
+    console.log(formData)
+
+    // later connect convex here
+
+    onOpenChange(false)
+  }
+
+  const passwordStrength = getPasswordStrength(formData.password)
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="w-[450px] sm:w-[540px] overflow-y-auto"
+      >
+        <SheetHeader>
+          <SheetTitle className="text-4xl font-bold">
+            Add New Employee
+          </SheetTitle>
+
+          <p className="text-gray-500 mt-3">
+            Enter the employee details below to add
+            them to the system.
+          </p>
+        </SheetHeader>
+
+        <form
+          onSubmit={handleSubmit}
+          className="mt-8 space-y-6"
+        >
+          {/* Full Name */}
+          <div>
+            <label className="text-sm font-semibold tracking-widest uppercase">
+              Full Name
+            </label>
+
+            <Input
+              name="fullName"
+              placeholder="John Doe"
+              value={formData.fullName}
+              onChange={handleChange}
+              className="mt-2 h-14 rounded-2xl"
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="text-sm font-semibold tracking-widest uppercase">
+              Email Address
+            </label>
+
+            <Input
+              type="email"
+              name="email"
+              placeholder="john@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              className="mt-2 h-14 rounded-2xl"
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="text-sm font-semibold tracking-widest uppercase">
+              Password
+            </label>
+
+            <Input
+              type="password"
+              name="password"
+              placeholder="********"
+              value={formData.password}
+              onChange={handleChange}
+              className="mt-2 h-14 rounded-2xl"
+            />
+
+            <div className="mt-2 space-y-2">
+              <div className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${passwordStrength.isStrong ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                {passwordStrength.label} password
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100">
+                <div
+                  className={`h-full rounded-full transition-all ${passwordStrength.isStrong ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                  style={{ width: `${Math.max((passwordStrength.score / passwordStrength.total) * 100, formData.password ? 18 : 0)}%` }}
+                />
+              </div>
+              <ul className="grid gap-1 text-[11px] text-zinc-500">
+                {passwordStrength.criteria.map((criterion) => (
+                  <li key={criterion.label} className={`flex items-center gap-2 ${criterion.met ? 'text-emerald-600' : ''}`}>
+                    <span className={`inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${criterion.met ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-100 text-zinc-400'}`}>
+                      {criterion.met ? '+' : '-'}
+                    </span>
+                    {criterion.label}
+                  </li>
+                ))}
+              </ul>
+              <p className={`text-[11px] font-medium ${passwordStrength.isStrong ? 'text-emerald-600' : 'text-amber-600'}`}>
+                {passwordStrength.message}
+              </p>
+            </div>
+            {passwordError && (
+              <p className="mt-1 text-[11px] text-rose-500">{passwordError}</p>
+            )}
+          </div>
+
+          {/* Phone + DOB */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-semibold tracking-widest uppercase">
+                Phone Number
+              </label>
+
+              <Input
+                name="phone"
+                placeholder="+1 234 567 890"
+                value={formData.phone}
+                onChange={handleChange}
+                className="mt-2 h-14 rounded-2xl"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold tracking-widest uppercase">
+                Date Of Birth
+              </label>
+
+              <Input
+                type="date"
+                name="dob"
+                value={formData.dob}
+                onChange={handleChange}
+                className="mt-2 h-14 rounded-2xl"
+              />
+            </div>
+          </div>
+
+          {/* Address */}
+          <div>
+            <label className="text-sm font-semibold tracking-widest uppercase">
+              Home Address
+            </label>
+
+            <Input
+              name="address"
+              placeholder="Enter address"
+              value={formData.address}
+              onChange={handleChange}
+              className="mt-2 h-14 rounded-2xl"
+            />
+          </div>
+
+          {/* Button */}
+          <Button
+            type="submit"
+            className="w-full h-14 rounded-2xl text-lg"
+          >
+            Add Employee
+          </Button>
+        </form>
+      </SheetContent>
+    </Sheet>
+  )
+}

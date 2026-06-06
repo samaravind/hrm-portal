@@ -29,6 +29,30 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Email Setup
+
+The employee form has a `Send Email` button that uses Resend.
+
+For the button to work in the Next.js API route, add these to `.env.local`:
+
+```bash
+RESEND_API_KEY=re_xxxxxxxxx
+RESEND_FROM_EMAIL="SAM MARKET <onboarding@yourdomain.com>"
+```
+
+If you also want the automatic welcome email after employee creation to send from Convex, set the same variables in your Convex deployment too:
+
+```bash
+npx convex env set RESEND_API_KEY
+npx convex env set RESEND_FROM_EMAIL
+```
+
+You can also sync local values into Convex with:
+
+```bash
+npx convex env set --from-file .env.local
+```
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
