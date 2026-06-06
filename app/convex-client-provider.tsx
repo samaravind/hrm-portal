@@ -12,9 +12,7 @@ import { useAuth } from "@clerk/nextjs";
 
 function createConvexClient() {
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL
-  if (!convexUrl) {
-    throw new Error('NEXT_PUBLIC_CONVEX_URL is not set.')
-  }
+  if (!convexUrl) return null
   return new ConvexReactClient(convexUrl)
 }
 
@@ -24,6 +22,10 @@ export function ConvexClientProvider({
   children: ReactNode;
 }) {
   const convex = useMemo(() => createConvexClient(), [])
+
+  if (!convex) {
+    return <>{children}</>
+  }
 
   return (
     <ConvexProviderWithClerk
