@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Resend } from 'resend'
 
 type Payload = {
   fullName?: string
@@ -148,7 +147,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const resend = new Resend(apiKey)
     const subject = 'Welcome to SAM MARKET'
     const text = [
       `Hello ${fullName},`,
@@ -162,27 +160,30 @@ export async function POST(req: NextRequest) {
       'If you need help, reply to this email and our team will assist you.',
     ].join('\n')
 
-    const emailResult = await resend.emails.send({
-      from: fromEmail,
-      to: [email],
-      subject,
-      text,
-      html: buildWelcomeEmailHtml(fullName, email, loginUrl, password),
+    const emailResult = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: fromEmail,
+        to: [email],
+        subject,
+        text,
+        html: buildWelcomeEmailHtml(fullName, email, loginUrl, password),
+      }),
     })
 
-    let emailSent = true
-    const emailId: string | null = emailResult.data?.id ?? null
+    const emailJson = await emailResult.json().catch(() => null)
+    const emailId: string | null = emailJson?.id ?? null
 
-    if (emailResult.error) {
-      emailSent = false
-    }
-
-    if (!emailSent) {
+    if (!emailResult.ok) {
       return NextResponse.json(
         {
           ok: false,
           emailSent: false,
-          error: emailResult.error?.message ?? 'Failed to send email.',
+          error: emailJson?.message ?? emailJson?.error ?? 'Failed to send email.',
         },
         { status: 500 },
       )
@@ -190,7 +191,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       ok: true,
-      emailSent,
+      emailSent: true,
       emailId,
     })
   } catch (err) {

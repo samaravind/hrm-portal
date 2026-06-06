@@ -11,7 +11,6 @@ import { Pagination } from '@/components/ui/pagination'
 import { DatePicker } from '@/components/ui/date-picker'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import * as XLSX from 'xlsx'
 import { getPasswordStrength } from '@/lib/password'
 
 const COUNTRY_CODES = [
@@ -991,10 +990,31 @@ export default function EmployeesPage() {
   const handleImport = async (file: File) => {
     setImporting(true)
     try {
-      const data = await file.arrayBuffer()
-      const workbook = XLSX.read(data, { type: 'array' })
-      const sheet = workbook.Sheets[workbook.SheetNames[0]]
-      const rows = XLSX.utils.sheet_to_json<Record<string, string>>(sheet) as Record<string, unknown>[]
+      if (!file.name.toLowerCase().endsWith('.csv')) {
+        alert('Only CSV files are supported for import right now.')
+        return
+      }
+
+      const text = await file.text()
+      const lines = text
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+
+      if (lines.length === 0) {
+        alert('The CSV file is empty.')
+        return
+      }
+
+      const headers = lines[0].split(',').map((header) => header.trim())
+      const rows = lines.slice(1).map((line) => {
+        const values = line.split(',')
+        const row: Record<string, string> = {}
+        headers.forEach((header, index) => {
+          row[header] = (values[index] ?? '').trim()
+        })
+        return row
+      })
 
       const employees: {
         fullName: string; email: string; password: string; dateOfBirth?: string; role: 'admin' | 'staff'
@@ -1180,7 +1200,7 @@ export default function EmployeesPage() {
           <input
             id="csvInput"
             type="file"
-            accept=".csv,.xlsx,.xls"
+            accept=".csv"
             className="hidden"
             onChange={(e) => {
               const file = e.target.files?.[0]

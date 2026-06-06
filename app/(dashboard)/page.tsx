@@ -12,10 +12,6 @@ import {
   BarChart3, PieChart, UserX, Bell,
   UserCheck, Wallet, Medal,
 } from 'lucide-react'
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart as RePieChart, Pie, Cell, Legend,
-} from 'recharts'
 
 const DEPT_COLORS = ['#6366f1', '#8b5cf6', '#a855f7', '#0ea5e9', '#14b8a6', '#f59e0b', '#ef4444', '#ec4899']
 
@@ -587,32 +583,25 @@ export default function DashboardPage() {
               <BarChart3 className="size-4 text-zinc-500" />
               <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Weekly Attendance</h3>
             </div>
-            <div className="h-44">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={weeklyTrend}>
-                  <XAxis
-                    dataKey="date"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 11, fill: '#a1a1aa' }}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 11, fill: '#a1a1aa' }}
-                    allowDecimals={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: '8px',
-                      border: '1px solid #e4e4e7',
-                      fontSize: '12px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                    }}
-                  />
-                  <Bar dataKey="punches" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={32} />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="space-y-3">
+              {weeklyTrend.map((day) => {
+                const maxPunches = Math.max(...weeklyTrend.map((item) => item.punches), 1)
+                const width = `${Math.max((day.punches / maxPunches) * 100, day.punches ? 8 : 0)}%`
+                return (
+                  <div key={day.fullDate} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+                      <span>{day.date}</span>
+                      <span>{day.punches}</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                      <div
+                        className="h-full rounded-full bg-indigo-500"
+                        style={{ width }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
 
@@ -623,32 +612,28 @@ export default function DashboardPage() {
                 <PieChart className="size-4 text-zinc-500" />
                 <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Departments</h3>
               </div>
-              <div className="h-44">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RePieChart>
-                    <Pie
-                      data={deptDistribution}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={44}
-                      outerRadius={68}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {deptDistribution.map((entry) => (
-                        <Cell key={entry.name} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Legend
-                      verticalAlign="bottom"
-                      iconType="circle"
-                      iconSize={6}
-                      formatter={(value: string) => (
-                        <span style={{ fontSize: '11px', color: '#71717a' }}>{value}</span>
-                      )}
-                    />
-                  </RePieChart>
-                </ResponsiveContainer>
+              <div className="space-y-3">
+                {deptDistribution.map((entry) => {
+                  const maxValue = Math.max(...deptDistribution.map((item) => item.value), 1)
+                  const width = `${Math.max((entry.value / maxValue) * 100, entry.value ? 8 : 0)}%`
+                  return (
+                    <div key={entry.name} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+                        <span className="flex items-center gap-2">
+                          <span className="size-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                          {entry.name}
+                        </span>
+                        <span>{entry.value}</span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width, backgroundColor: entry.color }}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}
