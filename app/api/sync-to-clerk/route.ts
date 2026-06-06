@@ -9,11 +9,18 @@ const CLERK_HEADERS = {
 }
 const CLERK_INSTANCE = 'https://touched-foxhound-58.clerk.accounts.dev'
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+function getConvexClient() {
+  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL
+  if (!convexUrl) {
+    throw new Error('NEXT_PUBLIC_CONVEX_URL is not set.')
+  }
+  return new ConvexHttpClient(convexUrl)
+}
 
 export async function POST(req: NextRequest) {
   try {
     const { employees } = await req.json() as { employees: { fullName: string; email: string; role: 'admin' | 'staff' }[] }
+    const convex = getConvexClient()
 
     if (!Array.isArray(employees) || employees.length === 0) {
       return NextResponse.json({ ok: 0, fail: 0, results: [] })
