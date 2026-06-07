@@ -91,7 +91,7 @@ function Field({ label, required, children }: {
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[10px] font-bold uppercase tracking-widest text-white/35">
+      <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-white/35">
         {label}{required && <span className="text-rose-500 ml-0.5">*</span>}
       </label>
       {children}
@@ -99,7 +99,8 @@ function Field({ label, required, children }: {
   )
 }
 
-const inputCls = 'w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2.5 text-sm text-white placeholder:text-white/35 focus:border-white/25 focus:outline-none transition'
+const inputCls =
+  'w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none transition dark:border-white/10 dark:bg-[#111111] dark:text-white dark:placeholder:text-white/35 dark:focus:border-white/25'
 
 // ─── Slide-in Panel ───────────────────────────────────────────────────────────
 
@@ -235,13 +236,13 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
 
   return (
     <>
-      {open && <div className="fixed inset-0 z-40 bg-black/20" onClick={onClose} />}
+      {open && <div className="fixed inset-0 z-40 bg-black/20 dark:bg-black/20" onClick={onClose} />}
 
-      <aside className={`fixed right-0 top-0 z-50 h-full w-[380px] border-l border-white/10 bg-[#0b0b0b] shadow-none transition-transform duration-300 ease-in-out flex flex-col ${open ? 'translate-x-0' : 'translate-x-full'}`}>
+      <aside className={`fixed right-0 top-0 z-50 flex h-full w-[380px] flex-col border-l border-zinc-200 bg-white shadow-2xl transition-transform duration-300 ease-in-out dark:border-white/10 dark:bg-[#0b0b0b] ${open ? 'translate-x-0' : 'translate-x-full'}`}>
         {/* Header */}
-        <div className="px-6 pt-8 pb-4 border-b border-white/10">
-          <h2 className="text-xl font-bold text-white">Add New Employee</h2>
-          <p className="mt-1 text-sm text-white/55">
+        <div className="border-b border-zinc-200 px-6 pb-4 pt-8 dark:border-white/10">
+          <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Add New Employee</h2>
+          <p className="mt-1 text-sm text-zinc-500 dark:text-white/55">
             Enter the employee details below to add them to the system.
           </p>
         </div>
@@ -251,7 +252,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
           <form id="employee-form" onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
 
             {/* Personal Information */}
-            <div className="flex items-center gap-2 text-sm font-semibold text-white/80 pb-1">
+            <div className="flex items-center gap-2 pb-1 text-sm font-semibold text-zinc-700 dark:text-white/80">
               <User className="size-4" />
               Personal Information
             </div>
@@ -277,35 +278,35 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                   className={inputCls + ' pr-10'}
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/35 hover:text-white/70">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:text-white/35 dark:hover:text-white/70">
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
               <div className="mt-2 space-y-2">
-                <div className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${passwordStrength.isStrong ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'}`}>
+                <div className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${passwordStrength.isStrong ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' : 'bg-amber-500/15 text-amber-700 dark:text-amber-300'}`}>
                   {passwordStrength.label} password
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                <div className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-white/10">
                   <div
                     className={`h-full rounded-full transition-all ${passwordStrength.isStrong ? 'bg-emerald-500' : 'bg-amber-500'}`}
                     style={{ width: `${Math.max((passwordStrength.score / passwordStrength.total) * 100, form.password ? 18 : 0)}%` }}
                   />
                 </div>
-                <ul className="grid gap-1 text-[11px] text-white/45">
+                <ul className="grid gap-1 text-[11px] text-zinc-500 dark:text-white/45">
                   {passwordStrength.criteria.map((criterion) => (
-                    <li key={criterion.label} className={`flex items-center gap-2 ${criterion.met ? 'text-emerald-300' : ''}`}>
-                      <span className={`inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${criterion.met ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/10 text-white/30'}`}>
+                    <li key={criterion.label} className={`flex items-center gap-2 ${criterion.met ? 'text-emerald-700 dark:text-emerald-300' : ''}`}>
+                      <span className={`inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${criterion.met ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' : 'bg-zinc-100 text-zinc-400 dark:bg-white/10 dark:text-white/30'}`}>
                         {criterion.met ? '+' : '-'}
                       </span>
                       {criterion.label}
                     </li>
                   ))}
                 </ul>
-                <p className={`text-[11px] font-medium ${passwordStrength.isStrong ? 'text-emerald-300' : 'text-amber-300'}`}>
+                <p className={`text-[11px] font-medium ${passwordStrength.isStrong ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'}`}>
                   {passwordStrength.message}
                 </p>
               </div>
-              {passwordError && <p className="text-[11px] text-rose-300 mt-1">{passwordError}</p>}
+              {passwordError && <p className="mt-1 text-[11px] text-rose-500 dark:text-rose-300">{passwordError}</p>}
             </Field>
 
             <Field label="Phone Number">
@@ -316,7 +317,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                     setForm((prev) => ({ ...prev, countryCode: val }))
                   }
                 >
-                  <SelectTrigger className="w-[110px]">
+                  <SelectTrigger className="w-[110px] border-zinc-200 bg-white text-zinc-900 dark:border-white/10 dark:bg-[#111111] dark:text-white">
                     <SelectValue>
                       {(() => {
                         const selected = COUNTRY_CODES.find((c) => c.code === form.countryCode) ?? COUNTRY_CODES.find((c) => c.value === form.countryCode) ?? COUNTRY_CODES[0]
@@ -325,7 +326,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                             <img
                               src={`https://flagcdn.com/w40/${selected.code.toLowerCase()}.png`}
                               alt={selected.code}
-                              className="w-5 h-3.5 object-cover rounded-xs border border-white/10"
+                              className="h-3.5 w-5 rounded-xs border border-zinc-200 object-cover dark:border-white/10"
                             />
                             <span className="text-sm font-medium">{selected.value}</span>
                           </div>
@@ -341,10 +342,10 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                           <img
                             src={`https://flagcdn.com/w40/${c.code.toLowerCase()}.png`}
                             alt={c.code}
-                            className="w-5 h-3.5 object-cover rounded-xs border border-white/10"
+                            className="h-3.5 w-5 rounded-xs border border-zinc-200 object-cover dark:border-white/10"
                           />
-                          <span className="text-xs text-white/45 font-semibold uppercase">{c.code}</span>
-                          <span className="text-white/70 font-medium">{c.value}</span>
+                          <span className="text-xs font-semibold uppercase text-zinc-500 dark:text-white/45">{c.code}</span>
+                          <span className="font-medium text-zinc-700 dark:text-white/70">{c.value}</span>
                         </div>
                       </SelectItem>
                     ))}
@@ -367,10 +368,10 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                         }))
                       }
                     }}
-                    placeholder="Enter 10-digit number" className={`w-full rounded-lg border bg-[#111111] px-3 py-2.5 text-sm text-white placeholder:text-white/35 focus:outline-none transition ${phoneError ? 'border-rose-300 focus:border-rose-400' : 'border-white/10 focus:border-white/25'}`} />
+                    placeholder="Enter 10-digit number" className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition dark:bg-[#111111] dark:text-white dark:placeholder:text-white/35 ${phoneError ? 'border-rose-300 focus:border-rose-400 dark:border-rose-300' : 'border-zinc-200 focus:border-zinc-400 dark:border-white/10 dark:focus:border-white/25'}`} />
                 </div>
               </div>
-              {phoneError && <p className="text-[11px] text-rose-300 mt-1">{phoneError}</p>}
+              {phoneError && <p className="mt-1 text-[11px] text-rose-500 dark:text-rose-300">{phoneError}</p>}
             </Field>
 
             <div className="grid grid-cols-2 gap-3">
@@ -385,10 +386,10 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
               </Field>
             </div>
 
-            <div className="border-t border-white/10 pt-1" />
+            <div className="border-t border-zinc-200 pt-1 dark:border-white/10" />
 
             {/* Role */}
-            <div className="flex items-center gap-2 text-sm font-semibold text-white/80 pb-1">
+            <div className="flex items-center gap-2 pb-1 text-sm font-semibold text-zinc-700 dark:text-white/80">
               <Shield className="size-4" />
               Role & Access
             </div>
@@ -401,8 +402,8 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                     type="button"
                     onClick={() => setForm((p) => ({ ...p, role: r }))}
                     className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition cursor-pointer ${form.role === r
-                      ? 'border-white/20 bg-white/10 text-white'
-                      : 'border-white/10 bg-[#111111] text-white/70 hover:border-white/25'
+                      ? 'border-zinc-900 bg-zinc-900 text-white dark:border-white/20 dark:bg-white/10 dark:text-white'
+                      : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-400 dark:border-white/10 dark:bg-[#111111] dark:text-white/70 dark:hover:border-white/25'
                       }`}
                   >
                     {r === 'staff' ? <User className="size-3.5" /> : <Shield className="size-3.5" />}
@@ -410,7 +411,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                   </button>
                 ))}
               </div>
-              <p className="mt-1.5 text-[11px] text-white/40">
+              <p className="mt-1.5 text-[11px] text-zinc-500 dark:text-white/40">
                 {form.role === 'admin'
                   ? 'Admin can view all employees\' attendance records.'
                   : 'Staff can only view their own attendance records.'}
@@ -418,7 +419,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
             </Field>
 
             {error && (
-              <p className="rounded-lg bg-rose-500/10 border border-rose-500/20 px-3 py-2 text-xs text-rose-300">
+              <p className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs text-rose-700 dark:text-rose-300">
                 {error}
               </p>
             )}
@@ -426,12 +427,12 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-white/10">
+        <div className="border-t border-zinc-200 px-6 py-4 dark:border-white/10">
           <button
             type="submit"
             form="employee-form"
             disabled={isSubmitting}
-            className="w-full rounded-lg border border-white/10 bg-[#111111] py-2.5 text-sm font-semibold text-white hover:bg-white/5 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="w-full rounded-lg border border-zinc-200 bg-zinc-900 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-[#111111] dark:hover:bg-white/5 cursor-pointer"
           >
             {isSubmitting ? 'Creating Employee...' : 'Create Employee'}
           </button>
@@ -495,62 +496,62 @@ function EmployeeRow({ employee, sno, role, formatDate, onView, onEdit }: {
   }
 
   return (
-    <tr className={`hover:bg-white/5 transition-colors ${isBlocked ? 'opacity-60' : ''}`}>
-      <td className="px-4 py-3 text-xs text-white/35 font-mono">{sno}</td>
+    <tr className={`transition-colors hover:bg-zinc-50 dark:hover:bg-white/5 ${isBlocked ? 'opacity-60' : ''}`}>
+      <td className="px-4 py-3 font-mono text-xs text-zinc-400 dark:text-white/35">{sno}</td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-white/75">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-bold text-zinc-700 dark:bg-white/10 dark:text-white/75">
             {initials}
           </div>
           <div>
             <div className="flex items-center gap-2">
-                <span className="font-semibold text-white">{employee.fullName}</span>
+                <span className="font-semibold text-zinc-900 dark:text-white">{employee.fullName}</span>
               {isBlocked && (
-                <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 px-1.5 py-0.5 text-[10px] font-bold text-rose-300 uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-300">
                   <Ban className="size-3" />
                   Blocked
                 </span>
               )}
             </div>
-            <div className="text-xs text-white/40">{employee.email}</div>
+            <div className="text-xs text-zinc-500 dark:text-white/40">{employee.email}</div>
           </div>
         </div>
       </td>
       <td className="px-4 py-3">
-        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ${role === 'admin' ? 'bg-white/10 text-white' : 'bg-white/10 text-white/75'
+        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ${role === 'admin' ? 'bg-zinc-100 text-zinc-700 dark:bg-white/10 dark:text-white' : 'bg-zinc-100 text-zinc-600 dark:bg-white/10 dark:text-white/75'
           }`}>
           {role === 'admin' ? 'Admin' : 'Staff'}
         </span>
       </td>
       <td className="px-4 py-3">
-        <span className="inline-block rounded bg-white/10 px-2 py-0.5 text-xs font-medium text-white/75">
+        <span className="inline-block rounded bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-white/10 dark:text-white/75">
           {employee.department}
         </span>
       </td>
-      <td className="px-4 py-3 text-white/75">{employee.employeeType}</td>
-      <td className="px-4 py-3 text-white/75">
-        {employee.phone || <span className="text-white/35">—</span>}
+      <td className="px-4 py-3 text-zinc-700 dark:text-white/75">{employee.employeeType}</td>
+      <td className="px-4 py-3 text-zinc-700 dark:text-white/75">
+        {employee.phone || <span className="text-zinc-400 dark:text-white/35">—</span>}
       </td>
-      <td className="px-4 py-3 text-white/60">{formatDate(employee.joiningDate)}</td>
+      <td className="px-4 py-3 text-zinc-600 dark:text-white/60">{formatDate(employee.joiningDate)}</td>
       <td className="px-4 py-3 text-right">
         <div className="inline-flex items-center gap-1">
           <button
             onClick={() => onView(employee)}
-            className="rounded-md border border-white/10 p-1.5 text-blue-300 hover:bg-white/5 transition cursor-pointer"
+            className="rounded-md border border-zinc-200 p-1.5 text-blue-600 transition hover:bg-zinc-50 dark:border-white/10 dark:text-blue-300 dark:hover:bg-white/5 cursor-pointer"
             title="View"
           >
             <Eye className="size-4" />
           </button>
           <button
             onClick={() => onEdit(employee)}
-            className="rounded-md border border-white/10 p-1.5 text-amber-300 hover:bg-white/5 transition cursor-pointer"
+            className="rounded-md border border-zinc-200 p-1.5 text-amber-600 transition hover:bg-zinc-50 dark:border-white/10 dark:text-amber-300 dark:hover:bg-white/5 cursor-pointer"
             title="Edit"
           >
             <Edit className="size-4" />
           </button>
           <button
             onClick={handleDelete}
-            className="rounded-md border border-white/10 p-1.5 text-rose-300 hover:bg-white/5 transition cursor-pointer"
+            className="rounded-md border border-zinc-200 p-1.5 text-rose-600 transition hover:bg-zinc-50 dark:border-white/10 dark:text-rose-300 dark:hover:bg-white/5 cursor-pointer"
             title="Delete"
           >
             <Trash2 className="size-4" />
@@ -559,8 +560,8 @@ function EmployeeRow({ employee, sno, role, formatDate, onView, onEdit }: {
             onClick={handleBlock}
             disabled={blocking}
             className={`rounded-md border p-1.5 transition cursor-pointer disabled:opacity-50 ${isBlocked
-              ? 'border-green-500/20 text-green-300 hover:bg-white/5'
-              : 'border-white/10 text-white/70 hover:bg-white/5'
+              ? 'border-green-200 text-green-700 hover:bg-green-50 dark:border-green-500/20 dark:text-green-300 dark:hover:bg-white/5'
+              : 'border-zinc-200 text-zinc-600 hover:bg-zinc-50 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/5'
               }`}
             title={isBlocked ? 'Unblock' : 'Block'}
           >
@@ -609,14 +610,14 @@ function ViewEmployeePanel({ employee, onClose }: {
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/70" onClick={onClose} />
-      <aside className="fixed right-0 top-0 z-50 h-full w-[500px] border-l border-white/10 bg-[#0b0b0b] shadow-none flex flex-col">
-        <div className="flex items-center justify-between px-6 pt-8 pb-4 border-b border-white/10">
+      <div className="fixed inset-0 z-40 bg-black/20 dark:bg-black/70" onClick={onClose} />
+      <aside className="fixed right-0 top-0 z-50 flex h-full w-[500px] flex-col border-l border-zinc-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#0b0b0b]">
+        <div className="flex items-center justify-between border-b border-zinc-200 px-6 pb-4 pt-8 dark:border-white/10">
           <div>
-            <h2 className="text-xl font-bold text-white">Employee Details</h2>
-            <p className="mt-0.5 text-sm text-white/55">{employee.fullName}</p>
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Employee Details</h2>
+            <p className="mt-0.5 text-sm text-zinc-500 dark:text-white/55">{employee.fullName}</p>
           </div>
-          <button onClick={onClose} className="rounded-lg border border-white/10 p-1.5 text-white/60 hover:bg-white/5 transition cursor-pointer">
+          <button onClick={onClose} className="rounded-lg border border-zinc-200 p-1.5 text-zinc-500 transition hover:bg-zinc-50 dark:border-white/10 dark:text-white/60 dark:hover:bg-white/5 cursor-pointer">
             <X className="size-4" />
           </button>
         </div>
@@ -624,29 +625,29 @@ function ViewEmployeePanel({ employee, onClose }: {
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
           {/* Personal Details */}
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-white/35 mb-3">Personal Details</h3>
+            <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-white/35">Personal Details</h3>
             <div className="space-y-3">
               {fields.map(({ label, value }) => (
                 <div key={label}>
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-white/35">{label}</label>
-                  <p className="mt-1 text-sm font-medium text-white">{value}</p>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-white/35">{label}</label>
+                  <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-white">{value}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Attendance History */}
-          <div className="border-t border-white/10 pt-5">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-white/35 mb-3">
+          <div className="border-t border-zinc-200 pt-5 dark:border-white/10">
+            <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-zinc-400 dark:text-white/35">
               Attendance History ({sessions.length} records)
             </h3>
             {sessions.length === 0 ? (
-              <p className="text-sm text-white/35 py-4 text-center">No attendance records found.</p>
+              <p className="py-4 text-center text-sm text-zinc-400 dark:text-white/35">No attendance records found.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-white/10 text-[10px] font-semibold text-white/45 uppercase tracking-wider">
+                    <tr className="border-b border-zinc-200 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:border-white/10 dark:text-white/45">
                       <th className="py-2 pr-2">Date</th>
                       <th className="py-2 px-2">In</th>
                       <th className="py-2 px-2">Out</th>
@@ -659,13 +660,13 @@ function ViewEmployeePanel({ employee, onClose }: {
                         ? (s.punchOutAt - s.punchInAt) / (1000 * 60 * 60)
                         : (Date.now() - s.punchInAt) / (1000 * 60 * 60)
                       return (
-                        <tr key={s._id} className="hover:bg-white/5">
-                          <td className="py-2.5 pr-2 font-medium text-white/80">{s.dateKey}</td>
-                          <td className="py-2.5 px-2 text-white/65">{formatTime(s.punchInAt)}</td>
-                          <td className="py-2.5 px-2 text-white/65">
-                            {s.punchOutAt ? formatTime(s.punchOutAt) : <span className="text-amber-300 font-semibold">Active</span>}
+                        <tr key={s._id} className="hover:bg-zinc-50 dark:hover:bg-white/5">
+                          <td className="py-2.5 pr-2 font-medium text-zinc-800 dark:text-white/80">{s.dateKey}</td>
+                          <td className="py-2.5 px-2 text-zinc-600 dark:text-white/65">{formatTime(s.punchInAt)}</td>
+                          <td className="py-2.5 px-2 text-zinc-600 dark:text-white/65">
+                            {s.punchOutAt ? formatTime(s.punchOutAt) : <span className="font-semibold text-amber-600 dark:text-amber-300">Active</span>}
                           </td>
-                          <td className="py-2.5 pl-2 text-right font-semibold text-white">{diff.toFixed(2)}h</td>
+                          <td className="py-2.5 pl-2 text-right font-semibold text-zinc-900 dark:text-white">{diff.toFixed(2)}h</td>
                         </tr>
                       )
                     })}
@@ -676,10 +677,10 @@ function ViewEmployeePanel({ employee, onClose }: {
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-white/10">
+        <div className="border-t border-zinc-200 px-6 py-4 dark:border-white/10">
           <button
             onClick={onClose}
-            className="w-full rounded-lg border border-white/10 bg-[#111111] py-2.5 text-sm font-semibold text-white hover:bg-white/5 transition cursor-pointer"
+            className="w-full rounded-lg border border-zinc-200 bg-zinc-900 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 dark:border-white/10 dark:bg-[#111111] dark:hover:bg-white/5 cursor-pointer"
           >
             Close
           </button>
@@ -781,65 +782,65 @@ function EditEmployeePanel({ employee, onClose }: {
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/70" onClick={onClose} />
-      <aside className="fixed right-0 top-0 z-50 h-full w-[420px] border-l border-white/10 bg-[#0b0b0b] shadow-none flex flex-col">
-        <div className="flex items-center justify-between px-6 pt-8 pb-4 border-b border-white/10">
+      <div className="fixed inset-0 z-40 bg-black/20 dark:bg-black/70" onClick={onClose} />
+      <aside className="fixed right-0 top-0 z-50 flex h-full w-[420px] flex-col border-l border-zinc-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#0b0b0b]">
+        <div className="flex items-center justify-between border-b border-zinc-200 px-6 pb-4 pt-8 dark:border-white/10">
           <div>
-            <h2 className="text-xl font-bold text-white">Edit Employee</h2>
-            <p className="mt-0.5 text-sm text-white/55">{employee.fullName}</p>
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Edit Employee</h2>
+            <p className="mt-0.5 text-sm text-zinc-500 dark:text-white/55">{employee.fullName}</p>
           </div>
-          <button onClick={onClose} className="rounded-lg border border-white/10 p-1.5 text-white/60 hover:bg-white/5 transition cursor-pointer">
+          <button onClick={onClose} className="rounded-lg border border-zinc-200 p-1.5 text-zinc-500 transition hover:bg-zinc-50 dark:border-white/10 dark:text-white/60 dark:hover:bg-white/5 cursor-pointer">
             <X className="size-4" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-white/10 dark:bg-white/5">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <h3 className="text-sm font-semibold text-white">Login & Security</h3>
-                <p className="mt-1 text-xs text-white/50">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Login & Security</h3>
+                <p className="mt-1 text-xs text-zinc-500 dark:text-white/50">
                   User ID is editable now. Password reset wiring can plug into this section next.
                 </p>
               </div>
               {syncingLogin && (
-                <span className="text-[11px] font-medium text-white/45">Syncing...</span>
+                <span className="text-[11px] font-medium text-zinc-400 dark:text-white/45">Syncing...</span>
               )}
             </div>
             <div className="mt-4 space-y-3">
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-white/35">User ID</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-white/35">User ID</label>
                 <input
                   type="text"
                   value={form.employeeId}
                   onChange={(e) => setForm({ ...form, employeeId: e.target.value })}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/10"
+                  className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-white/10 dark:bg-[#111111] dark:text-white dark:focus:ring-white/10"
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-white/35">Password</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-white/35">Password</label>
                 <input
                   type="password"
                   value={form.newPassword}
                   onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
                   placeholder="Ready for reset flow"
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-white/10"
+                  className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-white/10 dark:bg-[#111111] dark:text-white dark:placeholder:text-white/35 dark:focus:ring-white/10"
                 />
-                <p className="mt-1 text-[11px] text-white/35">
+                <p className="mt-1 text-[11px] text-zinc-400 dark:text-white/35">
                   This field is in place for the future reset action, so we can connect it to Clerk next.
                 </p>
               </div>
             </div>
             {securityWarning && (
-              <p className="mt-3 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+              <p className="mt-3 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
                 {securityWarning}
               </p>
             )}
           </div>
 
-          {([
-            { label: 'Full Name', key: 'fullName', type: 'text' },
-            { label: 'Email', key: 'email', type: 'email' },
+            {([
+              { label: 'Full Name', key: 'fullName', type: 'text' },
+              { label: 'Email', key: 'email', type: 'email' },
             { label: 'Phone', key: 'phone', type: 'phone' },
             { label: 'Department', key: 'department', type: 'text' },
             { label: 'Position', key: 'position', type: 'text' },
@@ -847,7 +848,7 @@ function EditEmployeePanel({ employee, onClose }: {
             { label: 'Salary', key: 'salary', type: 'number' },
           ] as const).map(({ label, key, type }) => (
             <div key={key}>
-              <label className="text-[10px] font-bold uppercase tracking-widest text-white/35">{label}</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-white/35">{label}</label>
               {type === 'phone' ? (
                 <>
                   <div className="mt-1 flex gap-2">
@@ -855,7 +856,7 @@ function EditEmployeePanel({ employee, onClose }: {
                       value={selectedCountryCode}
                       onValueChange={setSelectedCountryCode}
                     >
-                      <SelectTrigger className="w-[110px] bg-[#111111] border-white/10 text-white">
+                      <SelectTrigger className="w-[110px] border-zinc-200 bg-white text-zinc-900 dark:border-white/10 dark:bg-[#111111] dark:text-white">
                         <SelectValue>
                           {(() => {
                             const selected = COUNTRY_CODES.find((c) => c.code === selectedCountryCode) ?? COUNTRY_CODES[0]
@@ -864,7 +865,7 @@ function EditEmployeePanel({ employee, onClose }: {
                                 <img
                                   src={`https://flagcdn.com/w40/${selected.code.toLowerCase()}.png`}
                                   alt={selected.code}
-                                  className="w-5 h-3.5 object-cover rounded-xs border border-white/10"
+                                  className="h-3.5 w-5 rounded-xs border border-zinc-200 object-cover dark:border-white/10"
                                 />
                                 <span className="text-sm font-medium">{selected.value}</span>
                               </div>
@@ -880,10 +881,10 @@ function EditEmployeePanel({ employee, onClose }: {
                               <img
                                 src={`https://flagcdn.com/w40/${c.code.toLowerCase()}.png`}
                                 alt={c.code}
-                                className="w-5 h-3.5 object-cover rounded-xs border border-white/10"
+                                className="h-3.5 w-5 rounded-xs border border-zinc-200 object-cover dark:border-white/10"
                               />
-                                <span className="text-xs text-white/45 font-semibold uppercase">{c.code}</span>
-                                <span className="text-white/70 font-medium">{c.value}</span>
+                                <span className="text-xs font-semibold uppercase text-zinc-500 dark:text-white/45">{c.code}</span>
+                                <span className="font-medium text-zinc-700 dark:text-white/70">{c.value}</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -895,44 +896,44 @@ function EditEmployeePanel({ employee, onClose }: {
                       maxLength={10}
                       value={form.phone}
                       onChange={(e) => handlePhoneChange(e.target.value)}
-                      className={`flex-1 rounded-lg border px-3 py-2 text-sm text-white bg-[#111111] focus:outline-none focus:ring-2 focus:ring-white/10 ${phoneError ? 'border-rose-300' : 'border-white/10'}`}
+                      className={`flex-1 rounded-lg border px-3 py-2 text-sm text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:bg-[#111111] dark:text-white dark:focus:ring-white/10 ${phoneError ? 'border-rose-300 dark:border-rose-300' : 'border-zinc-200 dark:border-white/10'}`}
                     />
                   </div>
-                  {phoneError && <p className="text-[11px] text-rose-300 mt-1">{phoneError}</p>}
+                  {phoneError && <p className="mt-1 text-[11px] text-rose-500 dark:text-rose-300">{phoneError}</p>}
                 </>
               ) : (
                 <input
                   type={type}
                   value={form[key] ?? ''}
                   onChange={(e) => setForm({ ...form, [key]: type === 'number' ? e.target.valueAsNumber : e.target.value })}
-                  className="mt-1 w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/10"
+                  className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-white/10 dark:bg-[#111111] dark:text-white dark:focus:ring-white/10"
                 />
               )}
             </div>
           ))}
           <div>
-            <label className="text-[10px] font-bold uppercase tracking-widest text-white/35">Date of Birth</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-white/35">Date of Birth</label>
             <DatePicker
               value={form.dateOfBirth}
               onChange={(val) => setForm({ ...form, dateOfBirth: val })}
             />
           </div>
           <div>
-            <label className="text-[10px] font-bold uppercase tracking-widest text-white/35">Address</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-white/35">Address</label>
             <textarea
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
               rows={3}
-              className="mt-1 w-full rounded-lg border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/10"
+              className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-200 dark:border-white/10 dark:bg-[#111111] dark:text-white dark:focus:ring-white/10"
             />
           </div>
         </form>
 
-        <div className="px-6 py-4 border-t border-white/10 flex gap-3">
+        <div className="flex gap-3 border-t border-zinc-200 px-6 py-4 dark:border-white/10">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-lg border border-white/10 bg-[#111111] py-2.5 text-sm font-semibold text-white hover:bg-white/5 transition cursor-pointer"
+            className="flex-1 rounded-lg border border-zinc-200 bg-white py-2.5 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50 dark:border-white/10 dark:bg-[#111111] dark:text-white dark:hover:bg-white/5 cursor-pointer"
           >
             Cancel
           </button>
@@ -940,7 +941,7 @@ function EditEmployeePanel({ employee, onClose }: {
             type="submit"
             onClick={handleSubmit}
             disabled={saving}
-            className="flex-1 rounded-lg border border-white/10 bg-[#111111] py-2.5 text-sm font-semibold text-white hover:bg-white/5 disabled:opacity-50 transition cursor-pointer"
+            className="flex-1 rounded-lg border border-zinc-200 bg-zinc-900 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-50 dark:border-white/10 dark:bg-[#111111] dark:hover:bg-white/5 cursor-pointer"
           >
             {saving ? 'Saving...' : 'Save'}
           </button>
@@ -1168,18 +1169,18 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="px-6 py-6 min-h-screen bg-[#050505] text-white" suppressHydrationWarning>
+    <div className="min-h-screen bg-white px-6 py-6 text-black dark:bg-black dark:text-white" suppressHydrationWarning>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Users className="size-6 text-white/75" />
-          <h1 className="text-2xl font-bold text-white">Employees</h1>
+          <Users className="size-6 text-black dark:text-white" />
+          <h1 className="text-2xl font-bold text-black dark:text-white">Employees</h1>
         </div>
         <div className="flex items-center gap-2">
           {employeesWithoutClerk.length > 0 && (
             <button
               onClick={handleSyncExisting}
               disabled={syncing}
-              className="inline-flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-300 hover:bg-amber-500/15 transition cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-black bg-white px-4 py-2 text-sm font-semibold text-black transition hover:bg-black hover:text-white disabled:opacity-50 dark:border-white dark:bg-black dark:text-white dark:hover:bg-white dark:hover:text-black cursor-pointer"
             >
               <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -1190,7 +1191,7 @@ export default function EmployeesPage() {
           <button
             onClick={() => document.getElementById('csvInput')?.click()}
             disabled={importing}
-            className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#111111] px-4 py-2 text-sm font-semibold text-white hover:bg-white/5 transition cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-black bg-white px-4 py-2 text-sm font-semibold text-black transition hover:bg-black hover:text-white disabled:opacity-50 dark:border-white dark:bg-black dark:text-white dark:hover:bg-white dark:hover:text-black cursor-pointer"
           >
             <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
@@ -1210,7 +1211,7 @@ export default function EmployeesPage() {
           />
           <button
             onClick={() => setPanelOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-[#111111] px-4 py-2 text-sm font-semibold text-white hover:bg-white/5 transition cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-lg border border-black bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-black dark:border-white dark:bg-white dark:text-black dark:hover:bg-white cursor-pointer"
           >
             <Plus className="size-4" />
             Create Employee
@@ -1225,9 +1226,9 @@ export default function EmployeesPage() {
           { label: 'Departments', value: departments },
           { label: 'Avg. Salary', value: avgSalary ?? '—' },
         ].map((s) => (
-          <div key={s.label} className="rounded-xl bg-[#0b0b0b] border border-white/10 px-5 py-4 shadow-none">
-            <div className="text-3xl font-bold text-white">{s.value}</div>
-            <div className="mt-1 text-sm text-white/45">{s.label}</div>
+          <div key={s.label} className="rounded-xl border border-black bg-white px-5 py-4 shadow-none dark:border-white dark:bg-black">
+            <div className="text-3xl font-bold text-black dark:text-white">{s.value}</div>
+            <div className="mt-1 text-sm text-black dark:text-white">{s.label}</div>
           </div>
         ))}
       </div>
@@ -1235,13 +1236,13 @@ export default function EmployeesPage() {
       {/* Search */}
       <div className="mb-4 grid gap-3 sm:grid-cols-2">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/35" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-black dark:text-white" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search employees by name, role, or department..."
-            className="w-full rounded-lg border border-white/10 bg-[#111111] pl-9 pr-4 py-2 text-sm text-white placeholder:text-white/35 focus:border-white/25 focus:outline-none transition"
+            className="w-full rounded-lg border border-black bg-white pl-9 pr-4 py-2 text-sm text-black placeholder:text-black focus:border-black focus:outline-none transition dark:border-white dark:bg-black dark:text-white dark:placeholder:text-white dark:focus:border-white"
           />
         </div>
         <div className="relative">
@@ -1250,28 +1251,28 @@ export default function EmployeesPage() {
             value={emailFilter}
             onChange={(e) => setEmailFilter(e.target.value)}
             placeholder="Filter by email address..."
-            className="w-full rounded-lg border border-white/10 bg-[#111111] px-4 py-2 text-sm text-white placeholder:text-white/35 focus:border-white/25 focus:outline-none transition"
+            className="w-full rounded-lg border border-black bg-white px-4 py-2 text-sm text-black placeholder:text-black focus:border-black focus:outline-none transition dark:border-white dark:bg-black dark:text-white dark:placeholder:text-white dark:focus:border-white"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="rounded-xl bg-[#0b0b0b] border border-white/10 shadow-none overflow-hidden">
+      <div className="overflow-hidden rounded-xl border border-black bg-white shadow-none dark:border-white dark:bg-black">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10">
+              <tr className="border-b border-black dark:border-white">
                 {['S.No', 'Employee', 'Role', 'Department', 'Type', 'Phone', 'Hired Date', 'Actions'].map((h) => (
-                  <th key={h} className={`px-4 py-3 text-xs font-semibold text-white/45 ${h === 'Actions' ? 'text-right' : 'text-left'}`}>
+                  <th key={h} className={`px-4 py-3 text-xs font-semibold text-black dark:text-white ${h === 'Actions' ? 'text-right' : 'text-left'}`}>
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-black dark:divide-white">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-sm text-white/35">
+                  <td colSpan={8} className="py-12 text-center text-sm text-black dark:text-white">
                     {search ? 'No employees match your search.' : 'No employees yet. Click "Create Employee" to add one.'}
                   </td>
                 </tr>
