@@ -1,29 +1,18 @@
-'use client'
+export const dynamic = 'force-dynamic'
 
 import type { ReactNode } from 'react'
-import { useEffect } from 'react'
-import { useUser } from '@clerk/nextjs'
-import { useMutation } from 'convex/react'
-import { api } from '@/convex/_generated/api'
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/ui/app-sidebar"
 import { AppHeader } from "@/components/ui/app-header"
 import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav"
 import { CartProvider } from '@/lib/cart-context'
 import { Toaster } from '@/components/ui/sonner'
+import { DashboardUserSync } from "./dashboard-user-sync"
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const { isLoaded, isSignedIn } = useUser()
-  const syncNewUser = useMutation(api.users.syncNewUser)
-
-  useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      syncNewUser()
-    }
-  }, [isLoaded, isSignedIn, syncNewUser])
-
   return (
     <CartProvider>
+      <DashboardUserSync />
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>

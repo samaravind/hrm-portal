@@ -2,10 +2,24 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { type DropdownProps, DayPicker, useDayPicker } from "react-day-picker"
+import { DayPicker, useDayPicker } from "react-day-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 import { cn } from "@/lib/utils"
+
+type CalendarDropdownProps = {
+  className?: string
+  options?: {
+    label: string
+    value: string | number
+    disabled?: boolean
+  }[]
+  value?: string | number | null
+  onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void
+  disabled?: boolean
+  "aria-label"?: string
+  name?: string
+}
 
 function CalendarDropdown({
   className,
@@ -15,7 +29,7 @@ function CalendarDropdown({
   disabled,
   "aria-label": ariaLabel,
   name,
-}: DropdownProps) {
+}: CalendarDropdownProps) {
   const selectedValue = value == null ? "" : String(value)
 
   return (
