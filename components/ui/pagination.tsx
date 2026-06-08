@@ -22,13 +22,13 @@ export function Pagination({ current, total, pageSize, onChange }: {
   }
 
   return (
-    <div className="flex items-center justify-between border-t border-zinc-100 px-4 py-3">
-      <p className="text-xs text-zinc-500">
-        Showing <span className="font-medium text-zinc-700">{Math.min((current - 1) * pageSize + 1, total)}</span>
+    <div className="flex items-center justify-between border-t border-zinc-200 px-4 py-3 text-zinc-600 dark:border-white/10 dark:text-zinc-400">
+      <p className="text-xs">
+        Showing <span className="font-medium text-zinc-900 dark:text-white">{Math.min((current - 1) * pageSize + 1, total)}</span>
         {' '}&ndash;{' '}
-        <span className="font-medium text-zinc-700">{Math.min(current * pageSize, total)}</span>
+        <span className="font-medium text-zinc-900 dark:text-white">{Math.min(current * pageSize, total)}</span>
         {' '}of{' '}
-        <span className="font-medium text-zinc-700">{total}</span>
+        <span className="font-medium text-zinc-900 dark:text-white">{total}</span>
       </p>
 
       <div className="flex items-center gap-1">
@@ -36,23 +36,23 @@ export function Pagination({ current, total, pageSize, onChange }: {
           type="button"
           onClick={() => onChange(current - 1)}
           disabled={current <= 1}
-          className="inline-flex items-center justify-center rounded-md border border-zinc-200 p-1.5 text-zinc-500 hover:bg-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+          className="inline-flex items-center justify-center rounded-md border border-zinc-200 bg-white p-1.5 text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-30 dark:border-white/10 dark:bg-black dark:text-zinc-300 dark:hover:bg-white/5 cursor-pointer"
         >
           <ChevronLeft className="size-4" />
         </button>
 
         {pages.map((page, idx) =>
           page === 'ellipsis' ? (
-            <span key={`e${idx}`} className="px-1 text-xs text-zinc-400">...</span>
+            <span key={`e${idx}`} className="px-1 text-xs text-zinc-400 dark:text-zinc-500">...</span>
           ) : (
             <button
               key={page}
               type="button"
               onClick={() => onChange(page)}
-              className={`inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
                 page === current
-                  ? 'bg-zinc-950 text-white'
-                  : 'text-zinc-600 hover:bg-zinc-100'
+                  ? 'border border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-black'
+                  : 'border border-transparent text-zinc-600 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white'
               }`}
             >
               {page}
@@ -64,7 +64,7 @@ export function Pagination({ current, total, pageSize, onChange }: {
           type="button"
           onClick={() => onChange(current + 1)}
           disabled={current >= totalPages}
-          className="inline-flex items-center justify-center rounded-md border border-zinc-200 p-1.5 text-zinc-500 hover:bg-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+          className="inline-flex items-center justify-center rounded-md border border-zinc-200 bg-white p-1.5 text-zinc-700 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-30 dark:border-white/10 dark:bg-black dark:text-zinc-300 dark:hover:bg-white/5 cursor-pointer"
         >
           <ChevronRight className="size-4" />
         </button>

@@ -1,7 +1,7 @@
 "use client"
 
 import { format, parseISO } from "date-fns"
-import { CalendarIcon, ChevronDownIcon } from "lucide-react"
+import { ChevronDownIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Calendar } from "./calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -32,23 +32,20 @@ function DatePicker({
         <button
           type="button"
           className={cn(
-            "flex h-11 w-full items-center justify-between rounded-2xl border border-black bg-[#FFFFFF] px-3.5 text-sm font-medium text-black transition hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-0 dark:border-white dark:bg-[#000000] dark:text-white dark:hover:bg-white dark:hover:text-black dark:focus-visible:ring-white",
+            "flex h-11 w-full items-center justify-between rounded-2xl border border-black bg-[#FFFFFF] px-3.5 text-sm font-medium text-black transition hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-0 dark:border-zinc-800 dark:bg-[#050505] dark:text-white dark:hover:bg-[#111111] dark:hover:text-white dark:focus-visible:ring-zinc-700",
             className,
           )}
         >
-          <span className="flex min-w-0 items-center gap-2">
-            <CalendarIcon className="size-4 shrink-0 text-black dark:text-white" />
-            <span className={cn("truncate", !selectedDate && "text-black dark:text-white")}>
-              {displayValue}
-            </span>
+          <span className={cn("min-w-0 truncate text-left", !selectedDate && "text-black dark:text-zinc-500")}>
+            {displayValue}
           </span>
-          <ChevronDownIcon className="size-4 shrink-0 text-black dark:text-white" />
+          <ChevronDownIcon className="size-4 shrink-0 text-black dark:text-zinc-400" />
         </button>
       </PopoverTrigger>
       <PopoverContent
         align="start"
         sideOffset={8}
-        className="w-auto rounded-2xl border border-black bg-[#FFFFFF] p-0 text-black dark:border-white dark:bg-[#000000] dark:text-white"
+        className="w-auto rounded-2xl border border-black bg-[#FFFFFF] p-0 text-black shadow-[0_18px_45px_rgba(0,0,0,0.12)] dark:border-zinc-800 dark:bg-[#050505] dark:text-white dark:shadow-[0_18px_45px_rgba(0,0,0,0.45)]"
       >
         <Calendar
           mode="single"

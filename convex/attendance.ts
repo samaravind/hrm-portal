@@ -45,7 +45,7 @@ export const listAllSessions = query({
     const identity = await getAttendanceIdentity(ctx, args)
 
     const viewer = await ctx.db
-      .q uery("users")
+      .query("users")
       .withIndex("by_userTokenIdentifier", (q) =>
         q.eq("userTokenIdentifier", identity.tokenIdentifier),
       )
