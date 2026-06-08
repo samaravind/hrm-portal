@@ -43,7 +43,7 @@ function AdminPunchSheet({ punchSheet, offset }: {
   return (
     <table className="w-full text-left text-sm border-collapse">
       <thead>
-        <tr className="border-b border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-zinc-800 dark:text-white">
+        <tr className="border-b border-zinc-200 dark:border-black text-xs font-semibold text-zinc-800 dark:text-white">
           <th className="py-3 px-2 w-8">S.No</th>
           <th className="py-3 px-2">Employee</th>
           <th className="py-3 px-2">Department</th>
@@ -53,7 +53,7 @@ function AdminPunchSheet({ punchSheet, offset }: {
           <th className="py-3 px-2 text-right">Hours</th>
         </tr>
       </thead>
-      <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+      <tbody className="divide-y divide-zinc-200 dark:divide-black">
         {punchSheet.length === 0 ? (
           <tr>
             <td className="py-8 px-2 text-center text-zinc-400 font-medium" colSpan={7}>
@@ -69,7 +69,7 @@ function AdminPunchSheet({ punchSheet, offset }: {
             const isComplete = s && s.punchOutAt !== null
             const diff = s ? ((s.punchOutAt ?? Date.now()) - s.punchInAt) / (1000 * 60 * 60) : 0
             return (
-              <tr key={emp._id} className="hover:bg-zinc-50/50 transition-colors">
+              <tr key={emp._id} className="hover:bg-zinc-50/50 transition-colors dark:hover:bg-black">
                 <td className="py-4 px-2 text-xs text-zinc-400 font-mono">{sno}</td>
                 <td className="py-4 px-2">
                   <button type="button" onClick={() => window.open(`/employee-attendance?email=${encodeURIComponent(emp.email)}&name=${encodeURIComponent(emp.fullName)}`, '_blank')} className="text-left font-semibold text-zinc-800 hover:text-[#6c47ff] transition-colors cursor-pointer">

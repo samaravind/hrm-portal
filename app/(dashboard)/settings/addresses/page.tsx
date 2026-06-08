@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, MapPin, Plus, Trash2, Pencil, Home, Building2 } from 'lucide-react'
+import { ArrowLeft, Building2, Home, MapPin, Pencil, Plus, Trash2 } from 'lucide-react'
 
 type Address = {
   id: string
@@ -15,7 +15,8 @@ type Address = {
   isDefault: boolean
 }
 
-const inputCls = 'w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none transition'
+const inputCls =
+  'w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none transition dark:border-zinc-900 dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-zinc-700'
 
 export default function AddressesPage() {
   const router = useRouter()
@@ -57,7 +58,7 @@ export default function AddressesPage() {
   const saveAddress = () => {
     if (!form.street || !form.city || !form.state || !form.pincode) return
     if (editingId) {
-      setAddresses(addresses.map((a) => a.id === editingId ? { ...a, ...form } : a))
+      setAddresses(addresses.map((a) => (a.id === editingId ? { ...a, ...form } : a)))
     } else {
       setAddresses([
         ...addresses.map((a) => ({ ...a, isDefault: false })),
@@ -69,26 +70,21 @@ export default function AddressesPage() {
     setEditingId(null)
   }
 
-  const removeAddress = (id: string) => setAddresses(addresses.filter((a) => a.id !== id))
-
-  const setDefault = (id: string) =>
-    setAddresses(addresses.map((a) => ({ ...a, isDefault: a.id === id })))
-
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className="mx-auto max-w-2xl px-4 py-8 text-zinc-900 dark:text-white">
       <button
         onClick={() => router.back()}
-        className="mb-6 inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-800 transition cursor-pointer"
+        className="mb-6 inline-flex items-center gap-2 text-sm text-zinc-500 transition hover:text-zinc-800 cursor-pointer dark:text-zinc-400 dark:hover:text-white"
       >
         <ArrowLeft className="size-4" />
         Back to Settings
       </button>
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-zinc-800">Addresses</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-zinc-800 dark:text-white">Addresses</h1>
         <button
-          onClick={() => startAdd()}
-          className="inline-flex items-center gap-2 rounded-lg bg-zinc-950 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 transition cursor-pointer"
+          onClick={startAdd}
+          className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-100 px-4 py-2 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-200 cursor-pointer dark:border-zinc-900 dark:bg-black dark:text-white dark:hover:bg-zinc-950"
         >
           <Plus className="size-4" />
           Add Address
@@ -99,43 +95,51 @@ export default function AddressesPage() {
         {addresses.map((addr) => (
           <div
             key={addr.id}
-            className="relative rounded-xl border border-zinc-200 bg-white px-4 py-4 shadow-xs"
+            className="relative rounded-xl border border-zinc-200 bg-white px-4 py-4 shadow-xs dark:border-zinc-900 dark:bg-black"
           >
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 <div className="mt-0.5">
                   {addr.label === 'Home' ? (
-                    <Home className="size-5 text-zinc-400" />
+                    <Home className="size-5 text-zinc-400 dark:text-zinc-500" />
                   ) : (
-                    <Building2 className="size-5 text-zinc-400" />
+                    <Building2 className="size-5 text-zinc-400 dark:text-zinc-500" />
                   )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-zinc-800">{addr.label}</span>
+                    <span className="text-sm font-semibold text-zinc-800 dark:text-white">{addr.label}</span>
                     {addr.isDefault && (
-                      <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Default</span>
+                      <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-600 dark:bg-zinc-950 dark:text-zinc-400">
+                        Default
+                      </span>
                     )}
                   </div>
-                  <p className="mt-1 text-sm text-zinc-600">
-                    {addr.street}, {addr.city}, {addr.state} – {addr.pincode}
+                  <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+                    {addr.street}, {addr.city}, {addr.state} - {addr.pincode}
                   </p>
-                  <p className="text-xs text-zinc-400">{addr.country}</p>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500">{addr.country}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => startEdit(addr)} className="text-zinc-400 hover:text-zinc-700 transition cursor-pointer">
+                <button
+                  onClick={() => startEdit(addr)}
+                  className="text-zinc-400 transition hover:text-zinc-700 cursor-pointer dark:text-zinc-500 dark:hover:text-white"
+                >
                   <Pencil className="size-4" />
                 </button>
                 {!addr.isDefault && (
                   <button
-                    onClick={() => setDefault(addr.id)}
-                    className="rounded border border-zinc-200 px-2 py-1 text-[10px] font-semibold text-zinc-500 hover:bg-zinc-50 transition cursor-pointer"
+                    onClick={() => setAddresses(addresses.map((a) => ({ ...a, isDefault: a.id === addr.id })))}
+                    className="rounded border border-zinc-200 px-2 py-1 text-[10px] font-semibold text-zinc-500 transition hover:bg-zinc-50 cursor-pointer dark:border-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-950"
                   >
                     Set Default
                   </button>
                 )}
-                <button onClick={() => removeAddress(addr.id)} className="text-rose-500 hover:text-rose-700 transition cursor-pointer">
+                <button
+                  onClick={() => setAddresses(addresses.filter((a) => a.id !== addr.id))}
+                  className="text-zinc-400 transition hover:text-zinc-700 cursor-pointer dark:text-zinc-500 dark:hover:text-white"
+                >
                   <Trash2 className="size-4" />
                 </button>
               </div>
@@ -144,17 +148,18 @@ export default function AddressesPage() {
         ))}
 
         {addresses.length === 0 && !showForm && (
-          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-12 text-center shadow-xs">
-            <MapPin className="mx-auto size-8 text-zinc-300" />
-            <p className="mt-2 text-sm text-zinc-400">No addresses saved yet.</p>
+          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-12 text-center shadow-xs dark:border-zinc-900 dark:bg-black">
+            <MapPin className="mx-auto size-8 text-zinc-300 dark:text-zinc-600" />
+            <p className="mt-2 text-sm text-zinc-400 dark:text-zinc-500">No addresses saved yet.</p>
           </div>
         )}
       </div>
 
-      {/* Add Address Form */}
       {showForm && (
-        <div className="mt-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-xs space-y-4">
-          <h2 className="text-sm font-bold text-zinc-800">{editingId ? 'Edit Address' : 'New Address'}</h2>
+        <div className="mt-4 space-y-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-xs dark:border-zinc-900 dark:bg-black">
+          <h2 className="text-sm font-bold text-zinc-800 dark:text-white">
+            {editingId ? 'Edit Address' : 'New Address'}
+          </h2>
 
           <div className="flex gap-2">
             {(['Home', 'Work', 'Other'] as const).map((l) => (
@@ -163,11 +168,11 @@ export default function AddressesPage() {
                 onClick={() => setForm({ ...form, label: l })}
                 className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
                   form.label === l
-                    ? 'border-zinc-900 bg-zinc-900 text-white'
-                    : 'border-zinc-200 text-zinc-600 hover:border-zinc-400'
+                    ? 'border-zinc-900 bg-zinc-900 text-white dark:border-zinc-900 dark:bg-black dark:text-white'
+                    : 'border-zinc-200 text-zinc-600 hover:border-zinc-400 dark:border-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-700'
                 }`}
               >
-                {l === 'Home' ? <Home className="size-3.5 inline mr-1" /> : l === 'Work' ? <Building2 className="size-3.5 inline mr-1" /> : null}
+                {l === 'Home' ? <Home className="mr-1 inline size-3.5" /> : l === 'Work' ? <Building2 className="mr-1 inline size-3.5" /> : null}
                 {l}
               </button>
             ))}
@@ -185,15 +190,18 @@ export default function AddressesPage() {
 
           <div className="flex gap-3">
             <button
-              onClick={() => { setShowForm(false); setEditingId(null); }}
-              className="flex-1 rounded-lg border border-zinc-200 py-2.5 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition cursor-pointer"
+              onClick={() => {
+                setShowForm(false)
+                setEditingId(null)
+              }}
+              className="flex-1 rounded-lg border border-zinc-200 py-2.5 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 cursor-pointer dark:border-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-950"
             >
               Cancel
             </button>
             <button
               onClick={saveAddress}
               disabled={!form.street || !form.city || !form.state || !form.pincode}
-              className="flex-1 rounded-lg bg-zinc-950 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 transition disabled:opacity-50 cursor-pointer"
+              className="flex-1 rounded-lg border border-zinc-200 bg-zinc-100 py-2.5 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-200 disabled:opacity-50 cursor-pointer dark:border-zinc-900 dark:bg-black dark:text-white dark:hover:bg-zinc-950"
             >
               {editingId ? 'Update Address' : 'Save Address'}
             </button>

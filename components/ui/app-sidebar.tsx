@@ -28,6 +28,7 @@ export function AppSidebar() {
   const isAdmin = viewer?.role === 'admin' || user?.publicMetadata?.role === 'admin'
 
   const navItems = getNavItems(isAdmin)
+  const activePath = pathname
 
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -56,10 +57,13 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname === item.url}
+                    isActive={activePath === item.url}
                     tooltip={item.title}
                   >
-                    <Link href={item.url}>
+                    <Link
+                      href={item.url}
+                      scroll={false}
+                    >
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>

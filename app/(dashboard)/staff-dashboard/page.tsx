@@ -217,7 +217,7 @@ export default function StaffDashboardPage() {
             <div className="space-y-5">
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
                 <Sparkles className="size-3.5" />
-                Staff Dashboard
+                Dashboard
               </div>
               <div className="space-y-3">
                 <h1 className="text-3xl font-semibold tracking-tight text-zinc-950 sm:text-4xl dark:text-zinc-50">
@@ -231,14 +231,14 @@ export default function StaffDashboardPage() {
               <div className="flex flex-wrap gap-3">
                 <Link
                   href="/my-attendance"
-                  className="inline-flex items-center gap-2 rounded-2xl bg-zinc-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-white"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-zinc-200 bg-zinc-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 dark:border-zinc-800 dark:bg-black dark:text-white dark:hover:bg-zinc-950"
                 >
                   <Calendar className="size-4" />
                   My Attendance
                 </Link>
                 <Link
                   href="/profile"
-                  className="inline-flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-800 dark:bg-black dark:text-white dark:hover:bg-zinc-950"
                 >
                   <UserRound className="size-4" />
                   Profile

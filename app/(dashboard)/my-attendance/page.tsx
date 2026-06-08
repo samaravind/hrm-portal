@@ -265,7 +265,7 @@ function MyAttendanceContent() {
       <div className="grid gap-6 lg:grid-cols-[1.2fr_2fr]">
         
         {/* Left Column: Live Punch Status */}
-        <section className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-xs flex flex-col justify-between min-h-[480px]">
+        <section className="rounded-3xl border border-zinc-200 dark:border-black bg-white dark:bg-black p-6 shadow-xs flex flex-col justify-between min-h-[480px]">
           <div>
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-zinc-950 inline-block"></span>
@@ -460,7 +460,7 @@ function MyAttendanceContent() {
             <div className="mt-6 overflow-x-auto">
               <table className="w-full text-left text-sm border-collapse">
                 <thead>
-                  <tr className="border-b border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-zinc-800 dark:text-white">
+                  <tr className="border-b border-zinc-200 dark:border-black text-xs font-semibold text-zinc-800 dark:text-white">
                     <th className="py-3 px-2 w-8">S.No</th>
                     <th className="py-3 px-2">Date & Day</th>
                     <th className="py-3 px-2">Check In</th>
@@ -468,7 +468,7 @@ function MyAttendanceContent() {
                     <th className="py-3 px-2 text-right">Work Hours</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                <tbody className="divide-y divide-zinc-200 dark:divide-black">
                   {filteredRecords.length === 0 ? (
                     <tr>
                       <td className="py-8 px-2 text-center text-zinc-400 font-medium" colSpan={5}>
@@ -484,7 +484,7 @@ function MyAttendanceContent() {
                       const hoursStr = (diff / (1000 * 60 * 60)).toFixed(2)
 
                       return (
-                        <tr key={record._id} className="hover:bg-zinc-50/50 transition-colors">
+                        <tr key={record._id} className="hover:bg-zinc-50/50 transition-colors dark:hover:bg-black">
                           <td className="py-4 px-2 text-xs text-zinc-400 font-mono">{sno}</td>
                           <td className="py-4 px-2">
                             <div className="font-semibold text-zinc-800">{dateStr}</div>

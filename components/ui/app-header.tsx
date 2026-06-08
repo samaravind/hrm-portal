@@ -1,16 +1,14 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { SignInButton, SignUpButton, UserButton, Show, useClerk, useUser } from '@clerk/nextjs'
-import { useQuery } from 'convex/react'
-import { api } from '@/convex/_generated/api'
+import { SignInButton, SignUpButton, UserButton, Show, useClerk } from '@clerk/nextjs'
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Repeat } from 'lucide-react'
 
 const pathTitles: Record<string, string> = {
   '/': 'Dashboard',
-  '/staff-dashboard': 'Staff Dashboard',
+  '/staff-dashboard': 'Dashboard',
   '/employee': 'Employees',
   '/my-attendance': 'My Attendance',
   '/attendance': 'Employee Attendance',
@@ -21,18 +19,14 @@ const pathTitles: Record<string, string> = {
 export function AppHeader() {
   const pathname = usePathname()
   const clerk = useClerk()
-  const { user } = useUser()
-  const viewer = useQuery(api.users.viewer)
-  const isAdmin = viewer?.role === 'admin' || user?.publicMetadata?.role === 'admin'
 
   const handleSwitchAccount = async () => {
     await clerk.signOut()
     window.location.href = '/sign-in'
   }
-  
-  const title = pathname === '/'
-    ? (isAdmin ? 'Admin Dashboard' : 'Staff Dashboard')
-    : pathTitles[pathname] ?? pathname.split('/').pop()?.replace(/-/g, ' ') ?? 'Dashboard'
+  const resolvedPath = pathname
+
+  const title = pathTitles[resolvedPath] ?? resolvedPath.split('/').pop()?.replace(/-/g, ' ') ?? 'Dashboard'
 
   return (
     <>

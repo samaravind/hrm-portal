@@ -100,7 +100,7 @@ function Field({ label, required, children }: {
 }
 
 const inputCls =
-  'w-full rounded-md border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-zinc-400 dark:border-[#141414] dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-white'
+  'w-full rounded-md border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-zinc-400 dark:border-zinc-900 dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-white'
 
 //  Slide-in Panel 
 
@@ -238,9 +238,9 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
     <>
       {open && <div className="fixed inset-0 z-40 bg-black/20 dark:bg-black/20" onClick={onClose} />}
 
-      <aside className={`fixed right-0 top-0 z-50 flex h-full w-[360px] flex-col border-l border-zinc-200 bg-white shadow-none transition-transform duration-300 ease-in-out dark:border-[#141414] dark:bg-black ${open ? 'translate-x-0' : 'translate-x-full'}`}>
+      <aside className={`fixed right-0 top-0 z-50 flex h-full w-[360px] flex-col border-l border-zinc-200 bg-white shadow-none transition-transform duration-300 ease-in-out dark:border-zinc-900 dark:bg-black ${open ? 'translate-x-0' : 'translate-x-full'}`}>
         {/* Header */}
-        <div className="border-b border-zinc-200 px-5 py-4 dark:border-[#141414]">
+              <div className="border-b border-zinc-200 px-5 py-4 dark:border-neutral-950">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Add New Employee</h2>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
             Enter the employee details below to add them to the system.
@@ -283,19 +283,19 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                 </button>
               </div>
               <div className="mt-2 space-y-2">
-                <div className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] ${passwordStrength.isStrong ? 'border-zinc-200 bg-zinc-100 text-zinc-700 dark:border-[#141414] dark:bg-[#050505] dark:text-zinc-300' : 'border-zinc-200 bg-white text-zinc-600 dark:border-[#141414] dark:bg-black dark:text-zinc-300'}`}>
+                <div className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] ${passwordStrength.isStrong ? 'border-zinc-200 bg-zinc-100 text-zinc-700 dark:border-zinc-900 dark:bg-black dark:text-zinc-300' : 'border-zinc-200 bg-white text-zinc-600 dark:border-zinc-900 dark:bg-black dark:text-zinc-300'}`}>
                   {passwordStrength.label} password
                 </div>
-                <div className="h-1 overflow-hidden rounded-full bg-zinc-200 dark:bg-[#0a0a0a]">
+                <div className="h-1 overflow-hidden rounded-full bg-zinc-200 dark:bg-black">
                   <div
-                    className={`h-full rounded-full transition-all ${passwordStrength.isStrong ? 'bg-zinc-700 dark:bg-[#141414]' : 'bg-zinc-400 dark:bg-[#0a0a0a]'}`}
+                    className={`h-full rounded-full transition-all ${passwordStrength.isStrong ? 'bg-zinc-700 dark:bg-[#141414]' : 'bg-zinc-400 dark:bg-black'}`}
                     style={{ width: `${Math.max((passwordStrength.score / passwordStrength.total) * 100, form.password ? 18 : 0)}%` }}
                   />
                 </div>
                 <ul className="grid gap-1 text-[11px] text-zinc-500 dark:text-zinc-400">
                   {passwordStrength.criteria.map((criterion) => (
                     <li key={criterion.label} className={`flex items-center gap-2 ${criterion.met ? 'text-zinc-700 dark:text-zinc-300' : ''}`}>
-                      <span className={`inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${criterion.met ? 'bg-zinc-200 text-zinc-800 dark:bg-[#0a0a0a] dark:text-zinc-300' : 'bg-zinc-100 text-zinc-400 dark:bg-[#0a0a0a] dark:text-zinc-500'}`}>
+                      <span className={`inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${criterion.met ? 'bg-zinc-200 text-zinc-800 dark:bg-black dark:text-zinc-300' : 'bg-zinc-100 text-zinc-400 dark:bg-black dark:text-zinc-500'}`}>
                         {criterion.met ? '+' : '-'}
                       </span>
                       {criterion.label}
@@ -317,7 +317,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                     setForm((prev) => ({ ...prev, countryCode: val }))
                   }
                 >
-                  <SelectTrigger className="w-[104px] border-zinc-200 bg-white text-zinc-900 dark:border-[#141414] dark:bg-black dark:text-white">
+                  <SelectTrigger className="w-[104px] border-zinc-200 bg-white text-zinc-900 dark:border-zinc-900 dark:bg-black dark:text-white">
                     <SelectValue>
                       {(() => {
                         const selected = COUNTRY_CODES.find((c) => c.code === form.countryCode) ?? COUNTRY_CODES.find((c) => c.value === form.countryCode) ?? COUNTRY_CODES[0]
@@ -326,7 +326,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                             <img
                               src={`https://flagcdn.com/w40/${selected.code.toLowerCase()}.png`}
                               alt={selected.code}
-                              className="h-3.5 w-5 rounded-xs border border-zinc-200 object-cover dark:border-[#141414]"
+                              className="h-3.5 w-5 rounded-xs border border-zinc-200 object-cover dark:border-zinc-900"
                             />
                             <span className="text-sm font-medium">{selected.value}</span>
                           </div>
@@ -342,7 +342,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                           <img
                             src={`https://flagcdn.com/w40/${c.code.toLowerCase()}.png`}
                             alt={c.code}
-                            className="h-3.5 w-5 rounded-xs border border-zinc-200 object-cover dark:border-[#141414]"
+                            className="h-3.5 w-5 rounded-xs border border-zinc-200 object-cover dark:border-zinc-900"
                           />
                           <span className="text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">{c.code}</span>
                           <span className="font-medium text-zinc-700 dark:text-zinc-300">{c.value}</span>
@@ -368,7 +368,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                         }))
                       }
                     }}
-                    placeholder="Enter 10-digit number" className={`w-full rounded-md border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition dark:bg-black dark:text-white dark:placeholder:text-zinc-500 ${phoneError ? 'border-zinc-300 focus:border-zinc-400 dark:border-white/20' : 'border-zinc-200 focus:border-zinc-400 dark:border-[#141414] dark:focus:border-white/25'}`} />
+                    placeholder="Enter 10-digit number" className={`w-full rounded-md border bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition dark:bg-black dark:text-white dark:placeholder:text-zinc-500 ${phoneError ? 'border-zinc-300 focus:border-zinc-400 dark:border-white/20' : 'border-zinc-200 focus:border-zinc-400 dark:border-zinc-900 dark:focus:border-white/25'}`} />
                 </div>
               </div>
               {phoneError && <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">{phoneError}</p>}
@@ -386,7 +386,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
               </Field>
             </div>
 
-            <div className="border-t border-zinc-200 pt-1 dark:border-[#141414]" />
+            <div className="border-t border-zinc-200 pt-1 dark:border-zinc-900" />
 
             {/* Role */}
             <div className="flex items-center gap-2 pb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -402,8 +402,8 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                     type="button"
                     onClick={() => setForm((p) => ({ ...p, role: r }))}
                     className={`flex items-center justify-center gap-2 rounded-md border py-2 text-sm font-medium transition cursor-pointer ${form.role === r
-                      ? 'border-zinc-900 bg-zinc-900 text-white dark:border-[#141414] dark:bg-[#050505] dark:text-white'
-                      : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-400 dark:border-[#141414] dark:bg-black dark:text-zinc-300 dark:hover:border-white/25'
+                      ? 'border-zinc-900 bg-zinc-900 text-white dark:border-zinc-900 dark:bg-black dark:text-white'
+                      : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-400 dark:border-zinc-900 dark:bg-black dark:text-zinc-300 dark:hover:border-white/25'
                       }`}
                   >
                     {r === 'staff' ? <User className="size-3.5" /> : <Shield className="size-3.5" />}
@@ -419,7 +419,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
             </Field>
 
             {error && (
-              <p className="rounded-md border border-zinc-200 bg-zinc-100 px-3 py-2 text-xs text-zinc-700 dark:border-[#141414] dark:bg-[#050505] dark:text-zinc-300">
+              <p className="rounded-md border border-zinc-200 bg-zinc-100 px-3 py-2 text-xs text-zinc-700 dark:border-zinc-900 dark:bg-black dark:text-zinc-300">
                 {error}
               </p>
             )}
@@ -427,12 +427,12 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-zinc-200 px-5 py-4 dark:border-[#141414]">
+        <div className="border-t border-zinc-200 px-5 py-4 dark:border-zinc-900">
           <button
             type="submit"
             form="employee-form"
             disabled={isSubmitting}
-            className="w-full rounded-md border border-zinc-200 bg-zinc-900 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#141414] dark:bg-[#050505] dark:text-white dark:hover:bg-[#111111] cursor-pointer"
+            className="w-full rounded-md border border-zinc-200 bg-zinc-900 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-900 dark:bg-black dark:text-white dark:hover:bg-zinc-950 cursor-pointer"
           >
             {isSubmitting ? 'Creating Employee...' : 'Create Employee'}
           </button>
@@ -497,18 +497,18 @@ function EmployeeRow({ employee, sno, role, formatDate, onView, onEdit }: {
     }
   }
   return (
-    <tr className={`border-b border-zinc-200/60 transition-colors last:border-b-0 hover:bg-zinc-50 dark:border-[#141414] dark:hover:bg-[#0a0a0a] ${isBlocked ? 'opacity-70' : ''}`}>
+    <tr className={`border-b border-zinc-200/60 transition-colors last:border-b-0 hover:bg-zinc-50 dark:border-black dark:hover:bg-black ${isBlocked ? 'opacity-70' : ''}`}>
       <td className="whitespace-nowrap px-3 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">{sno}</td>
       <td className="px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
-          <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-zinc-900 text-[11px] font-semibold text-white dark:bg-[#050505] dark:text-white">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-zinc-900 text-[11px] font-semibold text-white dark:bg-black dark:text-white">
             {initials}
           </div>
           <div className="min-w-0">
             <div className="flex min-w-0 items-center gap-1.5">
               <span className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">{employee.fullName}</span>
               {isBlocked && (
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-300 bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-600 dark:border-[#141414] dark:bg-[#050505] dark:text-white/60">
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-300 bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-600 dark:border-zinc-900 dark:bg-black dark:text-white/60">
                   <Ban className="size-3" />
                   Blocked
                 </span>
@@ -519,26 +519,26 @@ function EmployeeRow({ employee, sno, role, formatDate, onView, onEdit }: {
         </div>
       </td>
       <td className="px-3 py-2">
-        <span className="inline-flex items-center rounded-md border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-700 dark:border-[#141414] dark:bg-black dark:text-zinc-300">{role === 'admin' ? 'Admin' : 'Staff'}</span>
+        <span className="inline-flex items-center rounded-md border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-700 dark:border-zinc-900 dark:bg-black dark:text-zinc-300">{role === 'admin' ? 'Admin' : 'Staff'}</span>
       </td>
       <td className="px-3 py-2">
-        <span className="inline-flex items-center rounded-md border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-700 dark:border-[#141414] dark:bg-black dark:text-zinc-300">{employee.department || 'Unassigned'}</span>
+        <span className="inline-flex items-center rounded-md border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-700 dark:border-zinc-900 dark:bg-black dark:text-zinc-300">{employee.department || 'Unassigned'}</span>
       </td>
       <td className="whitespace-nowrap px-3 py-2 text-sm text-zinc-700 dark:text-zinc-200">{employee.employeeType || 'Employee'}</td>
       <td className="whitespace-nowrap px-3 py-2 text-sm text-zinc-700 dark:text-zinc-200">{employee.phone || <span className="text-zinc-400 dark:text-zinc-500"></span>}</td>
       <td className="whitespace-nowrap px-3 py-2 text-sm text-zinc-700 dark:text-zinc-200">{formatDate(employee.joiningDate)}</td>
       <td className="px-3 py-2">
         <div className="flex items-center justify-end gap-1">
-          <button type="button" onClick={() => onView(employee)} className="inline-flex size-6.5 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 dark:border-[#141414] dark:bg-black dark:text-white/65 dark:hover:bg-[#0a0a0a]" title="View">
+          <button type="button" onClick={() => onView(employee)} className="inline-flex size-6.5 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950" title="View">
             <Eye className="size-3.5" />
           </button>
-          <button type="button" onClick={() => onEdit(employee)} className="inline-flex size-6.5 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 dark:border-[#141414] dark:bg-black dark:text-white/65 dark:hover:bg-[#0a0a0a]" title="Edit">
+          <button type="button" onClick={() => onEdit(employee)} className="inline-flex size-6.5 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950" title="Edit">
             <Edit className="size-3.5" />
           </button>
-          <button type="button" onClick={handleDelete} className="inline-flex size-6.5 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 dark:border-[#141414] dark:bg-black dark:text-white/65 dark:hover:bg-[#0a0a0a]" title="Delete">
+          <button type="button" onClick={handleDelete} className="inline-flex size-6.5 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950" title="Delete">
             <Trash2 className="size-3.5" />
           </button>
-          <button type="button" onClick={handleBlock} disabled={blocking} className={`inline-flex size-6.5 items-center justify-center rounded-md border transition disabled:opacity-50 ${isBlocked ? 'border-zinc-300 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:border-[#141414] dark:bg-[#050505] dark:text-white/70 dark:hover:bg-[#0a0a0a]' : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-100 dark:border-[#141414] dark:bg-black dark:text-white/65 dark:hover:bg-[#0a0a0a]'}`} title={isBlocked ? 'Unblock' : 'Block'}>
+          <button type="button" onClick={handleBlock} disabled={blocking} className={`inline-flex size-6.5 items-center justify-center rounded-md border transition disabled:opacity-50 ${isBlocked ? 'border-zinc-300 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:border-zinc-900 dark:bg-black dark:text-white/70 dark:hover:bg-zinc-950' : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950'}`} title={isBlocked ? 'Unblock' : 'Block'}>
             <Ban className="size-3.5" />
           </button>
         </div>
@@ -585,13 +585,13 @@ function ViewEmployeePanel({ employee, onClose }: {
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/30 dark:bg-black/70" onClick={onClose} />
-      <aside className="fixed right-0 top-0 z-50 flex h-full w-[460px] flex-col border-l border-zinc-200 bg-white shadow-none dark:border-[#141414] dark:bg-black">
-        <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4 dark:border-[#141414]">
+      <aside className="fixed right-0 top-0 z-50 flex h-full w-[460px] flex-col border-l border-zinc-200 bg-white shadow-none dark:border-zinc-900 dark:bg-black">
+        <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4 dark:border-zinc-900">
           <div>
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Employee Details</h2>
             <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">{employee.fullName}</p>
           </div>
-          <button onClick={onClose} className="rounded-md border border-zinc-200 p-1.5 text-zinc-500 transition hover:bg-zinc-50 dark:border-[#141414] dark:text-zinc-400 dark:hover:bg-[#0a0a0a] cursor-pointer">
+          <button onClick={onClose} className="rounded-md border border-zinc-200 p-1.5 text-zinc-500 transition hover:bg-zinc-50 dark:border-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-950 cursor-pointer">
             <X className="size-4" />
           </button>
         </div>
@@ -611,7 +611,7 @@ function ViewEmployeePanel({ employee, onClose }: {
           </div>
 
           {/* Attendance History */}
-          <div className="border-t border-zinc-200 pt-4 dark:border-[#141414]">
+          <div className="border-t border-zinc-200 pt-4 dark:border-zinc-900">
             <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
               Attendance History ({sessions.length} records)
             </h3>
@@ -621,20 +621,20 @@ function ViewEmployeePanel({ employee, onClose }: {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-zinc-200 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400 dark:border-[#141414] dark:text-zinc-500">
+                    <tr className="border-b border-zinc-200 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400 dark:border-neutral-950 dark:text-zinc-500">
                       <th className="py-2 pr-2">Date</th>
                       <th className="py-2 px-2">In</th>
                       <th className="py-2 px-2">Out</th>
                       <th className="py-2 pl-2 text-right">Hours</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-zinc-200 dark:divide-neutral-950">
                     {sessions.map((s) => {
                       const diff = s.punchOutAt
                         ? (s.punchOutAt - s.punchInAt) / (1000 * 60 * 60)
                         : (now - s.punchInAt) / (1000 * 60 * 60)
                       return (
-                        <tr key={s._id} className="hover:bg-zinc-50 dark:hover:bg-[#0a0a0a]">
+                        <tr key={s._id} className="hover:bg-zinc-50 dark:hover:bg-black">
                           <td className="py-2.5 pr-2 font-medium text-zinc-800 dark:text-white/80">{s.dateKey}</td>
                           <td className="py-2.5 px-2 text-zinc-600 dark:text-white/65">{formatTime(s.punchInAt)}</td>
                           <td className="py-2.5 px-2 text-zinc-600 dark:text-white/65">
@@ -651,10 +651,10 @@ function ViewEmployeePanel({ employee, onClose }: {
           </div>
         </div>
 
-        <div className="border-t border-zinc-200 px-6 py-4 dark:border-[#141414]">
+        <div className="border-t border-zinc-200 px-6 py-4 dark:border-zinc-900">
           <button
             onClick={onClose}
-            className="w-full rounded-md border border-zinc-200 bg-zinc-900 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 dark:border-[#141414] dark:bg-[#050505] dark:text-white dark:hover:bg-[#111111] cursor-pointer"
+            className="w-full rounded-md border border-zinc-200 bg-zinc-900 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 dark:border-zinc-900 dark:bg-black dark:text-white dark:hover:bg-zinc-950 cursor-pointer"
           >
             Close
           </button>
@@ -757,19 +757,19 @@ function EditEmployeePanel({ employee, onClose }: {
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/30 dark:bg-black/70" onClick={onClose} />
-      <aside className="fixed right-0 top-0 z-50 flex h-full w-[400px] flex-col border-l border-zinc-200 bg-white shadow-none dark:border-[#141414] dark:bg-black">
-        <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4 dark:border-[#141414]">
+      <aside className="fixed right-0 top-0 z-50 flex h-full w-[400px] flex-col border-l border-zinc-200 bg-white shadow-none dark:border-zinc-900 dark:bg-black">
+        <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-4 dark:border-zinc-900">
           <div>
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Edit Employee</h2>
             <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">{employee.fullName}</p>
           </div>
-          <button onClick={onClose} className="rounded-md border border-zinc-200 p-1.5 text-zinc-500 transition hover:bg-zinc-50 dark:border-[#141414] dark:text-zinc-400 dark:hover:bg-[#0a0a0a] cursor-pointer">
+          <button onClick={onClose} className="rounded-md border border-zinc-200 p-1.5 text-zinc-500 transition hover:bg-zinc-50 dark:border-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-950 cursor-pointer">
             <X className="size-4" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
-          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3.5 dark:border-[#141414] dark:bg-[#050505]">
+          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3.5 dark:border-zinc-900 dark:bg-black">
             <div className="flex items-center justify-between gap-2">
               <div>
                 <h3 className="text-sm font-medium text-zinc-900 dark:text-white">Login & Security</h3>
@@ -788,7 +788,7 @@ function EditEmployeePanel({ employee, onClose }: {
                   type="text"
                   value={form.employeeId}
                   onChange={(e) => setForm({ ...form, employeeId: e.target.value })}
-                  className="mt-1 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-400 dark:border-[#141414] dark:bg-black dark:text-white dark:focus:border-white"
+                  className="mt-1 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-400 dark:border-zinc-900 dark:bg-black dark:text-white dark:focus:border-white"
                 />
               </div>
               <div>
@@ -798,7 +798,7 @@ function EditEmployeePanel({ employee, onClose }: {
                   value={form.newPassword}
                   onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
                   placeholder="Ready for reset flow"
-                  className="mt-1 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-zinc-400 dark:border-[#141414] dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-white"
+                  className="mt-1 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-zinc-400 dark:border-zinc-900 dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-white"
                 />
                 <p className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">
                   Reserved for the future reset action so we can connect it to Clerk later.
@@ -806,7 +806,7 @@ function EditEmployeePanel({ employee, onClose }: {
               </div>
             </div>
             {securityWarning && (
-              <p className="mt-3 rounded-md border border-zinc-200 bg-zinc-100 px-3 py-2 text-xs text-zinc-700 dark:border-[#141414] dark:bg-[#050505] dark:text-zinc-300">
+              <p className="mt-3 rounded-md border border-zinc-200 bg-zinc-100 px-3 py-2 text-xs text-zinc-700 dark:border-zinc-900 dark:bg-black dark:text-zinc-300">
                 {securityWarning}
               </p>
             )}
@@ -830,7 +830,7 @@ function EditEmployeePanel({ employee, onClose }: {
                       value={selectedCountryCode}
                       onValueChange={setSelectedCountryCode}
                     >
-                      <SelectTrigger className="w-[104px] border-zinc-200 bg-white text-zinc-900 dark:border-[#141414] dark:bg-black dark:text-white">
+                      <SelectTrigger className="w-[104px] border-zinc-200 bg-white text-zinc-900 dark:border-zinc-900 dark:bg-black dark:text-white">
                         <SelectValue>
                           {(() => {
                             const selected = COUNTRY_CODES.find((c) => c.code === selectedCountryCode) ?? COUNTRY_CODES[0]
@@ -839,7 +839,7 @@ function EditEmployeePanel({ employee, onClose }: {
                                 <img
                                   src={`https://flagcdn.com/w40/${selected.code.toLowerCase()}.png`}
                                   alt={selected.code}
-                                  className="h-3.5 w-5 rounded-xs border border-zinc-200 object-cover dark:border-[#141414]"
+                                  className="h-3.5 w-5 rounded-xs border border-zinc-200 object-cover dark:border-zinc-900"
                                 />
                                 <span className="text-sm font-medium">{selected.value}</span>
                               </div>
@@ -855,7 +855,7 @@ function EditEmployeePanel({ employee, onClose }: {
                               <img
                                 src={`https://flagcdn.com/w40/${c.code.toLowerCase()}.png`}
                                 alt={c.code}
-                            className="h-3.5 w-5 rounded-xs border border-zinc-200 object-cover dark:border-[#141414]"
+                            className="h-3.5 w-5 rounded-xs border border-zinc-200 object-cover dark:border-zinc-900"
                           />
                                 <span className="text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">{c.code}</span>
                                 <span className="font-medium text-zinc-700 dark:text-zinc-300">{c.value}</span>
@@ -870,7 +870,7 @@ function EditEmployeePanel({ employee, onClose }: {
                       maxLength={10}
                       value={form.phone}
                       onChange={(e) => handlePhoneChange(e.target.value)}
-                      className={`flex-1 rounded-md border px-3 py-2 text-sm text-zinc-900 bg-white outline-none transition focus:border-zinc-400 dark:bg-black dark:text-white dark:focus:border-white ${phoneError ? 'border-zinc-300 dark:border-white/20' : 'border-zinc-200 dark:border-[#141414]'}`}
+                      className={`flex-1 rounded-md border px-3 py-2 text-sm text-zinc-900 bg-white outline-none transition focus:border-zinc-400 dark:bg-black dark:text-white dark:focus:border-white ${phoneError ? 'border-zinc-300 dark:border-white/20' : 'border-zinc-200 dark:border-zinc-900'}`}
                     />
                   </div>
                   {phoneError && <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">{phoneError}</p>}
@@ -880,7 +880,7 @@ function EditEmployeePanel({ employee, onClose }: {
                   type={type}
                   value={form[key] ?? ''}
                   onChange={(e) => setForm({ ...form, [key]: type === 'number' ? e.target.valueAsNumber : e.target.value })}
-                  className="mt-1 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-400 dark:border-[#141414] dark:bg-black dark:text-white dark:focus:border-white"
+                  className="mt-1 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-400 dark:border-zinc-900 dark:bg-black dark:text-white dark:focus:border-white"
                 />
               )}
             </div>
@@ -898,16 +898,16 @@ function EditEmployeePanel({ employee, onClose }: {
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
               rows={3}
-              className="mt-1 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-400 dark:border-[#141414] dark:bg-black dark:text-white dark:focus:border-white"
+              className="mt-1 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-400 dark:border-zinc-900 dark:bg-black dark:text-white dark:focus:border-white"
             />
           </div>
         </form>
 
-        <div className="flex gap-2 border-t border-zinc-200 px-5 py-4 dark:border-[#141414]">
+        <div className="flex gap-2 border-t border-zinc-200 px-5 py-4 dark:border-zinc-900">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-md border border-zinc-200 bg-white py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-[#141414] dark:bg-black dark:text-white dark:hover:bg-[#0a0a0a] cursor-pointer"
+            className="flex-1 rounded-md border border-zinc-200 bg-white py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-900 dark:bg-black dark:text-white dark:hover:bg-zinc-950 cursor-pointer"
           >
             Cancel
           </button>
@@ -915,7 +915,7 @@ function EditEmployeePanel({ employee, onClose }: {
             type="submit"
             onClick={handleSubmit}
             disabled={saving}
-            className="flex-1 rounded-md border border-zinc-200 bg-zinc-900 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 dark:border-[#141414] dark:bg-[#050505] dark:text-white dark:hover:bg-[#111111] cursor-pointer"
+            className="flex-1 rounded-md border border-zinc-200 bg-zinc-900 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 dark:border-zinc-900 dark:bg-black dark:text-white dark:hover:bg-zinc-950 cursor-pointer"
           >
             {saving ? 'Saving...' : 'Save'}
           </button>
@@ -1156,7 +1156,7 @@ export default function EmployeesPage() {
             <button
               onClick={handleSyncExisting}
               disabled={syncing}
-              className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 disabled:opacity-50 dark:border-[#141414] dark:bg-black dark:text-white dark:hover:bg-[#0a0a0a] cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-900 dark:bg-black dark:text-white dark:hover:bg-zinc-950 cursor-pointer"
             >
               <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -1167,7 +1167,7 @@ export default function EmployeesPage() {
           <button
             onClick={() => document.getElementById('csvInput')?.click()}
             disabled={importing}
-            className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 disabled:opacity-50 dark:border-[#141414] dark:bg-black dark:text-white dark:hover:bg-[#0a0a0a] cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-900 dark:bg-black dark:text-white dark:hover:bg-zinc-950 cursor-pointer"
           >
             <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
@@ -1187,7 +1187,7 @@ export default function EmployeesPage() {
           />
           <button
             onClick={() => setPanelOpen(true)}
-            className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-zinc-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 dark:border-[#141414] dark:bg-[#050505] dark:text-white dark:hover:bg-[#111111] cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-zinc-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 dark:border-zinc-900 dark:bg-black dark:text-white dark:hover:bg-zinc-950 cursor-pointer"
           >
             <Plus className="size-4" />
             Create Employee
@@ -1196,7 +1196,7 @@ export default function EmployeesPage() {
       </div>
 
       {/* Search */}
-      <div className="mb-4 grid gap-3 rounded-xl border border-zinc-200 bg-white p-2.5 dark:border-[#141414] dark:bg-black sm:grid-cols-2">
+      <div className="mb-4 grid gap-3 rounded-xl border border-zinc-200 bg-white p-2.5 dark:border-zinc-900 dark:bg-black sm:grid-cols-2">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400 dark:text-zinc-500" />
           <input
@@ -1204,7 +1204,7 @@ export default function EmployeesPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search employees by name, role, or department..."
-            className="w-full rounded-lg border border-zinc-200 bg-white pl-9 pr-4 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-zinc-400 focus:bg-white dark:border-[#141414] dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-zinc-500 dark:focus:bg-black"
+            className="w-full rounded-lg border border-zinc-200 bg-white pl-9 pr-4 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-zinc-400 focus:bg-white dark:border-zinc-900 dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-zinc-500 dark:focus:bg-black"
           />
         </div>
         <div className="relative">
@@ -1213,14 +1213,14 @@ export default function EmployeesPage() {
             value={emailFilter}
             onChange={(e) => setEmailFilter(e.target.value)}
             placeholder="Filter by email address..."
-            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-zinc-400 focus:bg-white dark:border-[#141414] dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-zinc-500 dark:focus:bg-black"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-zinc-400 focus:bg-white dark:border-zinc-900 dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-zinc-500 dark:focus:bg-black"
           />
         </div>
       </div>
 
       {/* Employee List */}
-      <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-[#141414] dark:bg-black">
-        <div className="border-b border-zinc-200 px-4 py-3.5 dark:border-[#141414] sm:px-5">
+      <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-black dark:bg-black">
+        <div className="border-b border-zinc-200 px-4 py-3.5 dark:border-black sm:px-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-white">Employee Directory</h2>
@@ -1228,7 +1228,7 @@ export default function EmployeesPage() {
                 Compact roster with fast actions and dense table layout.
               </p>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 dark:border-[#141414] dark:bg-black dark:text-zinc-300">
+            <div className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 dark:border-zinc-900 dark:bg-black dark:text-zinc-300">
               <Users className="size-3.5 text-zinc-500 dark:text-zinc-400" />
               {filtered.length} employees
             </div>
@@ -1248,7 +1248,7 @@ export default function EmployeesPage() {
               <col className="w-[16%]" />
             </colgroup>
             <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-[#141414] dark:bg-[#050505]">
+                <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-black dark:bg-black">
                 {['S.No', 'Employee', 'Role', 'Department', 'Type', 'Phone', 'Hired Date', 'Actions'].map((h) => (
                   <th key={h} className={`px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-500 ${h === 'Actions' ? 'text-right' : 'text-left'}`}>
                     {h}
@@ -1256,7 +1256,7 @@ export default function EmployeesPage() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200 bg-white dark:divide-zinc-800 dark:bg-black">
+              <tbody className="divide-y divide-zinc-200 bg-white dark:divide-black dark:bg-black">
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-10 text-center text-sm text-zinc-500 dark:text-zinc-400">

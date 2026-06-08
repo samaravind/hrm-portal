@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { House, Cog, CalendarCheck2, Users, User, UserCheck2 } from 'lucide-react'
+import { House, Cog, CalendarCheck2, Users, UserCheck2 } from 'lucide-react'
 
 export type NavItem = {
   title: string
@@ -18,7 +18,6 @@ const adminNavItems: NavItem[] = [
 const staffNavItems: NavItem[] = [
   { title: 'Dashboard', url: '/staff-dashboard', icon: House },
   { title: 'My Attendance', url: '/my-attendance', icon: CalendarCheck2 },
-  { title: 'Profile', url: '/profile', icon: User },
   { title: 'Settings', url: '/settings', icon: Cog },
 ]
 

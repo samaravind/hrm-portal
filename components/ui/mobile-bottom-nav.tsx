@@ -13,16 +13,18 @@ export function MobileBottomNav() {
   const viewer = useQuery(api.users.viewer)
   const isAdmin = viewer?.role === 'admin' || user?.publicMetadata?.role === 'admin'
   const navItems = getNavItems(isAdmin)
+  const activePath = pathname
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-black/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[0_-10px_30px_rgba(0,0,0,0.35)] backdrop-blur md:hidden">
       <div className={`grid gap-1 ${navItems.length > 4 ? 'grid-cols-5' : 'grid-cols-4'}`}>
         {navItems.map((item) => {
-          const active = pathname === item.url
+          const active = activePath === item.url
           return (
             <Link
               key={item.title}
               href={item.url}
+              scroll={false}
               className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[10px] font-medium transition ${
                 active ? 'text-white' : 'text-white/45'
               }`}

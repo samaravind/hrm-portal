@@ -44,7 +44,7 @@ export default function SettingsPage() {
   const darkMode = theme === 'dark'
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#FFFFFF] px-2.5 py-4.5 text-zinc-950 dark:bg-[#050505] dark:text-white sm:px-4 sm:py-5">
+    <div className="min-h-[calc(100vh-4rem)] bg-white px-2.5 py-4.5 text-zinc-950 dark:bg-black dark:text-white sm:px-4 sm:py-5">
       <div className="mx-auto max-w-[560px]">
         <div className="mb-2.5 sm:mb-3">
           <p className="text-[9px] font-medium uppercase tracking-[0.28em] text-zinc-500 dark:text-zinc-500">
@@ -55,17 +55,17 @@ export default function SettingsPage() {
           </h1>
         </div>
 
-        <div className="overflow-hidden rounded-[20px] border border-zinc-100 bg-white shadow-none dark:border-white/5 dark:bg-[#0a0a0a]">
-          <div className="divide-y divide-zinc-100 dark:divide-white/5">
+        <div className="overflow-hidden rounded-[20px] border border-zinc-100 bg-white shadow-none dark:border-black dark:bg-black">
+          <div className="divide-y divide-zinc-100 dark:divide-black">
             {settingsItems.slice(0, 3).map((item) => {
               const Icon = item.icon
               return (
                 <Link
                   key={item.title}
                   href={item.href}
-                  className="flex items-center gap-2.5 px-3.5 py-3 transition-colors hover:bg-white dark:hover:bg-white/3 sm:px-4 sm:py-3.5"
+                  className="flex items-center gap-2.5 px-3.5 py-3 transition-colors hover:bg-white dark:hover:bg-black sm:px-4 sm:py-3.5"
                 >
-                  <div className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-2xl border border-zinc-100 bg-white text-zinc-500 dark:border-white/8 dark:bg-white/5 dark:text-zinc-300">
+                  <div className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-2xl border border-zinc-100 bg-white text-zinc-500 dark:border-black dark:bg-black dark:text-zinc-300">
                     <Icon className="size-3.5" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -81,8 +81,8 @@ export default function SettingsPage() {
               )
             })}
 
-            <div className="flex items-center gap-2.5 px-3.5 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-white/3 sm:px-4 sm:py-3.5">
-              <div className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-2xl border border-zinc-100 bg-white text-zinc-500 dark:border-white/8 dark:bg-white/5 dark:text-zinc-300">
+            <div className="flex items-center gap-2.5 px-3.5 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-black sm:px-4 sm:py-3.5">
+              <div className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-2xl border border-zinc-100 bg-white text-zinc-500 dark:border-black dark:bg-black dark:text-zinc-300">
                 {darkMode ? <Moon className="size-3.5" /> : <Sun className="size-3.5" />}
               </div>
               <div className="min-w-0 flex-1">
@@ -95,8 +95,8 @@ export default function SettingsPage() {
                 onClick={toggleTheme}
                 className={`inline-flex h-5 w-9 shrink-0 items-center rounded-full border p-0.5 transition-colors ${
                   darkMode
-                    ? 'border-violet-500/30 bg-violet-600 justify-end'
-                    : 'border-zinc-200 bg-zinc-200 dark:border-white/10 dark:bg-zinc-800 justify-start'
+                    ? 'border-zinc-900 bg-zinc-900 justify-end'
+                    : 'border-zinc-200 bg-zinc-200 dark:border-zinc-900 dark:bg-zinc-900 justify-start'
                 }`}
                 aria-label="Toggle dark mode"
               >
@@ -106,9 +106,9 @@ export default function SettingsPage() {
 
             <Link
               href="/settings/about"
-              className="flex items-center gap-2.5 px-3.5 py-3 transition-colors hover:bg-white dark:hover:bg-white/3 sm:px-4 sm:py-3.5"
-            >
-              <div className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-2xl border border-zinc-100 bg-white text-zinc-500 dark:border-white/8 dark:bg-white/5 dark:text-zinc-300">
+            className="flex items-center gap-2.5 px-3.5 py-3 transition-colors hover:bg-white dark:hover:bg-black sm:px-4 sm:py-3.5"
+          >
+              <div className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-2xl border border-zinc-100 bg-white text-zinc-500 dark:border-black dark:bg-black dark:text-zinc-300">
                 <Info className="size-3.5" />
               </div>
               <div className="min-w-0 flex-1">
