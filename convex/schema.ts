@@ -13,6 +13,16 @@ export default defineSchema({
 
   github: v.optional(v.string()),
 
+  approved: v.optional(v.boolean()),
+
+  approvalStatus: v.optional(v.union(
+    v.literal("pending"),
+    v.literal("approved"),
+    v.literal("declined")
+  )),
+
+  accessRequestSentAt: v.optional(v.number()),
+
   dob: v.optional(v.string()),
 
   role: v.union(
@@ -20,7 +30,9 @@ export default defineSchema({
     v.literal("staff")
   ),
 }).index("by_userTokenIdentifier", ["userTokenIdentifier"])
-  .index("by_userEmail", ["userEmail"]),
+  .index("by_userEmail", ["userEmail"])
+  .index("by_approved", ["approved"])
+  .index("by_approvalStatus", ["approvalStatus"]),
 
   attendanceSessions: defineTable({
     userTokenIdentifier: v.string(),

@@ -18,7 +18,6 @@ async function getAttendanceIdentity(
         tokenIdentifier: string
         name?: string | null
         email?: string | null
-        publicMetadata?: Record<string, unknown>
       } | null>
     }
   },
@@ -62,10 +61,8 @@ export const listAllSessions = query({
       )
       .unique()
 
-    const rawIdentity = await ctx.auth.getUserIdentity()
-    const metaRole = (rawIdentity?.publicMetadata as { role?: string } | undefined)?.role?.toLowerCase()
     const normalizedRole = viewer?.role?.toLowerCase()
-    const isAdmin = normalizedRole === "admin" || metaRole === "admin"
+    const isAdmin = normalizedRole === "admin"
 
     if (isAdmin) {
       const sessions = await ctx.db
@@ -244,10 +241,8 @@ export const adminPunchOutEmployee = mutation({
       )
       .unique()
 
-    const rawIdentity = await ctx.auth.getUserIdentity()
-    const metaRole = (rawIdentity?.publicMetadata as { role?: string } | undefined)?.role?.toLowerCase()
     const normalizedRole = viewer?.role?.toLowerCase()
-    const isAdmin = normalizedRole === "admin" || metaRole === "admin"
+    const isAdmin = normalizedRole === "admin"
 
     if (!isAdmin) {
       throw new Error("Only admins can punch out other employees.")
@@ -307,9 +302,7 @@ export const getPunchSheet = query({
       .unique()
 
     const dbRole = viewer?.role?.toLowerCase()
-    const rawIdentity = await ctx.auth.getUserIdentity()
-    const metaRole = (rawIdentity?.publicMetadata as { role?: string } | undefined)?.role?.toLowerCase()
-    const isAdmin = dbRole === "admin" || metaRole === "admin"
+    const isAdmin = dbRole === "admin"
     if (!isAdmin) return null
 
     const dateKey = getDateKey()

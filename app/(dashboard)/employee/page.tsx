@@ -9,6 +9,7 @@ import { Search, Plus, X, Eye, EyeOff, Edit, Trash2, Ban, User, Shield, Users } 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Pagination } from '@/components/ui/pagination'
 import { DatePicker } from '@/components/ui/date-picker'
+import { hrmsSectionClass, hrmsTableClass, hrmsTableEmptyClass, hrmsTableHeadCellClass, hrmsTableHeadRowClass, hrmsTableRowClass } from '@/components/ui/hrms-table'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { getPasswordStrength } from '@/lib/password'
@@ -498,18 +499,18 @@ function EmployeeRow({ employee, sno, role, formatDate, onView, onEdit }: {
     }
   }
   return (
-    <tr className={`border-b border-zinc-200/60 transition-colors last:border-b-0 hover:bg-zinc-50 dark:border-black dark:hover:bg-black ${isBlocked ? 'opacity-70' : ''}`}>
-      <td className="whitespace-nowrap px-3 py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">{sno}</td>
+    <tr className={`${hrmsTableRowClass} ${isBlocked ? 'opacity-70' : ''}`}>
+      <td className="whitespace-nowrap px-4 py-4 text-xs font-semibold text-zinc-400 dark:text-zinc-500">{sno}</td>
       <td className="px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
-          <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-zinc-900 text-[11px] font-semibold text-white dark:bg-black dark:text-white">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-[11px] font-semibold text-white shadow-sm ring-1 ring-white/20">
             {initials}
           </div>
           <div className="min-w-0">
             <div className="flex min-w-0 items-center gap-1.5">
-              <span className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">{employee.fullName}</span>
+              <span className="truncate text-sm font-semibold text-zinc-950 dark:text-zinc-100">{employee.fullName}</span>
               {isBlocked && (
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-300 bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-600 dark:border-zinc-900 dark:bg-black dark:text-white/60">
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-rose-600 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-200">
                   <Ban className="size-3" />
                   Blocked
                 </span>
@@ -520,26 +521,26 @@ function EmployeeRow({ employee, sno, role, formatDate, onView, onEdit }: {
         </div>
       </td>
       <td className="px-3 py-2">
-        <span className="inline-flex items-center rounded-md border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-700 dark:border-zinc-900 dark:bg-black dark:text-zinc-300">{role === 'admin' ? 'Admin' : 'Staff'}</span>
+        <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${role === 'admin' ? 'bg-indigo-500/10 text-indigo-700 ring-1 ring-inset ring-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-200 dark:ring-indigo-400/20' : 'bg-zinc-500/10 text-zinc-700 ring-1 ring-inset ring-zinc-200 dark:bg-zinc-500/15 dark:text-zinc-200 dark:ring-zinc-400/20'}`}>{role === 'admin' ? 'Admin' : 'Staff'}</span>
       </td>
       <td className="px-3 py-2">
-        <span className="inline-flex items-center rounded-md border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-700 dark:border-zinc-900 dark:bg-black dark:text-zinc-300">{employee.department || 'Unassigned'}</span>
+        <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${employee.department ? 'bg-cyan-500/10 text-cyan-700 ring-1 ring-inset ring-cyan-200 dark:bg-cyan-500/15 dark:text-cyan-200 dark:ring-cyan-400/20' : 'bg-zinc-500/10 text-zinc-700 ring-1 ring-inset ring-zinc-200 dark:bg-zinc-500/15 dark:text-zinc-200 dark:ring-zinc-400/20'}`}>{employee.department || 'Unassigned'}</span>
       </td>
       <td className="whitespace-nowrap px-3 py-2 text-sm text-zinc-700 dark:text-zinc-200">{employee.employeeType || 'Employee'}</td>
-      <td className="whitespace-nowrap px-3 py-2 text-sm text-zinc-700 dark:text-zinc-200">{employee.phone || <span className="text-zinc-400 dark:text-zinc-500"></span>}</td>
+      <td className="whitespace-nowrap px-3 py-2 text-sm text-zinc-700 dark:text-zinc-200">{employee.phone || <span className="text-zinc-400 dark:text-zinc-500">—</span>}</td>
       <td className="whitespace-nowrap px-3 py-2 text-sm text-zinc-700 dark:text-zinc-200">{formatDate(employee.joiningDate)}</td>
       <td className="px-3 py-2">
         <div className="flex items-center justify-end gap-1">
-          <button type="button" onClick={() => onView(employee)} className="inline-flex size-6.5 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950" title="View">
+          <button type="button" onClick={() => onView(employee)} className="inline-flex size-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-indigo-500/20 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-300" title="View">
             <Eye className="size-3.5" />
           </button>
-          <button type="button" onClick={() => onEdit(employee)} className="inline-flex size-6.5 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950" title="Edit">
+          <button type="button" onClick={() => onEdit(employee)} className="inline-flex size-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-amber-500/20 dark:hover:bg-amber-500/10 dark:hover:text-amber-300" title="Edit">
             <Edit className="size-3.5" />
           </button>
-          <button type="button" onClick={handleDelete} className="inline-flex size-6.5 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950" title="Delete">
+          <button type="button" onClick={handleDelete} className="inline-flex size-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-rose-500/20 dark:hover:bg-rose-500/10 dark:hover:text-rose-300" title="Delete">
             <Trash2 className="size-3.5" />
           </button>
-          <button type="button" onClick={handleBlock} disabled={blocking} className={`inline-flex size-6.5 items-center justify-center rounded-md border transition disabled:opacity-50 ${isBlocked ? 'border-zinc-300 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:border-zinc-900 dark:bg-black dark:text-white/70 dark:hover:bg-zinc-950' : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950'}`} title={isBlocked ? 'Unblock' : 'Block'}>
+          <button type="button" onClick={handleBlock} disabled={blocking} className={`inline-flex size-8 items-center justify-center rounded-lg border transition disabled:opacity-50 ${isBlocked ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200 dark:hover:bg-emerald-500/15' : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-white/5'}`} title={isBlocked ? 'Unblock' : 'Block'}>
             <Ban className="size-3.5" />
           </button>
         </div>
@@ -1050,7 +1051,7 @@ function EditEmployeePanel({ employee, onClose }: {
 export default function EmployeesPage() {
   const router = useRouter()
   const viewer = useQuery(api.users.viewer)
-  const { isLoaded, user } = useUser()
+  const { isLoaded } = useUser()
   const employees = useQuery(api.employees.list) ?? []
   const allRoles = useQuery(api.users.getAllUserRoles)
   const userEmails = useQuery(api.users.getAllUserEmails) ?? []
@@ -1216,7 +1217,7 @@ export default function EmployeesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [employees.length, userEmails.length])
 
-  const isAdmin = viewer?.role === 'admin' || user?.publicMetadata?.role === 'admin'
+  const isAdmin = viewer?.role === 'admin'
 
   useEffect(() => {
     if (viewer !== undefined && isLoaded && !isAdmin) {
@@ -1267,11 +1268,16 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white px-4 py-4 text-zinc-900 dark:bg-black dark:text-white" suppressHydrationWarning>
+    <div className="min-h-screen bg-zinc-50 px-4 py-4 text-zinc-900 dark:bg-black dark:text-white" suppressHydrationWarning>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <Users className="size-5 text-zinc-900 dark:text-white" />
-          <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-white">Employees</h1>
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-zinc-950 text-white shadow-lg shadow-zinc-950/10 dark:bg-white dark:text-zinc-950">
+            <Users className="size-5" />
+          </div>
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-white">Employees</h1>
+            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">Enterprise roster, search, filters, and quick actions.</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           {employeesWithoutClerk.length > 0 && (
@@ -1318,15 +1324,15 @@ export default function EmployeesPage() {
       </div>
 
       {/* Search */}
-      <div className="mb-4 grid gap-3 rounded-xl border border-zinc-200 bg-white p-2.5 dark:border-zinc-900 dark:bg-black sm:grid-cols-2">
+      <div className="mb-4 grid gap-3 rounded-[24px] border border-zinc-200/70 bg-white/90 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)] backdrop-blur dark:border-zinc-900 dark:bg-zinc-950/85 dark:shadow-[0_10px_30px_rgba(0,0,0,0.25)] sm:grid-cols-2">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400 dark:text-zinc-500" />
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search employees by name, role, or department..."
-            className="w-full rounded-lg border border-zinc-200 bg-white pl-9 pr-4 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-zinc-400 focus:bg-white dark:border-zinc-900 dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-zinc-500 dark:focus:bg-black"
+            className="w-full rounded-xl border border-zinc-200 bg-white pl-9 pr-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-zinc-600"
           />
         </div>
         <div className="relative">
@@ -1335,14 +1341,14 @@ export default function EmployeesPage() {
             value={emailFilter}
             onChange={(e) => setEmailFilter(e.target.value)}
             placeholder="Filter by email address..."
-            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-zinc-400 focus:bg-white dark:border-zinc-900 dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-zinc-500 dark:focus:bg-black"
+            className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-zinc-600"
           />
         </div>
       </div>
 
       {/* Employee List */}
-      <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-black dark:bg-black">
-        <div className="border-b border-zinc-200 px-4 py-3.5 dark:border-black sm:px-5">
+      <section className={hrmsSectionClass}>
+        <div className="border-b border-zinc-200/70 px-4 py-4 dark:border-zinc-900 sm:px-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-white">Employee Directory</h2>
@@ -1350,7 +1356,7 @@ export default function EmployeesPage() {
                 Compact roster with fast actions and dense table layout.
               </p>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 dark:border-zinc-900 dark:bg-black dark:text-zinc-300">
+            <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3.5 py-1.5 text-xs font-medium text-zinc-600 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">
               <Users className="size-3.5 text-zinc-500 dark:text-zinc-400" />
               {filtered.length} employees
             </div>
@@ -1379,7 +1385,7 @@ export default function EmployeesPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-[1120px] w-full table-auto border-collapse text-sm">
+            <table className={hrmsTableClass}>
               <colgroup>
                 <col className="w-[5%]" />
                 <col className="w-[30%]" />
@@ -1391,18 +1397,18 @@ export default function EmployeesPage() {
                 <col className="w-[16%]" />
               </colgroup>
               <thead>
-                <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-black dark:bg-black">
+                <tr className={hrmsTableHeadRowClass}>
                   {['S.No', 'Employee', 'Role', 'Department', 'Type', 'Phone', 'Hired Date', 'Actions'].map((h) => (
-                    <th key={h} className={`px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-500 ${h === 'Actions' ? 'text-right' : 'text-left'}`}>
+                    <th key={h} className={`${hrmsTableHeadCellClass} ${h === 'Actions' ? 'text-right' : 'text-left'}`}>
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-200 bg-white dark:divide-black dark:bg-black">
+              <tbody className="divide-y divide-zinc-200/80 dark:divide-zinc-800">
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-10 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                    <td colSpan={8} className={hrmsTableEmptyClass}>
                       {search ? 'No employees match your search.' : 'No employees yet. Click "Create Employee" to add one.'}
                     </td>
                   </tr>
@@ -1424,7 +1430,9 @@ export default function EmployeesPage() {
           </div>
         )}
 
-        <Pagination current={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={setPage} />
+        <div className="border-t border-zinc-200/70 px-4 py-4 dark:border-zinc-900 sm:px-5">
+          <Pagination current={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={setPage} />
+        </div>
       </section>
 
       {/* View Employee Panel */}

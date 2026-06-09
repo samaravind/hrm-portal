@@ -1,102 +1,64 @@
 'use client'
 
-import { useState } from 'react'
 import { SignIn } from '@clerk/nextjs'
-import { BrandMark } from '@/components/ui/brand-mark'
-
-function createSeededRandom(seed: number) {
-  return () => {
-    seed = (seed * 1664525 + 1013904223) % 4294967296
-    return seed / 4294967296
-  }
-}
-
-function generateSparkles() {
-  const rng = createSeededRandom(42)
-  return Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    left: `${rng() * 100}%`,
-    top: `${rng() * 100}%`,
-    animationDelay: `${rng() * 5}s`,
-    animationDuration: `${3 + rng() * 4}s`,
-  }))
-}
+import { AuthArtwork } from '@/components/auth/auth-artwork'
 
 export default function SignInPage() {
-  const [sparkles] = useState(generateSparkles)
   return (
-    <main className="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-950 via-purple-900 to-pink-950 px-6 py-16 overflow-hidden">
-      {/* Animated gradient overlay */}
-      <div className="pointer-events-none absolute inset-0 animate-pulse opacity-30" style={{
-        background: 'radial-gradient(ellipse at 20% 50%, rgba(139,92,246,0.3) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(236,72,153,0.3) 0%, transparent 50%), radial-gradient(ellipse at 50% 80%, rgba(59,130,246,0.3) 0%, transparent 50%)',
-        animation: 'pulse 8s ease-in-out infinite',
-      }} />
+    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#eef6ff_0%,#f7fbff_46%,#ffffff_100%)] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.16),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(129,140,248,0.12),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(14,165,233,0.08),_transparent_24%)]" />
 
-      {/* Floating colored orbs */}
-      <div className="pointer-events-none absolute -top-32 -left-32 h-80 w-80 rounded-full bg-gradient-to-br from-violet-500/30 via-fuchsia-500/20 to-transparent blur-3xl animate-[float_12s_ease-in-out_infinite]" />
-      <div className="pointer-events-none absolute top-1/3 -right-32 h-96 w-96 rounded-full bg-gradient-to-br from-pink-500/20 via-rose-500/10 to-transparent blur-3xl animate-[float_15s_ease-in-out_infinite_reverse]" />
-      <div className="pointer-events-none absolute -bottom-40 left-1/3 h-80 w-80 rounded-full bg-gradient-to-br from-blue-500/20 via-indigo-500/10 to-transparent blur-3xl animate-[float_10s_ease-in-out_infinite]" />
+      <div className="relative mx-auto grid w-full max-w-7xl gap-6 lg:min-h-[calc(100vh-3rem)] lg:grid-cols-[1.08fr_0.92fr]">
+        <AuthArtwork />
 
-      {/* Sparkle dots */}
-      <div className="pointer-events-none absolute inset-0">
-        {sparkles.map((sparkle) => (
-          <div
-            key={sparkle.id}
-            className="absolute h-1 w-1 rounded-full bg-white/30 animate-ping"
-            style={{
-              left: sparkle.left,
-              top: sparkle.top,
-              animationDelay: sparkle.animationDelay,
-              animationDuration: sparkle.animationDuration,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative w-full max-w-sm animate-in fade-in duration-500">
-        {/* Brand */}
-        <div className="mb-8 text-center">
-          <BrandMark className="mx-auto mb-4 size-16 shadow-lg shadow-black/30 animate-[float_6s_ease-in-out_infinite]" />
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-violet-200 via-fuchsia-200 to-pink-200 bg-clip-text text-transparent">
-            SAM MARKET
-          </h1>
-          <p className="mt-1.5 text-sm text-violet-300/80">Sign in to your account</p>
-        </div>
-
-        <SignIn
-          appearance={{
-            baseTheme: undefined,
-            elements: {
-              rootBox: 'w-full',
-              card: 'rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent shadow-2xl shadow-black/30 backdrop-blur-xl p-0',
-              header: 'hidden',
-              headerTitle: 'hidden',
-              headerSubtitle: 'hidden',
-              formRoot: 'p-0',
-              formFieldLabel: 'text-xs font-semibold uppercase tracking-widest text-violet-300 mb-1.5',
-              formFieldInput: 'w-full rounded-xl border border-white/10 bg-white/5 py-3 px-3.5 text-sm text-white placeholder:text-violet-300/40 transition-all focus:border-violet-400 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-violet-500/30',
-              formFieldInputShowPasswordButton: 'text-violet-300 hover:text-white',
-              dividerRow: 'hidden',
-              socialButtonsBlockButton: 'rounded-xl border border-white/10 bg-white/5 py-2.5 text-sm text-violet-200 hover:bg-white/10 hover:text-white transition-all',
-              socialButtonsBlockButtonText: 'text-violet-200',
-              socialButtonsBlockButtonArrow: 'hidden',
-              formButtonPrimary: 'w-full rounded-xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 py-3 text-sm font-bold text-white transition-all hover:from-violet-500 hover:via-fuchsia-500 hover:to-pink-500 shadow-lg shadow-violet-600/30 hover:shadow-violet-500/40',
-              footer: 'hidden',
-              footerAction: 'hidden',
-              formFieldAction: 'text-xs text-violet-400 hover:text-violet-200 transition',
-              identityPreviewEditButton: 'text-violet-400 hover:text-white',
-              identityPreviewText: 'text-violet-200',
-              identityPreview: 'rounded-xl border border-white/10 bg-white/5 p-3',
-              backLink: 'text-violet-400 hover:text-violet-200 text-sm',
-              formResendCodeLink: 'text-violet-400 hover:text-violet-200 text-sm',
-              formHeaderTitle: 'text-white text-lg font-semibold',
-              formHeaderSubtitle: 'text-violet-300 text-sm',
-              alert: 'rounded-xl border border-rose-500/20 bg-rose-500/10 text-rose-300 text-sm',
-              alertText: 'text-rose-300',
-              alertIcon: 'text-rose-300',
-            },
-          }}
-        />
+        <section className="flex items-start lg:pt-6">
+          <div className="w-full rounded-[40px] border border-white/80 bg-white/92 p-5 shadow-[0_30px_90px_rgba(15,23,42,0.10)] backdrop-blur-2xl sm:p-8">
+            <SignIn
+              signUpUrl="/sign-up"
+              signUpFallbackRedirectUrl="/pending-approval"
+              fallbackRedirectUrl="/"
+              appearance={{
+                variables: {
+                  colorPrimary: '#0284c7',
+                  colorBackground: '#ffffff',
+                  colorText: '#0f172a',
+                  colorInputBackground: '#f8fafc',
+                  colorInputText: '#0f172a',
+                  borderRadius: '1rem',
+                },
+                elements: {
+                  rootBox: 'w-full',
+                  card:
+                    'w-full border border-sky-100/80 bg-white/95 shadow-[0_24px_70px_rgba(14,165,233,0.12)] backdrop-blur-xl',
+                  header: 'hidden',
+                  headerTitle: 'hidden',
+                  headerSubtitle: 'hidden',
+                  formRoot: 'p-0',
+                  formFieldLabel: 'text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 mb-1.5',
+                  formFieldInput:
+                    'w-full rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:ring-4 focus:ring-sky-100',
+                  formFieldInputShowPasswordButton: 'text-slate-400 hover:text-slate-600',
+                  socialButtonsBlockButton:
+                    'rounded-2xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50',
+                  socialButtonsBlockButtonText: 'text-slate-700',
+                  socialButtonsBlockButtonArrow: 'hidden',
+                  dividerRow: 'text-slate-400',
+                  formButtonPrimary:
+                    'w-full rounded-2xl bg-gradient-to-r from-sky-600 via-cyan-600 to-sky-700 py-3 text-sm font-semibold text-white shadow-[0_16px_38px_rgba(2,132,199,0.25)] transition hover:-translate-y-0.5 hover:from-sky-500 hover:via-cyan-500 hover:to-sky-600',
+                  formFieldAction: 'text-xs text-sky-600 hover:text-sky-500',
+                  backLink: 'text-sm font-medium text-sky-700 hover:text-sky-600',
+                  formResendCodeLink: 'text-sky-600 hover:text-sky-500',
+                  identityPreview: 'rounded-2xl border border-slate-200 bg-slate-50 p-3',
+                  identityPreviewText: 'text-slate-800',
+                  identityPreviewEditButton: 'text-sky-600 hover:text-sky-500',
+                  alert: 'rounded-2xl border border-rose-200 bg-rose-50 text-rose-700',
+                  alertText: 'text-rose-700',
+                  alertIcon: 'text-rose-500',
+                },
+              }}
+            />
+          </div>
+        </section>
       </div>
     </main>
   )

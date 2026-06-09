@@ -27,11 +27,25 @@ export async function POST(req: NextRequest) {
 
     const lookupRes = await client.users.getUserList({ emailAddress: [email] })
     if (lookupRes.data.length > 0) {
-      const userId = lookupRes.data[0].id
+  const userId = lookupRes.data[0].id
+
+  console.log("Deleting Clerk User:", userId)
+
+  try {
+    const user = await client.users.getUser(userId)
+
+    if (user) {
       await client.users.deleteUser(userId)
+
       clerkDeleted = true
       clerkMessage = 'User deleted from Clerk.'
     }
+  } catch (error) {
+    console.error("Clerk delete failed:", error)
+
+    clerkMessage = 'User already deleted or invalid.'
+  }
+}
 
     const convexResult = await convex.mutation(api.employees.removeByEmail, { email })
 

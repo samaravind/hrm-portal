@@ -60,27 +60,38 @@ function getTodayKey() {
 
 export default function StaffDashboardPage() {
   const router = useRouter()
-  const { user, isLoaded } = useUser()
+  const { isLoaded, user } = useUser()
   const viewer = useQuery(api.users.viewer)
   const rawEmployees = useQuery(api.employees.list)
   const employees = useMemo(() => rawEmployees ?? [], [rawEmployees])
 
-  const isAdmin = viewer?.role === 'admin' || user?.publicMetadata?.role === 'admin'
+  const isAdmin = viewer?.role === 'admin'
 
   useEffect(() => {
-    if (viewer !== undefined && isLoaded && isAdmin) {
+    if (!isLoaded || viewer === undefined) return
+
+    if (viewer?.approvalStatus === 'pending' && !isAdmin) {
+      router.replace('/pending-approval')
+      return
+    }
+
+    if (viewer?.approvalStatus === 'declined' && !isAdmin) {
+      router.replace('/denied')
+      return
+    }
+
+    if (isAdmin) {
       router.replace('/')
     }
   }, [viewer, isLoaded, isAdmin, router])
 
-  const viewerIdentity = useMemo(() => {
-    if (!isLoaded || !user) return null
-    return {
-      viewerId: user.id,
-      viewerName: user.fullName ?? user.username ?? null,
-      viewerEmail: user.primaryEmailAddress?.emailAddress ?? null,
-    }
-  }, [isLoaded, user])
+  const viewerIdentity = isLoaded && user
+    ? {
+        viewerId: user.id,
+        viewerName: user.fullName ?? user.username ?? null,
+        viewerEmail: user.primaryEmailAddress?.emailAddress ?? null,
+      }
+    : null
 
   const mySessions = useQuery(api.attendance.getMySessions, viewerIdentity ?? 'skip')
   const todaySession = useQuery(api.attendance.getTodaySession, viewerIdentity ?? 'skip')
@@ -111,7 +122,8 @@ export default function StaffDashboardPage() {
   const weekHours = useMemo(
     () =>
       completedSessionsThisWeek.reduce(
-        (total: number, session: { punchOutAt: any; punchInAt: number }) => total + ((session.punchOutAt ?? session.punchInAt) - session.punchInAt),
+        (total: number, session: { punchOutAt: number | null; punchInAt: number }) =>
+          total + ((session.punchOutAt ?? session.punchInAt) - session.punchInAt),
         0,
       ),
     [completedSessionsThisWeek],

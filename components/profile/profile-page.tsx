@@ -19,7 +19,7 @@ const normalizeStoredPhone = (value: string) => {
 }
 
 export function ProfilePage() {
-  const { user, isLoaded } = useUser()
+  const { isLoaded, user } = useUser()
   const viewer = useQuery(api.users.viewer)
   const employees = useQuery(api.employees.list) ?? []
   const updateCurrentProfile = useMutation(api.users.updateCurrentProfile)
@@ -34,7 +34,7 @@ export function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const employee = viewer?.email ? employees.find((e) => e.email === viewer.email) : null
-  const roleLabel = viewer?.role === 'admin' || user?.publicMetadata?.role === 'admin' ? 'Admin' : 'Staff'
+  const roleLabel = viewer?.role === 'admin' ? 'Admin' : 'Staff'
   const avatarUrl = photoPreview || user?.imageUrl || null
   const displayName = viewer?.name || user?.fullName || 'Sam Aravind'
   const emailValue = viewer?.email || user?.primaryEmailAddress?.emailAddress || 'Not set'
@@ -536,7 +536,7 @@ export function ProfilePage() {
                   <Bell className="size-4 text-zinc-500 dark:text-zinc-500" />
                 </div>
                 <div className="mt-3 space-y-2">
-                  {notifications.map((note, index) => (
+                  {notifications.map((note) => (
                     <div key={note} className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 dark:border-neutral-950 dark:bg-black">
                       <div className="flex items-start gap-2">
                         <span className="mt-1 size-2 shrink-0 rounded-full bg-zinc-900 dark:bg-zinc-700" />

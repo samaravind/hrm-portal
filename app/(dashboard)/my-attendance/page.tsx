@@ -18,6 +18,7 @@ import type { Doc } from '@/convex/_generated/dataModel'
 import { api } from '@/convex/_generated/api'
 import { Pagination } from '@/components/ui/pagination'
 import { DatePicker } from '@/components/ui/date-picker'
+import { hrmsSectionClass, hrmsTableClass, hrmsTableEmptyClass, hrmsTableHeadRowClass, hrmsTableRowClass, hrmsTableViewportClass } from '@/components/ui/hrms-table'
 
 const DATE_LOCALE = 'en-US'
 
@@ -431,7 +432,7 @@ function MyAttendanceContent() {
           </div>
 
           {/* Attendance History */}
-          <section className="flex min-h-0 flex-1 flex-col rounded-[32px] border border-zinc-200/80 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.08)] dark:border-zinc-900 dark:bg-zinc-950 dark:shadow-[0_18px_50px_rgba(0,0,0,0.35)] sm:p-6">
+          <section className={hrmsSectionClass}>
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <h2 className="text-xl font-semibold tracking-tight text-zinc-950 dark:text-white">Attendance History</h2>
@@ -459,24 +460,24 @@ function MyAttendanceContent() {
               )}
             </div>
 
-            <div className="mt-6 min-h-0 overflow-x-auto">
-              <table className="min-w-[780px] w-full border-collapse text-left text-sm">
-                <thead>
-                  <tr className="border-b border-zinc-200/80 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-200">
-                    <th className="w-12 px-2 py-3">S.No</th>
-                    <th className="px-2 py-3">Date & Day</th>
-                    <th className="px-2 py-3">Check In</th>
-                    <th className="px-2 py-3">Check Out</th>
-                    <th className="px-2 py-3 text-right">Work Hours</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-200/80 dark:divide-zinc-800">
-                  {filteredRecords.length === 0 ? (
-                    <tr>
-                      <td className="px-2 py-10 text-center font-medium text-zinc-400 dark:text-zinc-500" colSpan={5}>
-                        No attendance records yet. Click the start button to punch in.
-                      </td>
-                    </tr>
+            <div className={`${hrmsTableViewportClass} mt-6 min-h-0`}>
+    <table className={hrmsTableClass}>
+      <thead>
+        <tr className={hrmsTableHeadRowClass}>
+          <th className="w-12 px-4 py-3">S.No</th>
+          <th className="px-4 py-3">Date & Day</th>
+          <th className="px-4 py-3">Check In</th>
+          <th className="px-4 py-3">Check Out</th>
+          <th className="px-4 py-3 text-right">Work Hours</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-zinc-200/80 dark:divide-zinc-800">
+        {filteredRecords.length === 0 ? (
+          <tr>
+            <td className={hrmsTableEmptyClass} colSpan={5}>
+              No attendance records yet. Click the start button to punch in.
+            </td>
+          </tr>
                   ) : (
                     paginatedRecords.map((record, idx) => {
                       const sno = (page - 1) * PAGE_SIZE + idx + 1
@@ -486,21 +487,21 @@ function MyAttendanceContent() {
                       const hoursStr = (diff / (1000 * 60 * 60)).toFixed(2)
 
                       return (
-                        <tr key={record._id} className="transition-colors hover:bg-zinc-50/80 dark:hover:bg-zinc-900/60">
-                          <td className="px-2 py-4 font-mono text-xs text-zinc-400 dark:text-zinc-500">{sno}</td>
-                          <td className="px-2 py-4">
-                            <div className="font-semibold text-zinc-900 dark:text-zinc-100">{dateStr}</div>
+                        <tr key={record._id} className={hrmsTableRowClass}>
+                          <td className="px-4 py-4 font-mono text-xs font-semibold text-zinc-400 dark:text-zinc-500">{sno}</td>
+                          <td className="px-4 py-4">
+                            <div className="font-semibold text-zinc-950 dark:text-zinc-100">{dateStr}</div>
                             <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">
                               {dayStr}
                             </div>
                           </td>
-                          <td className="px-2 py-4 font-medium text-zinc-700 dark:text-zinc-300">
+                          <td className="px-4 py-4 font-medium text-zinc-700 dark:text-zinc-300">
                             <span className="flex items-center gap-2">
                               <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" />
                               {formatTime(record.punchInAt)}
                             </span>
                           </td>
-                          <td className="px-2 py-4 font-medium text-zinc-700 dark:text-zinc-300">
+                          <td className="px-4 py-4 font-medium text-zinc-700 dark:text-zinc-300">
                             {isRecordActive ? (
                               <span className="flex items-center gap-2">
                                 <span className="h-2 w-2 rounded-full bg-amber-500 inline-block animate-pulse" />
@@ -513,7 +514,7 @@ function MyAttendanceContent() {
                               </span>
                             )}
                           </td>
-                          <td className="px-2 py-4 text-right font-bold text-zinc-950 dark:text-zinc-100">
+                          <td className="px-4 py-4 text-right font-bold text-zinc-950 dark:text-zinc-100">
                             {hoursStr}h
                           </td>
                         </tr>

@@ -22,6 +22,13 @@ type WelcomeMessageArgs = {
   appUrl?: string
 }
 
+type AccessRequestMessageArgs = {
+  userName: string
+  userEmail: string
+  requestedAt: string
+  appUrl?: string
+}
+
 function getAppUrl(appUrl?: string) {
   if (appUrl) {
     return appUrl.replace(/\/$/, "")
@@ -160,6 +167,43 @@ function buildWelcomeHtml(args: WelcomeMessageArgs) {
   `
 }
 
+function buildAccessRequestText(args: AccessRequestMessageArgs) {
+  return [
+    "New account access request",
+    "",
+    `Name: ${args.userName}`,
+    `Email: ${args.userEmail}`,
+    `Requested at: ${args.requestedAt}`,
+    `Review link: ${getAppUrl(args.appUrl)}/pending-approval`,
+    "",
+    "Please review the account and approve or decline it from the dashboard.",
+  ].join("\n")
+}
+
+function buildAccessRequestHtml(args: AccessRequestMessageArgs) {
+  const safeName = escapeHtml(args.userName)
+  const safeEmail = escapeHtml(args.userEmail)
+  const safeRequestedAt = escapeHtml(args.requestedAt)
+  const safeReviewUrl = escapeHtml(`${getAppUrl(args.appUrl)}/pending-approval`)
+
+  return `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
+      <h2 style="margin-bottom: 16px;">New account access request</h2>
+      <p>A new user has created an account and is waiting for approval.</p>
+      <ul>
+        <li><strong>Name:</strong> ${safeName}</li>
+        <li><strong>Email:</strong> ${safeEmail}</li>
+        <li><strong>Requested at:</strong> ${safeRequestedAt}</li>
+      </ul>
+      <p>
+        <a href="${safeReviewUrl}" style="display:inline-block;background:#111827;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:12px 20px;border-radius:12px;">
+          Review pending approvals
+        </a>
+      </p>
+    </div>
+  `
+}
+
 async function sendResendEmail(args: ResendEmailArgs) {
   const apiKey = process.env.RESEND_API_KEY
   const fromEmail = process.env.RESEND_FROM_EMAIL
@@ -264,6 +308,24 @@ export const sendEmployeeOnboarding = internalAction({
       emailSent: Boolean(emailResult.sent),
       warnings: warnings.length ? warnings : undefined,
     }
+  },
+})
+
+export const sendAccessRequestEmail = internalAction({
+  args: {
+    adminEmail: v.string(),
+    userName: v.string(),
+    userEmail: v.string(),
+    requestedAt: v.string(),
+    appUrl: v.optional(v.string()),
+  },
+  handler: async (_ctx, args) => {
+    return await sendResendEmail({
+      email: args.adminEmail,
+      subject: `Access request from ${args.userName}`,
+      text: buildAccessRequestText(args),
+      html: buildAccessRequestHtml(args),
+    })
   },
 })
 

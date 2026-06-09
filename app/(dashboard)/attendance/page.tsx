@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Printer, Search } from 'lucide-react'
 import { api } from '@/convex/_generated/api'
 import { Pagination } from '@/components/ui/pagination'
+import { hrmsSectionClass, hrmsTableClass, hrmsTableEmptyClass, hrmsTableHeadRowClass, hrmsTableRowClass } from '@/components/ui/hrms-table'
 
 function formatTime(timestamp: number | null) {
   if (!timestamp) return '--:--'
@@ -74,7 +75,7 @@ function PunchSheetCardList({
 }) {
   if (punchSheet.length === 0) {
     return (
-      <div className="rounded-2xl border border-zinc-200 bg-white px-4 py-8 text-center text-sm text-zinc-500 dark:border-zinc-900 dark:bg-black dark:text-zinc-400">
+      <div className="rounded-[24px] border border-white/70 bg-white/80 px-4 py-8 text-center text-sm text-zinc-500 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/75 dark:text-zinc-400">
         No employees found. Add employees in the Employee section first.
       </div>
     )
@@ -91,7 +92,7 @@ function PunchSheetCardList({
         return (
           <article
             key={emp._id}
-            className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-xs dark:border-zinc-900 dark:bg-black"
+            className="rounded-[24px] border border-white/70 bg-white/80 p-4 shadow-[0_16px_40px_rgba(99,102,241,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_52px_rgba(99,102,241,0.12)] dark:border-white/10 dark:bg-zinc-950/75"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -101,33 +102,35 @@ function PunchSheetCardList({
                 <button
                   type="button"
                   onClick={() => window.open(`/employee-attendance?email=${encodeURIComponent(emp.email)}&name=${encodeURIComponent(emp.fullName)}`, '_blank')}
-                  className="mt-1 block truncate text-left text-base font-semibold text-zinc-900 transition hover:text-[#6c47ff] dark:text-white"
+                  className="mt-1 block text-left text-base font-semibold tracking-tight text-zinc-950 transition hover:text-indigo-600 dark:text-white dark:hover:text-indigo-300"
                 >
                   {emp.fullName}
                 </button>
-                <p className="truncate text-xs text-zinc-400 dark:text-zinc-500">{emp.email}</p>
+                <p className="break-all text-xs text-zinc-400 dark:text-zinc-500 sm:break-normal">{emp.email}</p>
               </div>
-              <PunchStatusBadge session={s} />
+              <div className="shrink-0 rounded-full bg-white/70 px-3 py-1.5 shadow-sm dark:bg-white/5">
+                <PunchStatusBadge session={s} />
+              </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <div className="rounded-xl bg-zinc-50 px-3 py-2 dark:bg-zinc-950">
+            <div className="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+              <div className="rounded-2xl bg-gradient-to-br from-indigo-50/80 to-white px-3 py-2.5 dark:from-white/5 dark:to-white/0">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">Department</p>
                 <p className="mt-1 text-sm font-medium text-zinc-700 dark:text-zinc-200">{emp.department || '—'}</p>
               </div>
-              <div className="rounded-xl bg-zinc-50 px-3 py-2 dark:bg-zinc-950">
+              <div className="rounded-2xl bg-gradient-to-br from-fuchsia-50/80 to-white px-3 py-2.5 dark:from-white/5 dark:to-white/0">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">Hours</p>
                 <p className="mt-1 text-sm font-medium text-zinc-700 dark:text-zinc-200">
                   {s ? `${diff.toFixed(2)}h` : '—'}
                 </p>
               </div>
-              <div className="rounded-xl bg-zinc-50 px-3 py-2 dark:bg-zinc-950">
+              <div className="rounded-2xl bg-gradient-to-br from-cyan-50/80 to-white px-3 py-2.5 dark:from-white/5 dark:to-white/0">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">Check In</p>
                 <p className="mt-1 text-sm font-medium text-zinc-700 dark:text-zinc-200">
                   {s ? formatTime(s.punchInAt) : '—'}
                 </p>
               </div>
-              <div className="rounded-xl bg-zinc-50 px-3 py-2 dark:bg-zinc-950">
+              <div className="rounded-2xl bg-gradient-to-br from-emerald-50/80 to-white px-3 py-2.5 dark:from-white/5 dark:to-white/0">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">Check Out</p>
                 <p className="mt-1 text-sm font-medium text-zinc-700 dark:text-zinc-200">
                   {s ? (s.punchOutAt ? formatTime(s.punchOutAt) : 'Active') : '—'}
@@ -151,7 +154,7 @@ function AdminPunchSheet({
   now: number
 }) {
   return (
-    <table className="min-w-[1120px] w-full table-fixed border-collapse text-left text-sm">
+    <table className={hrmsTableClass}>
       <colgroup>
         <col className="w-[5%]" />
         <col className="w-[30%]" />
@@ -162,7 +165,7 @@ function AdminPunchSheet({
         <col className="w-[7%]" />
       </colgroup>
       <thead>
-        <tr className="border-b border-zinc-200 text-xs font-semibold text-zinc-800 dark:border-zinc-900 dark:text-white">
+        <tr className={hrmsTableHeadRowClass}>
           <th className="py-3 px-4">S.No</th>
           <th className="py-3 px-4">Employee</th>
           <th className="py-3 px-4">Department</th>
@@ -175,7 +178,7 @@ function AdminPunchSheet({
       <tbody className="divide-y divide-zinc-200 dark:divide-zinc-900">
         {punchSheet.length === 0 ? (
           <tr>
-            <td className="py-8 px-4 text-center text-zinc-400 font-medium" colSpan={7}>
+          <td className={hrmsTableEmptyClass} colSpan={7}>
               No employees found. Add employees in the Employee section first.
             </td>
           </tr>
@@ -187,9 +190,9 @@ function AdminPunchSheet({
             const diff = s ? ((s.punchOutAt ?? now) - s.punchInAt) / (1000 * 60 * 60) : 0
 
             return (
-              <tr key={emp._id} className="transition-colors hover:bg-zinc-50/70 dark:hover:bg-zinc-950">
-                <td className="py-4 px-4 text-xs font-mono text-zinc-400">{sno}</td>
-                <td className="py-4 px-4">
+              <tr key={emp._id} className={hrmsTableRowClass}>
+                <td className="px-4 py-4 text-xs font-mono font-semibold text-zinc-400 dark:text-zinc-500">{sno}</td>
+                <td className="px-4 py-4">
                   <button
                     type="button"
                     onClick={() => window.open(`/employee-attendance?email=${encodeURIComponent(emp.email)}&name=${encodeURIComponent(emp.fullName)}`, '_blank')}
@@ -197,9 +200,9 @@ function AdminPunchSheet({
                   >
                     {emp.fullName}
                   </button>
-                  <div className="mt-0.5 text-[10px] font-medium text-zinc-400">{emp.email}</div>
+                  <div className="mt-0.5 text-[10px] font-medium text-zinc-400 dark:text-zinc-500">{emp.email}</div>
                 </td>
-                <td className="py-4 px-4">
+                <td className="px-4 py-4">
                   {emp.department ? (
                     <span className="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">
                       {emp.department}
@@ -211,13 +214,13 @@ function AdminPunchSheet({
                 <td className="py-4 px-4">
                   <PunchStatusBadge session={s} />
                 </td>
-                <td className="py-4 px-4 font-medium text-zinc-700 dark:text-zinc-200">
+                <td className="px-4 py-4 font-medium text-zinc-700 dark:text-zinc-200">
                   {s ? formatTime(s.punchInAt) : <span className="text-zinc-300">—</span>}
                 </td>
-                <td className="py-4 px-4 font-medium text-zinc-700 dark:text-zinc-200">
+                <td className="px-4 py-4 font-medium text-zinc-700 dark:text-zinc-200">
                   {s ? (s.punchOutAt ? formatTime(s.punchOutAt) : 'Active') : <span className="text-zinc-300">—</span>}
                 </td>
-                <td className="py-4 px-4 text-right font-bold text-zinc-950 dark:text-zinc-100">
+                <td className="px-4 py-4 text-right font-bold text-zinc-950 dark:text-zinc-100">
                   {s ? `${diff.toFixed(2)}h` : <span className="text-zinc-300">—</span>}
                 </td>
               </tr>
@@ -230,10 +233,10 @@ function AdminPunchSheet({
 }
 
 export default function EmployeeAttendancePage() {
-  const { user, isLoaded } = useUser()
+  const { isLoaded, user } = useUser()
   const router = useRouter()
   const viewer = useQuery(api.users.viewer)
-  const isAdmin = viewer?.role === 'admin' || user?.publicMetadata?.role === 'admin'
+  const isAdmin = viewer?.role === 'admin'
 
   const viewerIdentity = useMemo(
     () =>
@@ -244,7 +247,15 @@ export default function EmployeeAttendancePage() {
             viewerEmail: user.primaryEmailAddress?.emailAddress ?? null,
           }
         : null,
-    [isLoaded, user],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      isLoaded,
+      user,
+      user?.id,
+      user?.fullName,
+      user?.username,
+      user?.primaryEmailAddress?.emailAddress,
+    ],
   )
 
   const [searchQuery, setSearchQuery] = useState('')
@@ -340,7 +351,7 @@ export default function EmployeeAttendancePage() {
 
       <section
         id="punch-sheet-print-area"
-        className="w-full overflow-hidden rounded-[28px] border border-zinc-200 bg-white p-4 shadow-xs dark:border-zinc-900 dark:bg-black sm:p-6"
+        className={hrmsSectionClass}
       >
         <div className="md:hidden">
           <PunchSheetCardList punchSheet={paginatedPunchSheet} offset={(currentPage - 1) * PAGE_SIZE} now={now} />
@@ -350,7 +361,7 @@ export default function EmployeeAttendancePage() {
           <AdminPunchSheet punchSheet={paginatedPunchSheet} offset={(currentPage - 1) * PAGE_SIZE} now={now} />
         </div>
 
-        <div className="mt-4">
+        <div className="border-t border-zinc-200/70 px-4 py-4 dark:border-zinc-900 sm:px-5">
           <Pagination current={currentPage} total={filteredPunchSheet.length} pageSize={PAGE_SIZE} onChange={setPage} />
         </div>
       </section>

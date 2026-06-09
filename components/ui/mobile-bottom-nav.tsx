@@ -2,16 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useUser } from '@clerk/nextjs'
 import { useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { getNavItems } from '@/components/ui/navigation-items'
 
 export function MobileBottomNav() {
   const pathname = usePathname()
-  const { user } = useUser()
   const viewer = useQuery(api.users.viewer)
-  const isAdmin = viewer?.role === 'admin' || user?.publicMetadata?.role === 'admin'
+  const isAdmin = viewer?.role === 'admin'
   const navItems = getNavItems(isAdmin)
   const activePath = pathname
 

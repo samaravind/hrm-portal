@@ -2,8 +2,10 @@ import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
 import { ClerkProvider } from '@clerk/nextjs'
 import { ConvexClientProvider } from './convex-client-provider'
+import { AuthUserSync } from './auth-user-sync'
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ThemeProvider } from '@/components/theme-provider'
+import { DashboardUserSync } from './(dashboard)/dashboard-user-sync'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -40,6 +42,8 @@ export default function RootLayout({
         <ThemeProvider>
           <ClerkProvider publishableKey={publishableKey}>
             <ConvexClientProvider>
+              <AuthUserSync />
+              <DashboardUserSync />
               <TooltipProvider>
                 {children}
               </TooltipProvider>
