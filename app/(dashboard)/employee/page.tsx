@@ -12,6 +12,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { getPasswordStrength } from '@/lib/password'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 const COUNTRY_CODES = [
   { code: 'IN', value: '+91', name: 'India' },
@@ -544,6 +545,125 @@ function EmployeeRow({ employee, sno, role, formatDate, onView, onEdit }: {
         </div>
       </td>
     </tr>
+  )
+}
+
+function EmployeeMobileCard({ employee, sno, role, formatDate, onView, onEdit }: {
+  employee: Doc<'employees'>
+  sno: number
+  role: string | undefined
+  formatDate: (d: string) => string
+  onView: (emp: Doc<'employees'>) => void
+  onEdit: (emp: Doc<'employees'>) => void
+}) {
+  const [blocking, setBlocking] = useState(false)
+  const toggleBlock = useMutation(api.employees.toggleBlockEmployee)
+  const initials = employee.fullName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+  const isBlocked = employee.blocked ?? false
+
+  const handleBlock = async () => {
+    setBlocking(true)
+    try {
+      const result = await toggleBlock({ id: employee._id })
+      await fetch('/api/block-employee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: result.email, block: result.blocked }),
+      })
+    } finally {
+      setBlocking(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete ${employee.fullName}?`)) return
+
+    try {
+      const res = await fetch('/api/delete-employee', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: employee.email }),
+      })
+
+      const data = await res.json().catch(() => null)
+      if (!res.ok) {
+        throw new Error(data?.error ?? 'Failed to delete employee.')
+      }
+
+      toast.success(
+        data?.employeeDeleted
+          ? 'Employee deleted from Clerk and the employee list.'
+          : 'Employee deleted from Clerk. No matching employee record was found.',
+      )
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete employee.')
+    }
+  }
+
+  return (
+    <article className={`rounded-xl border border-zinc-200 bg-white p-4 shadow-none transition dark:border-zinc-900 dark:bg-black ${isBlocked ? 'opacity-70' : ''}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="mt-0.5 inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-md border border-zinc-200 bg-zinc-50 px-1.5 text-[10px] font-medium text-zinc-500 dark:border-zinc-900 dark:bg-black dark:text-zinc-400">
+            {sno}
+          </div>
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-[12px] font-semibold text-white dark:bg-black dark:text-white">
+            {initials}
+          </div>
+          <div className="min-w-0">
+            <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+              <span className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">{employee.fullName}</span>
+              {isBlocked && (
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-300 bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-600 dark:border-zinc-900 dark:bg-black dark:text-white/60">
+                  <Ban className="size-3" />
+                  Blocked
+                </span>
+              )}
+            </div>
+            <p className="mt-0.5 truncate text-xs text-zinc-500 dark:text-zinc-400">{employee.email}</p>
+          </div>
+        </div>
+        <div className="shrink-0">
+          <div className="flex items-center gap-1">
+            <button type="button" onClick={() => onView(employee)} className="inline-flex size-7 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950" title="View">
+              <Eye className="size-3.5" />
+            </button>
+            <button type="button" onClick={() => onEdit(employee)} className="inline-flex size-7 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950" title="Edit">
+              <Edit className="size-3.5" />
+            </button>
+            <button type="button" onClick={handleDelete} className="inline-flex size-7 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950" title="Delete">
+              <Trash2 className="size-3.5" />
+            </button>
+            <button type="button" onClick={handleBlock} disabled={blocking} className={`inline-flex size-7 items-center justify-center rounded-md border transition disabled:opacity-50 ${isBlocked ? 'border-zinc-300 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:border-zinc-900 dark:bg-black dark:text-white/70 dark:hover:bg-zinc-950' : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950'}`} title={isBlocked ? 'Unblock' : 'Block'}>
+              <Ban className="size-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2.5 dark:border-zinc-900 dark:bg-black">
+          <p className="uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500">Role</p>
+          <p className="mt-1 font-semibold text-zinc-800 dark:text-zinc-100">{role === 'admin' ? 'Admin' : 'Staff'}</p>
+        </div>
+        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2.5 dark:border-zinc-900 dark:bg-black">
+          <p className="uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500">Department</p>
+          <p className="mt-1 font-semibold text-zinc-800 dark:text-zinc-100">{employee.department || 'Unassigned'}</p>
+        </div>
+        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2.5 dark:border-zinc-900 dark:bg-black">
+          <p className="uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500">Type</p>
+          <p className="mt-1 font-semibold text-zinc-800 dark:text-zinc-100">{employee.employeeType || 'Employee'}</p>
+        </div>
+        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2.5 dark:border-zinc-900 dark:bg-black">
+          <p className="uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500">Phone</p>
+          <p className="mt-1 truncate font-semibold text-zinc-800 dark:text-zinc-100">{employee.phone || '--'}</p>
+        </div>
+        <div className="col-span-2 rounded-lg border border-zinc-200 bg-zinc-50 p-2.5 dark:border-zinc-900 dark:bg-black">
+          <p className="uppercase tracking-[0.14em] text-zinc-400 dark:text-zinc-500">Hired Date</p>
+          <p className="mt-1 font-semibold text-zinc-800 dark:text-zinc-100">{formatDate(employee.joiningDate)}</p>
+        </div>
+      </div>
+    </article>
   )
 }
 //  View Employee Panel 
@@ -1129,6 +1249,8 @@ export default function EmployeesPage() {
     )
   }, [employees, search, emailFilter])
 
+  const isMobile = useIsMobile()
+
   if (viewer !== undefined && isLoaded && !isAdmin) {
     return null
   }
@@ -1235,50 +1357,72 @@ export default function EmployeesPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full table-fixed border-collapse text-sm">
-            <colgroup>
-              <col className="w-[5%]" />
-              <col className="w-[30%]" />
-              <col className="w-[10%]" />
-              <col className="w-[14%]" />
-              <col className="w-[10%]" />
-              <col className="w-[13%]" />
-              <col className="w-[12%]" />
-              <col className="w-[16%]" />
-            </colgroup>
-            <thead>
+        {isMobile ? (
+          <div className="space-y-3 p-3">
+            {paginatedEmployees.length === 0 ? (
+              <div className="rounded-xl border border-zinc-200 bg-white px-4 py-10 text-center text-sm text-zinc-500 dark:border-zinc-900 dark:bg-black dark:text-zinc-400">
+                {search ? 'No employees match your search.' : 'No employees yet. Click "Create Employee" to add one.'}
+              </div>
+            ) : (
+              paginatedEmployees.map((emp, idx) => (
+                <EmployeeMobileCard
+                  key={emp._id}
+                  employee={emp}
+                  sno={(page - 1) * PAGE_SIZE + idx + 1}
+                  role={roleMap[emp.email]}
+                  formatDate={formatDate}
+                  onView={setViewingEmployee}
+                  onEdit={setEditingEmployee}
+                />
+              ))
+            )}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-[1120px] w-full table-auto border-collapse text-sm">
+              <colgroup>
+                <col className="w-[5%]" />
+                <col className="w-[30%]" />
+                <col className="w-[10%]" />
+                <col className="w-[14%]" />
+                <col className="w-[10%]" />
+                <col className="w-[13%]" />
+                <col className="w-[12%]" />
+                <col className="w-[16%]" />
+              </colgroup>
+              <thead>
                 <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-black dark:bg-black">
-                {['S.No', 'Employee', 'Role', 'Department', 'Type', 'Phone', 'Hired Date', 'Actions'].map((h) => (
-                  <th key={h} className={`px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-500 ${h === 'Actions' ? 'text-right' : 'text-left'}`}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-              <tbody className="divide-y divide-zinc-200 bg-white dark:divide-black dark:bg-black">
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-10 text-center text-sm text-zinc-500 dark:text-zinc-400">
-                    {search ? 'No employees match your search.' : 'No employees yet. Click "Create Employee" to add one.'}
-                  </td>
+                  {['S.No', 'Employee', 'Role', 'Department', 'Type', 'Phone', 'Hired Date', 'Actions'].map((h) => (
+                    <th key={h} className={`px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-500 ${h === 'Actions' ? 'text-right' : 'text-left'}`}>
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ) : (
-                paginatedEmployees.map((emp, idx) => (
-                  <EmployeeRow
-                    key={emp._id}
-                    employee={emp}
-                    sno={(page - 1) * PAGE_SIZE + idx + 1}
-                    role={roleMap[emp.email]}
-                    formatDate={formatDate}
-                    onView={setViewingEmployee}
-                    onEdit={setEditingEmployee}
-                  />
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-zinc-200 bg-white dark:divide-black dark:bg-black">
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-10 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                      {search ? 'No employees match your search.' : 'No employees yet. Click "Create Employee" to add one.'}
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedEmployees.map((emp, idx) => (
+                    <EmployeeRow
+                      key={emp._id}
+                      employee={emp}
+                      sno={(page - 1) * PAGE_SIZE + idx + 1}
+                      role={roleMap[emp.email]}
+                      formatDate={formatDate}
+                      onView={setViewingEmployee}
+                      onEdit={setEditingEmployee}
+                    />
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         <Pagination current={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={setPage} />
       </section>

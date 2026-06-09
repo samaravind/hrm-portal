@@ -11,15 +11,25 @@ type ViewerFallback = {
   viewerEmail?: string | null
 }
 
-async function getAttendanceIdentity(ctx: {
-  auth: { getUserIdentity: () => Promise<{ tokenIdentifier: string; name?: string | null; email?: string | null; publicMetadata?: Record<string, unknown> } | null> }
-}, fallback?: ViewerFallback) {
+async function getAttendanceIdentity(
+  ctx: {
+    auth: {
+      getUserIdentity: () => Promise<{
+        tokenIdentifier: string
+        name?: string | null
+        email?: string | null
+        publicMetadata?: Record<string, unknown>
+      } | null>
+    }
+  },
+  fallback?: ViewerFallback,
+) {
   const identity = await ctx.auth.getUserIdentity()
   if (identity) {
     return {
       tokenIdentifier: identity.tokenIdentifier,
-      name: identity.name ?? null,
-      email: identity.email ?? null,
+      name: identity.name ?? fallback?.viewerName ?? null,
+      email: identity.email ?? fallback?.viewerEmail ?? null,
     }
   }
 
@@ -27,7 +37,7 @@ async function getAttendanceIdentity(ctx: {
   // hasn't propagated to ctx.auth yet (e.g. first render after sign-in).
   if (fallback?.viewerId) {
     return {
-      tokenIdentifier: `https://touched-foxhound-58.clerk.accounts.dev|${fallback.viewerId}`,
+      tokenIdentifier: "https://touched-foxhound-58.clerk.accounts.dev|" + fallback.viewerId,
       name: fallback.viewerName ?? null,
       email: fallback.viewerEmail ?? null,
     }
@@ -35,6 +45,7 @@ async function getAttendanceIdentity(ctx: {
 
   throw new Error("Not authenticated. Please sign in.")
 }
+
 export const listAllSessions = query({
   args: {
     viewerId: v.optional(v.union(v.string(), v.null())),
@@ -74,6 +85,7 @@ export const listAllSessions = query({
     return sessions.sort((a, b) => b.createdAt - a.createdAt)
   },
 })
+
 export const getTodaySession = query({
   args: {
     viewerId: v.optional(v.union(v.string(), v.null())),
@@ -93,6 +105,7 @@ export const getTodaySession = query({
       .unique()
   },
 })
+
 export const punchIn = mutation({
   args: {
     viewerId: v.optional(v.union(v.string(), v.null())),
@@ -101,6 +114,14 @@ export const punchIn = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await getAttendanceIdentity(ctx, args)
+    const viewer = await ctx.db
+      .query("users")
+      .withIndex("by_userTokenIdentifier", (q) =>
+        q.eq("userTokenIdentifier", identity.tokenIdentifier),
+      )
+      .unique()
+    const resolvedName = viewer?.userName ?? identity.name
+    const resolvedEmail = viewer?.userEmail ?? identity.email
 
     const now = Date.now()
     const dateKey = getDateKey()
@@ -122,8 +143,8 @@ export const punchIn = mutation({
 
     const sessionId = await ctx.db.insert("attendanceSessions", {
       userTokenIdentifier: identity.tokenIdentifier,
-      userName: identity.name,
-      userEmail: identity.email,
+      userName: resolvedName,
+      userEmail: resolvedEmail,
       dateKey,
       punchInAt: now,
       punchOutAt: null,
@@ -170,6 +191,7 @@ export const punchOut = mutation({
     return await ctx.db.get(existing._id)
   },
 })
+
 export const listAllSessionss = query({
   args: {},
   handler: async (ctx) => {
@@ -293,22 +315,33 @@ export const getPunchSheet = query({
     const dateKey = getDateKey()
     const employees = await ctx.db.query("employees").collect()
     const allUsers = await ctx.db.query("users").collect()
+
     const userRoleByEmail = new Map<string, string>()
+    const userByEmail = new Map<string, { tokenIdentifier: string; email: string | null; name: string | null }>()
+    const userByToken = new Map<string, { tokenIdentifier: string; email: string | null; name: string | null }>()
     for (const u of allUsers) {
-      if (u.userEmail) userRoleByEmail.set(u.userEmail.toLowerCase(), u.role)
+      const normalizedEmail = u.userEmail?.toLowerCase()
+      const userSummary = {
+        tokenIdentifier: u.userTokenIdentifier,
+        email: u.userEmail,
+        name: u.userName,
+      }
+      if (normalizedEmail) {
+        userRoleByEmail.set(normalizedEmail, u.role)
+        userByEmail.set(normalizedEmail, userSummary)
+      }
+      userByToken.set(u.userTokenIdentifier, userSummary)
     }
 
     const allTodaySessions = await ctx.db
       .query("attendanceSessions")
-      .filter((q) => q.eq(q.field("dateKey"), dateKey))
+      .withIndex("by_dateKey", (q) => q.eq("dateKey", dateKey))
       .collect()
 
-    const filteredSessions = allTodaySessions.filter(
-      (s) => s.userTokenIdentifier !== identity.tokenIdentifier,
-    )
-
+    const sessionsByToken = new Map<string, typeof allTodaySessions[number]>()
     const sessionsByEmail = new Map<string, typeof allTodaySessions[number]>()
     const seenEmails = new Set<string>()
+    const viewerEmail = viewer?.userEmail?.toLowerCase() ?? identity.email?.toLowerCase() ?? null
     const result: {
       employee: {
         _id: string
@@ -328,16 +361,25 @@ export const getPunchSheet = query({
       } | null
     }[] = []
 
-    for (const s of filteredSessions) {
+    for (const s of allTodaySessions) {
+      if (s.userTokenIdentifier) {
+        sessionsByToken.set(s.userTokenIdentifier, s)
+      }
       if (s.userEmail) {
         sessionsByEmail.set(s.userEmail.toLowerCase(), s)
       }
     }
 
-    // Employees from the employees table
     for (const emp of employees) {
       seenEmails.add(emp.email.toLowerCase())
-      const session = sessionsByEmail.get(emp.email.toLowerCase())
+      const normalizedEmail = emp.email.toLowerCase()
+      const relatedUser = userByEmail.get(normalizedEmail)
+      const session =
+        (relatedUser ? sessionsByToken.get(relatedUser.tokenIdentifier) : null) ??
+        sessionsByEmail.get(normalizedEmail) ??
+        (viewerEmail && normalizedEmail === viewerEmail
+          ? sessionsByToken.get(identity.tokenIdentifier) ?? null
+          : null)
       result.push({
         employee: {
           _id: emp._id,
@@ -347,7 +389,7 @@ export const getPunchSheet = query({
           position: emp.position,
           employeeId: emp.employeeId,
           employeeType: emp.employeeType,
-          role: userRoleByEmail.get(emp.email.toLowerCase()) || 'staff',
+          role: userRoleByEmail.get(emp.email.toLowerCase()) || "staff",
         },
         session: session
           ? {
@@ -360,21 +402,22 @@ export const getPunchSheet = query({
       })
     }
 
-    // Users with attendance records but not in employees table
-    for (const s of filteredSessions) {
-      const email = s.userEmail?.toLowerCase()
-      if (email && !seenEmails.has(email)) {
-        seenEmails.add(email)
+    for (const s of allTodaySessions) {
+      const normalizedEmail = s.userEmail?.toLowerCase()
+      const relatedUser = s.userTokenIdentifier ? userByToken.get(s.userTokenIdentifier) : null
+      const displayEmail = normalizedEmail ?? relatedUser?.email?.toLowerCase() ?? null
+      if (displayEmail && !seenEmails.has(displayEmail)) {
+        seenEmails.add(displayEmail)
         result.push({
           employee: {
             _id: s._id,
-            fullName: s.userName || s.userEmail || 'Unknown',
-            email: s.userEmail ?? '',
-            department: '',
-            position: '',
-            employeeId: '',
-            employeeType: '',
-            role: userRoleByEmail.get(email) || 'staff',
+            fullName: s.userName || relatedUser?.name || s.userEmail || "Unknown",
+            email: s.userEmail ?? relatedUser?.email ?? "",
+            department: "",
+            position: "",
+            employeeId: "",
+            employeeType: "",
+            role: userRoleByEmail.get(displayEmail) || "staff",
           },
           session: {
             _id: s._id,

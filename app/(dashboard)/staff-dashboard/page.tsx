@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { Key, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
@@ -99,7 +99,7 @@ export default function StaffDashboardPage() {
 
   const sessions = useMemo(() => mySessions ?? [], [mySessions])
   const sessionsThisWeek = useMemo(
-    () => sessions.filter((session) => weekDates.includes(session.dateKey)),
+    () => sessions.filter((session: { dateKey: string }) => weekDates.includes(session.dateKey)),
     [sessions, weekDates],
   )
 
@@ -111,7 +111,7 @@ export default function StaffDashboardPage() {
   const weekHours = useMemo(
     () =>
       completedSessionsThisWeek.reduce(
-        (total, session) => total + ((session.punchOutAt ?? session.punchInAt) - session.punchInAt),
+        (total: number, session: { punchOutAt: any; punchInAt: number }) => total + ((session.punchOutAt ?? session.punchInAt) - session.punchInAt),
         0,
       ),
     [completedSessionsThisWeek],
@@ -212,7 +212,7 @@ export default function StaffDashboardPage() {
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.12),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(16,185,129,0.10),_transparent_24%),linear-gradient(180deg,_#f8fafc_0%,_#eef2ff_100%)] px-4 py-6 text-zinc-950 sm:px-6 dark:bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.16),_transparent_24%),radial-gradient(circle_at_top_right,_rgba(16,185,129,0.12),_transparent_20%),linear-gradient(180deg,_#030712_0%,_#111827_100%)] dark:text-zinc-100">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <section className="overflow-hidden rounded-[30px] border border-white/70 bg-white/90 shadow-[0_30px_80px_rgba(15,23,42,0.10)] backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/85 dark:shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
+        <section className="overflow-hidden rounded-[30px] border border-white/70 bg-white/90 shadow-[0_30px_80px_rgba(15,23,42,0.10)] backdrop-blur dark:border-black dark:bg-zinc-950/85 dark:shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
           <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.35fr_0.85fr]">
             <div className="space-y-5">
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
@@ -231,14 +231,14 @@ export default function StaffDashboardPage() {
               <div className="flex flex-wrap gap-3">
                 <Link
                   href="/my-attendance"
-                  className="inline-flex items-center gap-2 rounded-2xl border border-zinc-200 bg-zinc-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 dark:border-zinc-800 dark:bg-black dark:text-white dark:hover:bg-zinc-950"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-zinc-200 bg-zinc-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 dark:border-black dark:bg-black dark:text-white dark:hover:bg-zinc-950"
                 >
                   <Calendar className="size-4" />
                   My Attendance
                 </Link>
                 <Link
                   href="/profile"
-                  className="inline-flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-800 dark:bg-black dark:text-white dark:hover:bg-zinc-950"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 dark:border-black dark:bg-black dark:text-white dark:hover:bg-zinc-950"
                 >
                   <UserRound className="size-4" />
                   Profile
@@ -246,7 +246,7 @@ export default function StaffDashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-zinc-200/70 bg-white p-5 text-zinc-950 shadow-[0_20px_50px_rgba(15,23,42,0.10)] dark:border-zinc-800 dark:bg-gradient-to-br dark:from-zinc-950 dark:via-zinc-900 dark:to-indigo-950 dark:text-white dark:shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
+            <div className="rounded-[24px] border border-zinc-200/70 bg-white p-5 text-zinc-950 shadow-[0_20px_50px_rgba(15,23,42,0.10)] dark:border-black dark:bg-gradient-to-br dark:from-zinc-950 dark:via-zinc-900 dark:to-indigo-950 dark:text-white dark:shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-500 dark:text-white/60">Profile</p>
@@ -259,19 +259,19 @@ export default function StaffDashboardPage() {
               </div>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-white/10 dark:bg-white/5">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-black dark:bg-white/5">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 dark:text-white/50">Department</p>
                   <p className="mt-1 text-sm font-semibold text-zinc-900 dark:text-white">{myEmployee?.department || 'Unassigned'}</p>
                 </div>
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-white/10 dark:bg-white/5">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-black dark:bg-white/5">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 dark:text-white/50">Role</p>
                   <p className="mt-1 text-sm font-semibold text-zinc-900 dark:text-white">{myEmployee?.position || 'Staff'}</p>
                 </div>
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-white/10 dark:bg-white/5">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-black dark:bg-white/5">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 dark:text-white/50">Today</p>
                   <p className="mt-1 text-sm font-semibold text-zinc-900 dark:text-white">{currentStatus}</p>
                 </div>
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-white/10 dark:bg-white/5">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-black dark:bg-white/5">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 dark:text-white/50">Date</p>
                   <p className="mt-1 text-sm font-semibold text-zinc-900 dark:text-white">{new Date(todayKey).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                 </div>
@@ -288,7 +288,7 @@ export default function StaffDashboardPage() {
 
         <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
           <div className="space-y-6">
-            <section className="rounded-[28px] border border-zinc-200/70 bg-white/95 p-6 shadow-[0_24px_50px_rgba(15,23,42,0.08)] dark:border-zinc-800 dark:bg-zinc-950/85 dark:shadow-[0_24px_50px_rgba(0,0,0,0.35)]">
+            <section className="rounded-[28px] border border-zinc-200/70 bg-white/95 p-6 shadow-[0_24px_50px_rgba(15,23,42,0.08)] dark:border-black dark:bg-zinc-950/85 dark:shadow-[0_24px_50px_rgba(0,0,0,0.35)]">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">Punch In / Out</h2>
@@ -325,7 +325,7 @@ export default function StaffDashboardPage() {
               </div>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/70">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-black dark:bg-zinc-900/70">
                   <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
                     <Clock3 className="size-4" />
                     <span className="text-[11px] font-semibold uppercase tracking-[0.18em]">Attendance</span>
@@ -333,7 +333,7 @@ export default function StaffDashboardPage() {
                   <div className="mt-3 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">{currentStatus}</div>
                   <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Based on your latest punch status.</p>
                 </div>
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/70">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-black dark:bg-zinc-900/70">
                   <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
                     <CircleAlert className="size-4" />
                     <span className="text-[11px] font-semibold uppercase tracking-[0.18em]">Leave Status</span>
@@ -341,7 +341,7 @@ export default function StaffDashboardPage() {
                   <div className="mt-3 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">{leaveStatus}</div>
                   <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">No leave features exposed here for staff.</p>
                 </div>
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/70">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-black dark:bg-zinc-900/70">
                   <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
                     <TrendingUp className="size-4" />
                     <span className="text-[11px] font-semibold uppercase tracking-[0.18em]">This Week</span>
@@ -349,7 +349,7 @@ export default function StaffDashboardPage() {
                   <div className="mt-3 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">{formatDuration(weekHours)}</div>
                   <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{sessionsThisWeek.length} session(s) logged</p>
                 </div>
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/70">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-black dark:bg-zinc-900/70">
                   <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
                     <Medal className="size-4" />
                     <span className="text-[11px] font-semibold uppercase tracking-[0.18em]">Performance</span>
@@ -360,7 +360,7 @@ export default function StaffDashboardPage() {
               </div>
             </section>
 
-            <section className="rounded-[28px] border border-zinc-200/70 bg-white/95 p-6 shadow-[0_24px_50px_rgba(15,23,42,0.08)] dark:border-zinc-800 dark:bg-zinc-950/85 dark:shadow-[0_24px_50px_rgba(0,0,0,0.35)]">
+            <section className="rounded-[28px] border border-zinc-200/70 bg-white/95 p-6 shadow-[0_24px_50px_rgba(15,23,42,0.08)] dark:border-black dark:bg-zinc-950/85 dark:shadow-[0_24px_50px_rgba(0,0,0,0.35)]">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">Recent Activity</h2>
@@ -381,7 +381,7 @@ export default function StaffDashboardPage() {
                     No attendance records yet.
                   </div>
                 ) : (
-                  sessions.slice(0, 5).map((session) => (
+                  sessions.slice(0, 5).map((session: { _id: Key | null | undefined; punchOutAt: number | null; punchInAt: number }) => (
                     <div key={session._id} className="flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center gap-3">
                         <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${session.punchOutAt === null ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300' : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300'}`}>
@@ -479,7 +479,7 @@ export default function StaffDashboardPage() {
                 </div>
               </div>
 
-              <div className="mt-5 space-y-3 rounded-[24px] border border-zinc-200 bg-zinc-50 p-4 dark:border-white/10 dark:bg-white/5">
+              <div className="mt-5 space-y-3 rounded-[24px] border border-zinc-200 bg-zinc-50 p-4 dark:border-black dark:bg-white/5">
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-sm text-zinc-500 dark:text-white/60">Email</span>
                   <span className="text-sm font-medium text-zinc-900 dark:text-white">{user?.primaryEmailAddress?.emailAddress ?? 'Not set'}</span>
@@ -514,28 +514,28 @@ export default function StaffDashboardPage() {
               </div>
             </section>
 
-            <section className="rounded-[28px] border border-zinc-200/70 bg-white/95 p-6 shadow-[0_24px_50px_rgba(15,23,42,0.08)] dark:border-zinc-800 dark:bg-zinc-950/85 dark:shadow-[0_24px_50px_rgba(0,0,0,0.35)]">
+            <section className="rounded-[28px] border border-zinc-200/70 bg-white/95 p-6 shadow-[0_24px_50px_rgba(15,23,42,0.08)] dark:border-black dark:bg-zinc-950/85 dark:shadow-[0_24px_50px_rgba(0,0,0,0.35)]">
               <div className="flex items-center gap-2">
                 <MapPin className="size-4 text-zinc-500 dark:text-zinc-400" />
                 <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">Personal Performance</h2>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/70">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-black dark:bg-zinc-900/70">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Attendance Rate</p>
                   <p className="mt-2 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">{attendanceRate}%</p>
                   <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Based on sessions this week</p>
                 </div>
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/70">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-black dark:bg-zinc-900/70">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Sessions</p>
                   <p className="mt-2 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">{sessionsThisWeek.length}</p>
                   <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">This week</p>
                 </div>
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/70">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-black dark:bg-zinc-900/70">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Hours</p>
                   <p className="mt-2 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">{formatDuration(weekHours)}</p>
                   <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Tracked this week</p>
                 </div>
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/70">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-black dark:bg-zinc-900/70">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">Score</p>
                   <p className="mt-2 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">{performanceScore}%</p>
                   <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Personal performance</p>

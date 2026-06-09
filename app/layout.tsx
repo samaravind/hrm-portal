@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
 import { ClerkProvider } from '@clerk/nextjs'
 import { ConvexClientProvider } from './convex-client-provider'
@@ -9,6 +9,11 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'SAM MARKET',
   description: 'Description Provided',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
@@ -31,7 +36,7 @@ export default function RootLayout({
           `,
         }} />
       </head>
-      <body className="antialiased">
+      <body className="min-h-screen bg-background text-foreground antialiased">
         <ThemeProvider>
           <ClerkProvider publishableKey={publishableKey}>
             <ConvexClientProvider>

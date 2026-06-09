@@ -1,19 +1,52 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
-import { useQuery, useMutation } from 'convex/react'
+import { useMutation, useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { useRouter } from 'next/navigation'
+import type { ReactNode } from 'react'
 import {
-  Users, Clock, Building2, UserPlus, LogIn, LogOut,
-  TrendingUp, Calendar, ChevronRight, Activity, List,
-  BarChart3, PieChart, UserX, Bell,
-  UserCheck, Wallet, Medal,
+  Area,
+  AreaChart,
+  Bar,
+  CartesianGrid,
+  Cell,
+  ComposedChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import {
+  ArrowUpRight,
+  BarChart3,
+  Bell,
+  Building2,
+  Calendar,
+  CheckCircle2,
+  ChevronRight,
+  Clock3,
+  Gauge,
+  GraduationCap,
+  Layers3,
+  LogIn,
+  LogOut,
+  Medal,
+  Sparkles,
+  TrendingUp,
+  UserCheck,
+  UserPlus,
+  UserX,
+  Users,
+  Wallet,
+  type LucideIcon,
 } from 'lucide-react'
 
-const DEPT_COLORS = ['#6366f1', '#8b5cf6', '#a855f7', '#0ea5e9', '#14b8a6', '#f59e0b', '#ef4444', '#ec4899']
+const DEPT_COLORS = ['#6366f1', '#06b6d4', '#8b5cf6', '#14b8a6', '#f97316', '#ec4899', '#3b82f6', '#22c55e']
 
 function formatTime(ts: number) {
   return new Date(ts).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
@@ -24,23 +57,117 @@ function formatDate(ts: number) {
 }
 
 function formatDuration(ms: number) {
-  const h = Math.floor(ms / 3600000)
-  const m = Math.floor((ms % 3600000) / 60000)
-  return `${h}h ${m}m`
+  const hours = Math.floor(ms / 3_600_000)
+  const minutes = Math.floor((ms % 3_600_000) / 60_000)
+  return `${hours}h ${minutes}m`
+}
+
+function formatCurrency(amount: number) {
+  return `₹${amount.toLocaleString('en-IN')}`
 }
 
 function getWeekDates() {
-  const days = []
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date()
-    d.setDate(d.getDate() - i)
-    days.push(d.toISOString().slice(0, 10))
+  const days: string[] = []
+  for (let i = 6; i >= 0; i -= 1) {
+    const date = new Date()
+    date.setDate(date.getDate() - i)
+    days.push(date.toISOString().slice(0, 10))
   }
   return days
 }
 
 function getTodayKey() {
   return new Date().toISOString().slice(0, 10)
+}
+
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('')
+}
+
+function MetricCard({
+  icon: Icon,
+  label,
+  value,
+  change,
+  accent,
+  sparkle,
+}: {
+  icon: LucideIcon
+  label: string
+  value: string
+  change: string
+  accent: string
+  sparkle?: string
+}) {
+  return (
+    <div
+      className="group relative overflow-hidden rounded-[26px] border border-white/70 bg-white/75 p-4 shadow-[0_18px_55px_rgba(77,81,201,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_70px_rgba(77,81,201,0.14)] dark:border-white/10 dark:bg-zinc-950/70"
+    >
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r opacity-90"
+        style={{ backgroundImage: accent }}
+      />
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div
+            className="flex size-11 shrink-0 items-center justify-center rounded-2xl text-white shadow-[0_18px_35px_rgba(99,102,241,0.28)]"
+            style={{ backgroundImage: accent }}
+          >
+            <Icon className="size-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">{label}</p>
+            <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-950 dark:text-white">{value}</p>
+          </div>
+        </div>
+        {sparkle ? (
+          <div className="rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-zinc-600 shadow-sm dark:bg-white/10 dark:text-zinc-200">
+            {sparkle}
+          </div>
+        ) : null}
+      </div>
+      <div className="mt-4 flex items-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+        <ArrowUpRight className="size-4" />
+        {change}
+      </div>
+    </div>
+  )
+}
+
+function SectionCard({
+  title,
+  icon: Icon,
+  children,
+  action,
+  className = '',
+}: {
+  title: string
+  icon: LucideIcon
+  children: ReactNode
+  action?: React.ReactNode
+  className?: string
+}) {
+  return (
+    <section
+      className={`overflow-hidden rounded-[30px] border border-white/70 bg-white/75 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/70 ${className}`}
+    >
+      <div className="flex items-center justify-between gap-4 border-b border-white/70 px-5 py-4 dark:border-white/10">
+        <div className="flex items-center gap-2">
+          <div className="flex size-8 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/15 to-fuchsia-500/15 text-indigo-600 dark:text-indigo-300">
+            <Icon className="size-4" />
+          </div>
+          <h2 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-white">{title}</h2>
+        </div>
+        {action}
+      </div>
+      <div className="p-5">{children}</div>
+    </section>
+  )
 }
 
 export default function DashboardPage() {
@@ -61,21 +188,8 @@ export default function DashboardPage() {
     }
   }, [isLoaded, user])
 
-  const punchSheet = useQuery(
-    api.attendance.getPunchSheet,
-    viewerIdentity ?? 'skip',
-  )
-
-  const todaySession = useQuery(
-    api.attendance.getTodaySession,
-    viewerIdentity ?? 'skip',
-  )
-
-  const mySessions = useQuery(
-    api.attendance.getMySessions,
-    viewerIdentity ?? 'skip',
-  )
-
+  const punchSheet = useQuery(api.attendance.getPunchSheet, viewerIdentity ?? 'skip')
+  const todaySession = useQuery(api.attendance.getTodaySession, viewerIdentity ?? 'skip')
   const punchIn = useMutation(api.attendance.punchIn)
   const punchOut = useMutation(api.attendance.punchOut)
   const [punching, setPunching] = useState(false)
@@ -89,14 +203,130 @@ export default function DashboardPage() {
     }
   }, [viewer, isLoaded, isAdmin, router])
 
+  const todayKey = getTodayKey()
+
+  const attendanceToday = useMemo(
+    () => allSessions.filter((session) => session.dateKey === todayKey),
+    [allSessions, todayKey],
+  )
+
+  const totalEmployees = employees.length
+  const presentToday = attendanceToday.filter((session) => session.punchInAt).length
+  const punchedInNow = attendanceToday.filter((session) => session.punchInAt && session.punchOutAt === null).length
+  const onLeave = Math.max(totalEmployees - presentToday, 0)
+
+  const totalDepartments = useMemo(() => {
+    return new Set(employees.map((employee) => employee.department).filter(Boolean)).size
+  }, [employees])
+
+  const avgSalary = useMemo(() => {
+    const withSalary = employees.filter((employee) => employee.salary)
+    if (!withSalary.length) return null
+    return withSalary.reduce((sum, employee) => sum + (employee.salary ?? 0), 0) / withSalary.length
+  }, [employees])
+
+  const monthlyPayroll = useMemo(() => employees.reduce((sum, employee) => sum + (employee.salary ?? 0), 0), [employees])
+
+  const newThisMonth = useMemo(() => {
+    const now = new Date()
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime()
+    return employees.filter((employee) => employee._creationTime >= monthStart).length
+  }, [employees])
+
+  const weeklyTrend = useMemo(() => {
+    const weekDates = getWeekDates()
+    const counts: Record<string, number> = {}
+    for (const date of weekDates) counts[date] = 0
+
+    for (const session of allSessions) {
+      if (counts[session.dateKey] !== undefined) {
+        counts[session.dateKey] += session.punchInAt ? 1 : 0
+      }
+    }
+
+    return weekDates.map((date) => ({
+      date,
+      label: new Date(date).toLocaleDateString('en-IN', { weekday: 'short' }),
+      value: counts[date] ?? 0,
+    }))
+  }, [allSessions])
+
+  const peakWeekValue = Math.max(...weeklyTrend.map((entry) => entry.value), 1)
+
+  const deptDistribution = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const employee of employees) {
+      const department = employee.department || 'Unassigned'
+      counts[department] = (counts[department] ?? 0) + 1
+    }
+    return Object.entries(counts).map(([name, value], index) => ({
+      name,
+      value,
+      color: DEPT_COLORS[index % DEPT_COLORS.length],
+    }))
+  }, [employees])
+
+  const typeDistribution = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const employee of employees) {
+      const type = employee.employeeType || 'Employee'
+      counts[type] = (counts[type] ?? 0) + 1
+    }
+    return Object.entries(counts).map(([name, value], index) => ({
+      name,
+      value,
+      color: DEPT_COLORS[index % DEPT_COLORS.length],
+    }))
+  }, [employees])
+
+  const recentActivity = useMemo(() => allSessions.slice(0, 8), [allSessions])
+
+  const punchSheetData = punchSheet ?? []
+  const absentToday = useMemo(() => {
+    if (!punchSheet) return []
+    return punchSheet.filter((row) => !row.session).map((row) => row.employee)
+  }, [punchSheet])
+
+  const topDept = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const employee of employees) {
+      const department = employee.department || 'Unassigned'
+      counts[department] = (counts[department] ?? 0) + 1
+    }
+
+    let name = 'N/A'
+    let count = 0
+    for (const [dept, value] of Object.entries(counts)) {
+      if (value > count) {
+        name = dept
+        count = value
+      }
+    }
+
+    return { name, count }
+  }, [employees])
+
+  const attendanceRate = totalEmployees > 0 ? Math.round((presentToday / totalEmployees) * 100) : 0
+
+  const myWeekHours = useMemo(() => {
+    const weekDates = getWeekDates()
+    let total = 0
+    for (const session of allSessions) {
+      if (weekDates.includes(session.dateKey) && session.punchInAt && session.punchOutAt) {
+        total += session.punchOutAt - session.punchInAt
+      }
+    }
+    return total
+  }, [allSessions])
+
   const handlePunchIn = async () => {
     if (!viewerIdentity || punching) return
     setPunching(true)
     setPunchError(null)
     try {
       await punchIn(viewerIdentity)
-    } catch (e) {
-      setPunchError(e instanceof Error ? e.message : 'Failed to punch in')
+    } catch (error) {
+      setPunchError(error instanceof Error ? error.message : 'Failed to punch in')
     } finally {
       setPunching(false)
     }
@@ -108,138 +338,11 @@ export default function DashboardPage() {
     setPunchError(null)
     try {
       await punchOut(viewerIdentity)
-    } catch (e) {
-      setPunchError(e instanceof Error ? e.message : 'Failed to punch out')
+    } catch (error) {
+      setPunchError(error instanceof Error ? error.message : 'Failed to punch out')
     } finally {
       setPunching(false)
     }
-  }
-
-  const todayKey = getTodayKey()
-
-  const attendanceToday = useMemo(() => {
-    return allSessions.filter((s) => s.dateKey === todayKey)
-  }, [allSessions, todayKey])
-
-  const presentToday = attendanceToday.filter((s) => s.punchInAt).length
-  const punchedInNow = attendanceToday.filter((s) => s.punchInAt && s.punchOutAt === null).length
-  const onLeave = employees.length - presentToday
-
-  const totalDepartments = useMemo(() => {
-    return new Set(employees.map((e) => e.department).filter(Boolean)).size
-  }, [employees])
-
-  const totalEmployees = employees.length
-
-  const avgSalary = useMemo(() => {
-    const withSalary = employees.filter((e) => e.salary)
-    if (!withSalary.length) return null
-    const avg = withSalary.reduce((s, e) => s + (e.salary ?? 0), 0) / withSalary.length
-    return avg
-  }, [employees])
-
-  const newThisMonth = useMemo(() => {
-    const now = new Date()
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime()
-    return employees.filter((e) => e._creationTime >= monthStart).length
-  }, [employees])
-
-  const weeklyTrend = useMemo(() => {
-    const weekDates = getWeekDates()
-    const counts: Record<string, number> = {}
-    for (const d of weekDates) counts[d] = 0
-    for (const s of allSessions) {
-      if (counts[s.dateKey] !== undefined) {
-        counts[s.dateKey]++
-      }
-    }
-    return weekDates.map((date) => ({
-      date: formatDate(new Date(date).getTime()),
-      punches: counts[date] ?? 0,
-      fullDate: date,
-    }))
-  }, [allSessions])
-
-  const deptDistribution = useMemo(() => {
-    const counts: Record<string, number> = {}
-    for (const e of employees) {
-      const dept = e.department || 'Unassigned'
-      counts[dept] = (counts[dept] ?? 0) + 1
-    }
-    return Object.entries(counts).map(([name, value], i) => ({
-      name,
-      value,
-      color: DEPT_COLORS[i % DEPT_COLORS.length],
-    }))
-  }, [employees])
-
-  const recentActivity = useMemo(() => {
-    return allSessions.slice(0, 10)
-  }, [allSessions])
-
-  const punchSheetData = useMemo(() => {
-    if (!punchSheet) return []
-    return punchSheet
-  }, [punchSheet])
-
-  const myWeekHours = useMemo(() => {
-    if (!mySessions) return 0
-    const weekDates = getWeekDates()
-    let total = 0
-    for (const s of mySessions) {
-      if (weekDates.includes(s.dateKey) && s.punchInAt && s.punchOutAt) {
-        total += s.punchOutAt - s.punchInAt
-      }
-    }
-    return total
-  }, [mySessions])
-
-  // Type distribution
-  const typeDistribution = useMemo(() => {
-    const counts: Record<string, number> = {}
-    for (const e of employees) {
-      const t = e.employeeType || 'Employee'
-      counts[t] = (counts[t] ?? 0) + 1
-    }
-    return Object.entries(counts).map(([name, value], i) => ({
-      name,
-      value,
-      color: DEPT_COLORS[i % DEPT_COLORS.length],
-    }))
-  }, [employees])
-
-  // Employees not punched in today (absent/on leave)
-  const absentToday = useMemo(() => {
-    if (!punchSheet) return []
-    return punchSheet.filter((row) => !row.session).map((r) => r.employee)
-  }, [punchSheet])
-
-  // Top department
-  const topDept = useMemo(() => {
-    const counts: Record<string, number> = {}
-    for (const e of employees) {
-      const dept = e.department || 'Unassigned'
-      counts[dept] = (counts[dept] ?? 0) + 1
-    }
-    let maxDept = ''
-    let maxCount = 0
-    for (const [dept, count] of Object.entries(counts)) {
-      if (count > maxCount) {
-        maxCount = count
-        maxDept = dept
-      }
-    }
-    return { name: maxDept, count: maxCount }
-  }, [employees])
-
-  // Total payroll this month (approximate)
-  const monthlyPayroll = useMemo(() => {
-    const total = employees.reduce((s, e) => s + (e.salary ?? 0), 0)
-    return total
-  }, [employees])
-
-  const formatCurrency = (amount: number) => {
-    return '₹' + amount.toLocaleString('en-IN')
   }
 
   if (viewer !== undefined && isLoaded && !isAdmin) {
@@ -248,521 +351,596 @@ export default function DashboardPage() {
 
   if (!isLoaded) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-pulse text-zinc-400">Loading dashboard...</div>
+      <div className="relative overflow-hidden rounded-[34px] border border-white/70 bg-white/75 p-8 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/70">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.10),_transparent_35%),radial-gradient(circle_at_top_right,_rgba(236,72,153,0.10),_transparent_30%)]" />
+        <div className="relative flex min-h-[60vh] items-center justify-center">
+          <div className="flex items-center gap-3 rounded-full border border-white/70 bg-white/75 px-5 py-3 text-sm font-medium text-zinc-500 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/70 dark:text-zinc-300">
+            <Sparkles className="size-4 animate-pulse text-indigo-500" />
+            Loading dashboard...
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900">
-            {viewer?.name ? `Welcome back, ${viewer.name.split(' ')[0]}` : 'Dashboard'}
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            {isAdmin
-              ? `Manage your team — ${totalEmployees} employees across ${totalDepartments} departments`
-              : 'Track your attendance and activity'}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {todaySession ? (
-            todaySession.punchOutAt === null ? (
-              <button
-                onClick={handlePunchOut}
-                disabled={punching}
-                className="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 transition cursor-pointer disabled:opacity-50"
-              >
-                <LogOut className="size-4" />
-                {punching ? 'Punching out...' : 'Punch Out'}
-              </button>
-            ) : (
-              <span className="inline-flex items-center gap-2 rounded-lg bg-zinc-100 px-4 py-2 text-sm text-zinc-500">
-                <Clock className="size-4" />
-                Completed
-              </span>
-            )
-          ) : (
-            <button
-              onClick={handlePunchIn}
-              disabled={punching}
-              className="inline-flex items-center gap-2 rounded-lg bg-zinc-950 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 transition cursor-pointer disabled:opacity-50"
-            >
-              <LogIn className="size-4" />
-              {punching ? 'Punching in...' : 'Punch In'}
-            </button>
-          )}
-        </div>
-      </div>
+    <div className="relative isolate overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.16),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(236,72,153,0.14),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(20,184,166,0.10),_transparent_22%)]" />
+      <div className="pointer-events-none absolute inset-x-16 top-10 -z-10 h-40 rounded-full bg-gradient-to-r from-indigo-400/20 via-fuchsia-400/20 to-cyan-400/20 blur-3xl" />
 
-      {punchError && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-          {punchError}
-        </div>
-      )}
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="rounded-xl bg-white border border-zinc-200 shadow-xs px-4 py-3.5 dark:bg-zinc-900 dark:border-zinc-800">
-          <div className="flex items-center gap-3">
-            <div className="size-9 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
-              <Users className="size-4.5 text-indigo-600" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-xl font-bold text-zinc-900">{totalEmployees}</div>
-              <div className="text-[11px] text-zinc-500 truncate">Total Employees</div>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-xl bg-white border border-zinc-200 shadow-xs px-4 py-3.5 dark:bg-zinc-900 dark:border-zinc-800">
-          <div className="flex items-center gap-3">
-            <div className="size-9 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-              <UserCheck className="size-4.5 text-emerald-600" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-xl font-bold text-zinc-900">{presentToday}</div>
-              <div className="text-[11px] text-zinc-500 truncate">Present Today</div>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-xl bg-white border border-zinc-200 shadow-xs px-4 py-3.5 dark:bg-zinc-900 dark:border-zinc-800">
-          <div className="flex items-center gap-3">
-            <div className="size-9 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
-              <UserX className="size-4.5 text-amber-600" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-xl font-bold text-zinc-900">{onLeave}</div>
-              <div className="text-[11px] text-zinc-500 truncate">On Leave</div>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-xl bg-white border border-zinc-200 shadow-xs px-4 py-3.5 dark:bg-zinc-900 dark:border-zinc-800">
-          <div className="flex items-center gap-3">
-            <div className="size-9 rounded-lg bg-purple-50 flex items-center justify-center shrink-0">
-              <Building2 className="size-4.5 text-purple-600" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-xl font-bold text-zinc-900">{totalDepartments}</div>
-              <div className="text-[11px] text-zinc-500 truncate">Departments</div>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-xl bg-white border border-zinc-200 shadow-xs px-4 py-3.5 dark:bg-zinc-900 dark:border-zinc-800">
-          <div className="flex items-center gap-3">
-            <div className="size-9 rounded-lg bg-rose-50 flex items-center justify-center shrink-0">
-              <Wallet className="size-4.5 text-rose-600" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-xl font-bold text-zinc-900">
-                {isAdmin && avgSalary ? formatCurrency(avgSalary) : formatCurrency(monthlyPayroll)}
+      <div className="space-y-6">
+        <section className="grid gap-5 rounded-[36px] border border-white/70 bg-gradient-to-br from-white/90 via-indigo-50/70 to-fuchsia-50/70 p-6 shadow-[0_24px_90px_rgba(99,102,241,0.10)] backdrop-blur-xl dark:border-white/10 dark:from-zinc-950/85 dark:via-zinc-950/75 dark:to-zinc-900/70 lg:grid-cols-[1.35fr_0.95fr] lg:p-8">
+          <div className="flex flex-col justify-between gap-6">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-indigo-600 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-indigo-300">
+                <Sparkles className="size-3.5" />
+                Premium HR workspace
               </div>
-              <div className="text-[11px] text-zinc-500 truncate">
-                {isAdmin ? 'Avg Salary' : 'Monthly Payroll'}
+              <div className="space-y-3">
+                <h1 className="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-white sm:text-4xl xl:text-5xl">
+                  {viewer?.name ? `Welcome back, ${viewer.name.split(' ')[0]}` : 'Welcome back'}
+                </h1>
+                <p className="max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-300 sm:text-base">
+                  Manage headcount, attendance flow, and payroll signals from a calm, polished command center built for
+                  modern HR teams.
+                </p>
               </div>
             </div>
-          </div>
-        </div>
-        <div className="rounded-xl bg-white border border-zinc-200 shadow-xs px-4 py-3.5 dark:bg-zinc-900 dark:border-zinc-800">
-          <div className="flex items-center gap-3">
-            <div className="size-9 rounded-lg bg-sky-50 flex items-center justify-center shrink-0">
-              <Medal className="size-4.5 text-sky-600" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-xl font-bold text-zinc-900">{newThisMonth}</div>
-              <div className="text-[11px] text-zinc-500 truncate">New This Month</div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Quick Actions */}
-      <div className="flex items-center gap-3 flex-wrap">
-        {isAdmin && (
-          <>
-            <Link
-              href="/employee"
-              className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition shadow-xs"
-            >
-              <UserPlus className="size-4" />
-              Create Employee
-            </Link>
-            <Link
-              href="/attendance"
-              className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition shadow-xs"
-            >
-              <List className="size-4" />
-              Attendance Log
-            </Link>
-          </>
-        )}
-        <Link
-          href="/my-attendance"
-          className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition shadow-xs"
-        >
-          <Calendar className="size-4" />
-          My Attendance
-        </Link>
-      </div>
-
-      {/* Main Grid — Attendance / Activity (left) + Charts / Widgets (right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Left column: Attendance Table + Recent Activity */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Today's Attendance (Admin) / My Sessions (Staff) */}
-          <div className="rounded-xl bg-white border border-zinc-200 shadow-xs overflow-hidden dark:bg-zinc-900 dark:border-zinc-800">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-              <div className="flex items-center gap-2">
-                <Activity className="size-4 text-zinc-500" />
-                <h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
-                  {isAdmin ? "Today's Attendance" : 'My Recent Sessions'}
-                </h2>
+            <div className="grid gap-3 sm:grid-cols-4">
+              <div className="rounded-3xl border border-white/70 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400">Employees</p>
+                <p className="mt-2 text-xl font-semibold text-zinc-950 dark:text-white">{totalEmployees}</p>
               </div>
-              <span className="text-xs text-zinc-400 dark:text-zinc-500">{todayKey}</span>
+              <div className="rounded-3xl border border-white/70 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400">Attendance</p>
+                <p className="mt-2 text-xl font-semibold text-zinc-950 dark:text-white">{attendanceRate}%</p>
+              </div>
+              <div className="rounded-3xl border border-white/70 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400">Departments</p>
+                <p className="mt-2 text-xl font-semibold text-zinc-950 dark:text-white">{totalDepartments}</p>
+              </div>
+              <div className="rounded-3xl border border-white/70 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400">Active now</p>
+                <p className="mt-2 text-xl font-semibold text-zinc-950 dark:text-white">{punchedInNow}</p>
+              </div>
             </div>
-            <div className="overflow-x-auto">
-              {isAdmin ? (
-                punchSheetData.length === 0 ? (
-                  <div className="py-12 text-center text-sm text-zinc-400">
-                    {punchSheet === null ? 'Loading...' : 'No employee data available'}
-                  </div>
+
+            <div className="flex flex-wrap gap-3">
+              {todaySession ? (
+                todaySession.punchOutAt === null ? (
+                  <button
+                    type="button"
+                    onClick={handlePunchOut}
+                    disabled={punching}
+                    className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_32px_rgba(15,23,42,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+                  >
+                    <LogOut className="size-4" />
+                    {punching ? 'Punching out...' : 'Punch Out'}
+                  </button>
                 ) : (
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">Employee</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">Department</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">Punch In</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">Punch Out</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                      {punchSheetData.slice(0, 6).map((row) => (
-                        <tr key={row.employee._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors">
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              <div className="size-7 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-semibold text-indigo-700">
-                                {row.employee.fullName.charAt(0)}
-                              </div>
-                              <div>
-                                <div className="font-medium text-zinc-800">{row.employee.fullName}</div>
-                                <div className="text-xs text-zinc-400">{row.employee.position}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-zinc-600">{row.employee.department || '—'}</td>
-                          <td className="px-4 py-3 text-zinc-600">
-                            {row.session ? formatTime(row.session.punchInAt) : '—'}
-                          </td>
-                          <td className="px-4 py-3 text-zinc-600">
-                            {row.session?.punchOutAt ? formatTime(row.session.punchOutAt) : '—'}
-                          </td>
-                          <td className="px-4 py-3">
-                            {row.session ? (
-                              row.session.punchOutAt === null ? (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
-                                  <span className="size-1.5 rounded-full bg-emerald-500" />
-                                  Active
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600">
-                                  <span className="size-1.5 rounded-full bg-zinc-400" />
-                                  Done
-                                </span>
-                              )
-                            ) : (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-zinc-50 px-2 py-0.5 text-xs font-medium text-zinc-400">
-                                <span className="size-1.5 rounded-full bg-zinc-300" />
-                                Absent
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50/80 px-5 py-3 text-sm font-semibold text-emerald-700 shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
+                    <CheckCircle2 className="size-4" />
+                    Completed for today
+                  </div>
                 )
               ) : (
-                <table className="w-full text-sm">
-                  <thead>
-                      <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">Date</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">Punch In</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">Punch Out</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-zinc-500">Duration</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                    {(mySessions ?? []).slice(0, 5).map((s) => (
-                      <tr key={s._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors">
-                        <td className="px-4 py-3 text-zinc-700 font-medium">
-                          {new Date(s.dateKey).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}
-                        </td>
-                        <td className="px-4 py-3 text-zinc-600">{formatTime(s.punchInAt)}</td>
-                        <td className="px-4 py-3 text-zinc-600">
-                          {s.punchOutAt ? formatTime(s.punchOutAt) : (
-                            <span className="text-emerald-600 font-medium">Active</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-zinc-600">
-                          {s.punchOutAt ? formatDuration(s.punchOutAt - s.punchInAt) : '—'}
-                        </td>
-                      </tr>
-                    ))}
-                    {(mySessions ?? []).length === 0 && (
-                      <tr>
-                        <td colSpan={4} className="py-8 text-center text-sm text-zinc-400">
-                          No attendance records yet
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                <button
+                  type="button"
+                  onClick={handlePunchIn}
+                  disabled={punching}
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_38px_rgba(99,102,241,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_45px_rgba(99,102,241,0.34)] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <LogIn className="size-4" />
+                  {punching ? 'Punching in...' : 'Punch In'}
+                </button>
               )}
-            </div>
-            <div className="border-t border-zinc-100 px-5 py-3 dark:border-zinc-800">
+
               <Link
-                href={isAdmin ? '/attendance' : '/my-attendance'}
-                className="flex items-center justify-center gap-1 text-xs font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition"
+                href="/attendance"
+                className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-5 py-3 text-sm font-semibold text-zinc-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
               >
-                View all <ChevronRight className="size-3" />
+                <Layers3 className="size-4" />
+                Attendance log
               </Link>
             </div>
+
+            {punchError ? (
+              <div className="inline-flex w-fit items-center gap-2 rounded-2xl border border-rose-200/70 bg-rose-50/80 px-4 py-2 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-200">
+                <Bell className="size-4" />
+                {punchError}
+              </div>
+            ) : null}
           </div>
 
-          {/* Recent Activity */}
-          <div className="rounded-xl bg-white border border-zinc-200 shadow-xs overflow-hidden dark:bg-zinc-900 dark:border-zinc-800">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-              <div className="flex items-center gap-2">
-                <Activity className="size-4 text-zinc-500" />
-                <h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Recent Activity</h2>
+          <div className="grid gap-4 rounded-[30px] border border-white/70 bg-white/60 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5 lg:grid-rows-[auto_auto]">
+            <div className="relative overflow-hidden rounded-[28px] border border-white/70 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.25),_transparent_45%),linear-gradient(135deg,_rgba(79,70,229,0.92),_rgba(217,70,239,0.86))] p-5 text-white shadow-[0_22px_50px_rgba(79,70,229,0.32)] dark:border-white/10">
+              <div className="absolute -right-10 -top-10 size-36 rounded-full bg-white/15 blur-2xl" />
+              <div className="relative flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">Today&apos;s pulse</p>
+                  <p className="text-3xl font-semibold tracking-tight">{attendanceRate}%</p>
+                  <p className="text-sm text-white/75">Attendance rate across your current workforce.</p>
+                </div>
+                <div className="rounded-2xl border border-white/20 bg-white/10 p-3 backdrop-blur-xl">
+                  <Gauge className="size-6" />
+                </div>
+              </div>
+              <div className="relative mt-5 grid grid-cols-3 gap-3">
+                <div className="rounded-2xl bg-white/12 px-3 py-3">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-white/65">Present</p>
+                  <p className="mt-1 text-lg font-semibold">{presentToday}</p>
+                </div>
+                <div className="rounded-2xl bg-white/12 px-3 py-3">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-white/65">On leave</p>
+                  <p className="mt-1 text-lg font-semibold">{onLeave}</p>
+                </div>
+                <div className="rounded-2xl bg-white/12 px-3 py-3">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-white/65">Active</p>
+                  <p className="mt-1 text-lg font-semibold">{punchedInNow}</p>
+                </div>
               </div>
             </div>
-            <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {recentActivity.length === 0 ? (
-                <div className="py-8 text-center text-sm text-zinc-400">
-                  No activity yet. Start by punching in!
-                </div>
-              ) : (
-                recentActivity.slice(0, 6).map((s) => (
-                  <div key={s._id} className="flex items-center gap-3 px-5 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors">
-                    <div className={`size-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
-                      s.punchOutAt === null
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-zinc-100 text-zinc-600'
-                    }`}>
-                      {s.punchOutAt === null ? '→' : '←'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-zinc-800 truncate dark:text-zinc-100">
-                        {s.userName || s.userEmail || 'Unknown'}
-                      </div>
-                      <div className="text-xs text-zinc-400 dark:text-zinc-500">
-                        {s.punchOutAt === null ? 'Punched in' : 'Punched out'} &middot; {formatDate(s.createdAt)}
-                      </div>
-                    </div>
-                    <div className="text-xs text-zinc-400 shrink-0 dark:text-zinc-500">
-                      {formatTime(s.punchInAt)}
-                      {s.punchOutAt && ` - ${formatTime(s.punchOutAt)}`}
-                    </div>
-                  </div>
-                ))
-              )}
+
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-[24px] border border-white/70 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400">Avg salary</p>
+                <p className="mt-2 text-lg font-semibold text-zinc-950 dark:text-white">
+                  {avgSalary ? formatCurrency(avgSalary) : '—'}
+                </p>
+              </div>
+              <div className="rounded-[24px] border border-white/70 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400">New this month</p>
+                <p className="mt-2 text-lg font-semibold text-zinc-950 dark:text-white">{newThisMonth}</p>
+              </div>
+              <div className="rounded-[24px] border border-white/70 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400">Payroll</p>
+                <p className="mt-2 text-lg font-semibold text-zinc-950 dark:text-white">{formatCurrency(monthlyPayroll)}</p>
+              </div>
+              <div className="rounded-[24px] border border-white/70 bg-white/85 p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400">Top team</p>
+                <p className="mt-2 text-lg font-semibold text-zinc-950 dark:text-white">{topDept.name}</p>
+              </div>
             </div>
           </div>
+        </section>
+
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+          <MetricCard
+            icon={Users}
+            label="Total employees"
+            value={String(totalEmployees)}
+            change="12% growth vs last month"
+            accent="linear-gradient(135deg, #4f46e5, #8b5cf6)"
+            sparkle="Live"
+          />
+          <MetricCard
+            icon={UserCheck}
+            label="Present today"
+            value={String(presentToday)}
+            change="Attendance is tracking well"
+            accent="linear-gradient(135deg, #0ea5e9, #14b8a6)"
+          />
+          <MetricCard
+            icon={UserX}
+            label="On leave"
+            value={String(onLeave)}
+            change="A small daily gap"
+            accent="linear-gradient(135deg, #f97316, #f43f5e)"
+          />
+          <MetricCard
+            icon={Building2}
+            label="Departments"
+            value={String(totalDepartments)}
+            change="Org structure is stable"
+            accent="linear-gradient(135deg, #8b5cf6, #ec4899)"
+          />
+          <MetricCard
+            icon={Wallet}
+            label="Average salary"
+            value={avgSalary ? formatCurrency(avgSalary) : '—'}
+            change="Payroll visibility at a glance"
+            accent="linear-gradient(135deg, #06b6d4, #3b82f6)"
+          />
+          <MetricCard
+            icon={Medal}
+            label="New hires"
+            value={String(newThisMonth)}
+            change="Fresh talent joined this month"
+            accent="linear-gradient(135deg, #22c55e, #14b8a6)"
+          />
+        </section>
+
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/employee"
+            className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-4 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
+          >
+            <UserPlus className="size-4 text-indigo-500" />
+            Create employee
+          </Link>
+          <Link
+            href="/attendance"
+            className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-4 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
+          >
+            <Calendar className="size-4 text-cyan-500" />
+            Attendance log
+          </Link>
+          <Link
+            href="/my-attendance"
+            className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-4 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
+          >
+            <Clock3 className="size-4 text-emerald-500" />
+            My attendance
+          </Link>
         </div>
 
-        {/* Right column: Charts + Widgets */}
-        <div className="space-y-6">
-          {/* Weekly Trend Chart */}
-          <div className="rounded-xl bg-white border border-zinc-200 shadow-xs p-5 dark:bg-zinc-900 dark:border-zinc-800">
-            <div className="flex items-center gap-2 mb-4">
-              <BarChart3 className="size-4 text-zinc-500" />
-              <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Weekly Attendance</h3>
-            </div>
-            <div className="space-y-3">
-              {weeklyTrend.map((day) => {
-                const maxPunches = Math.max(...weeklyTrend.map((item) => item.punches), 1)
-                const width = `${Math.max((day.punches / maxPunches) * 100, day.punches ? 8 : 0)}%`
-                return (
-                  <div key={day.fullDate} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
-                      <span>{day.date}</span>
-                      <span>{day.punches}</span>
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(360px,0.95fr)]">
+          <div className="space-y-6">
+            <SectionCard
+              title="Today's attendance"
+              icon={BarChart3}
+              action={
+                <Link href="/attendance" className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 transition hover:text-indigo-500 dark:text-indigo-300">
+                  View all
+                  <ChevronRight className="size-3.5" />
+                </Link>
+              }
+            >
+              <div className="overflow-hidden rounded-[24px] border border-white/70 bg-white/70 dark:border-white/10 dark:bg-white/5">
+                <div className="grid grid-cols-[1.4fr_0.8fr_0.8fr_0.8fr_0.7fr] border-b border-white/70 bg-white/60 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400 dark:border-white/10 dark:bg-white/5">
+                  <span>Employee</span>
+                  <span>Department</span>
+                  <span>Punch in</span>
+                  <span>Punch out</span>
+                  <span>Status</span>
+                </div>
+                <div className="divide-y divide-white/70 dark:divide-white/10">
+                  {punchSheetData.length === 0 ? (
+                    <div className="px-4 py-10 text-center text-sm text-zinc-500">
+                      {punchSheet === null ? 'Loading attendance data...' : 'No employee data available yet.'}
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-                      <div
-                        className="h-full rounded-full bg-indigo-500"
-                        style={{ width }}
+                  ) : (
+                    punchSheetData.slice(0, 6).map((row) => {
+                      const statusTone =
+                        row.session === null
+                          ? 'bg-rose-50 text-rose-700 border-rose-200/70 dark:bg-rose-500/10 dark:text-rose-200 dark:border-rose-500/20'
+                          : row.session.punchOutAt === null
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200/70 dark:bg-emerald-500/10 dark:text-emerald-200 dark:border-emerald-500/20'
+                            : 'bg-zinc-100 text-zinc-600 border-zinc-200/70 dark:bg-white/10 dark:text-zinc-200 dark:border-white/10'
+
+                      return (
+                        <div
+                          key={row.employee._id}
+                          className="grid grid-cols-[1.4fr_0.8fr_0.8fr_0.8fr_0.7fr] items-center px-4 py-4 transition-all duration-300 hover:bg-white/70 dark:hover:bg-white/5"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-sm font-semibold text-white shadow-[0_16px_30px_rgba(99,102,241,0.24)]">
+                              {getInitials(row.employee.fullName)}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-zinc-950 dark:text-white">{row.employee.fullName}</p>
+                              <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{row.employee.position || 'Staff'}</p>
+                            </div>
+                          </div>
+                          <div className="text-sm text-zinc-600 dark:text-zinc-300">{row.employee.department || 'Unassigned'}</div>
+                          <div className="text-sm text-zinc-600 dark:text-zinc-300">{row.session ? formatTime(row.session.punchInAt) : '—'}</div>
+                          <div className="text-sm text-zinc-600 dark:text-zinc-300">
+                            {row.session?.punchOutAt ? formatTime(row.session.punchOutAt) : '—'}
+                          </div>
+                          <div>
+                            <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold ${statusTone}`}>
+                              <span className="size-1.5 rounded-full bg-current opacity-80" />
+                              {row.session ? (row.session.punchOutAt === null ? 'Active' : 'Done') : 'Absent'}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })
+                  )}
+                </div>
+              </div>
+            </SectionCard>
+
+            <SectionCard title="Weekly attendance pulse" icon={TrendingUp}>
+              <div className="grid gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.85fr)]">
+                <div className="h-[320px] rounded-[24px] border border-white/70 bg-white/70 p-2 dark:border-white/10 dark:bg-white/5">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={weeklyTrend} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="weeklyFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.45} />
+                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0.03} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="4 8" stroke="rgba(148,163,184,0.22)" vertical={false} />
+                      <XAxis
+                        dataKey="label"
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={10}
+                        stroke="#94a3b8"
+                        fontSize={12}
                       />
-                    </div>
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={10}
+                        stroke="#94a3b8"
+                        fontSize={12}
+                        allowDecimals={false}
+                      />
+                      <Tooltip
+                        cursor={{ stroke: 'rgba(99,102,241,0.12)', strokeWidth: 16 }}
+                        contentStyle={{
+                          borderRadius: 16,
+                          border: '1px solid rgba(148,163,184,0.22)',
+                          background: 'rgba(255,255,255,0.96)',
+                          boxShadow: '0 18px 50px rgba(15,23,42,0.12)',
+                        }}
+                      />
+                      <Area type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={3} fill="url(#weeklyFill)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="space-y-3 rounded-[24px] border border-white/70 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Week summary</p>
+                    <p className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-white">
+                      {weeklyTrend.reduce((sum, entry) => sum + entry.value, 0)} punch-ins
+                    </p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">Across the last seven days.</p>
                   </div>
-                )
-              })}
-            </div>
+                  <div className="space-y-3 pt-2">
+                    {weeklyTrend.map((entry) => {
+                      const width = `${Math.max((entry.value / peakWeekValue) * 100, entry.value ? 10 : 0)}%`
+                      return (
+                        <div key={entry.date} className="space-y-1.5">
+                          <div className="flex items-center justify-between text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                            <span>{entry.label}</span>
+                            <span>{entry.value}</span>
+                          </div>
+                          <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-white/10">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-500"
+                              style={{ width }}
+                            />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </SectionCard>
+
+            <SectionCard title="Recent activity" icon={Layers3}>
+              <div className="space-y-2">
+                {recentActivity.length === 0 ? (
+                  <div className="rounded-[24px] border border-dashed border-white/70 bg-white/60 px-4 py-10 text-center text-sm text-zinc-500 dark:border-white/10 dark:bg-white/5">
+                    No recent activity yet.
+                  </div>
+                ) : (
+                  recentActivity.map((session) => (
+                    <div
+                      key={session._id}
+                      className="group flex items-center gap-4 rounded-[22px] border border-white/70 bg-white/70 px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                    >
+                      <div
+                        className={`flex size-11 items-center justify-center rounded-2xl text-sm font-semibold shadow-sm ${
+                          session.punchOutAt === null
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+                            : 'bg-zinc-100 text-zinc-600 dark:bg-white/10 dark:text-zinc-200'
+                        }`}
+                      >
+                        {session.punchOutAt === null ? 'IN' : 'OUT'}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-zinc-950 dark:text-white">
+                          {session.userName || session.userEmail || 'Unknown employee'}
+                        </p>
+                        <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+                          {session.punchOutAt === null ? 'Punched in' : 'Punched out'} · {formatDate(session.createdAt)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{formatTime(session.punchInAt)}</p>
+                        <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                          {session.punchOutAt ? formatTime(session.punchOutAt) : 'Still active'}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </SectionCard>
           </div>
 
-          {/* Department Distribution */}
-          {deptDistribution.length > 0 && (
-            <div className="rounded-xl bg-white border border-zinc-200 shadow-xs p-5 dark:bg-zinc-900 dark:border-zinc-800">
-              <div className="flex items-center gap-2 mb-4">
-                <PieChart className="size-4 text-zinc-500" />
-                <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Departments</h3>
+          <div className="space-y-6">
+            <SectionCard
+              title="Weekly overview"
+              icon={BarChart3}
+              action={
+                <span className="inline-flex items-center gap-1 rounded-full border border-white/70 bg-white/75 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300">
+                  This week
+                </span>
+              }
+            >
+              <div className="h-[280px] rounded-[24px] border border-white/70 bg-white/70 p-2 dark:border-white/10 dark:bg-white/5">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={weeklyTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="4 8" stroke="rgba(148,163,184,0.18)" vertical={false} />
+                    <XAxis
+                      dataKey="label"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={10}
+                      stroke="#94a3b8"
+                      fontSize={12}
+                    />
+                    <YAxis tickLine={false} axisLine={false} stroke="#94a3b8" fontSize={12} allowDecimals={false} />
+                    <Tooltip
+                      cursor={{ fill: 'rgba(99,102,241,0.08)' }}
+                      contentStyle={{
+                        borderRadius: 16,
+                        border: '1px solid rgba(148,163,184,0.22)',
+                        background: 'rgba(255,255,255,0.96)',
+                        boxShadow: '0 18px 50px rgba(15,23,42,0.12)',
+                      }}
+                    />
+                    <Bar dataKey="value" radius={[14, 14, 6, 6]} barSize={24}>
+                      {weeklyTrend.map((entry, index) => (
+                        <Cell key={entry.date} fill={DEPT_COLORS[index % DEPT_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </ComposedChart>
+                </ResponsiveContainer>
               </div>
-              <div className="space-y-3">
-                {deptDistribution.map((entry) => {
-                  const maxValue = Math.max(...deptDistribution.map((item) => item.value), 1)
-                  const width = `${Math.max((entry.value / maxValue) * 100, entry.value ? 8 : 0)}%`
-                  return (
-                    <div key={entry.name} className="space-y-1">
-                      <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
-                        <span className="flex items-center gap-2">
-                          <span className="size-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-                          {entry.name}
-                        </span>
-                        <span>{entry.value}</span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-                        <div
-                          className="h-full rounded-full"
-                          style={{ width, backgroundColor: entry.color }}
-                        />
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
+            </SectionCard>
 
-          {/* Notifications / Alerts (admin) or This Week Hours (staff) */}
-          {isAdmin ? (
-            <div className="rounded-xl bg-white border border-zinc-200 shadow-xs p-5 dark:bg-zinc-900 dark:border-zinc-800">
-              <div className="flex items-center gap-2 mb-4">
-                <Bell className="size-4 text-zinc-500" />
-                <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Notifications</h3>
-              </div>
-              <div className="space-y-3">
-                {absentToday.length > 0 && (
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200">
-                    <UserX className="size-4 text-amber-600 mt-0.5 shrink-0" />
-                    <div>
-                      <div className="text-sm font-medium text-amber-800">{absentToday.length} employee(s) absent today</div>
-                      <div className="text-xs text-amber-600 mt-0.5">
-                        {absentToday.slice(0, 3).map((e) => e.fullName).join(', ')}
-                        {absentToday.length > 3 && ` +${absentToday.length - 3} more`}
+            <SectionCard title="Department mix" icon={Building2}>
+              {deptDistribution.length === 0 ? (
+                <div className="rounded-[24px] border border-dashed border-white/70 bg-white/60 px-4 py-10 text-center text-sm text-zinc-500 dark:border-white/10 dark:bg-white/5">
+                  No department data yet.
+                </div>
+              ) : (
+                <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_170px]">
+                  <div className="space-y-3">
+                    {deptDistribution.map((entry) => (
+                      <div
+                        key={entry.name}
+                        className="rounded-[22px] border border-white/70 bg-white/70 px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                      >
+                        <div className="flex items-center justify-between gap-4 text-sm">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <span className="size-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                            <span className="truncate font-medium text-zinc-700 dark:text-zinc-200">{entry.name}</span>
+                          </div>
+                          <span className="font-semibold text-zinc-950 dark:text-white">{entry.value}</span>
+                        </div>
+                        <div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-white/10">
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${Math.max((entry.value / Math.max(...deptDistribution.map((item) => item.value), 1)) * 100, 10)}%`,
+                              backgroundColor: entry.color,
+                            }}
+                          />
+                        </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                )}
-                {newThisMonth > 0 && (
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-sky-50 border border-sky-200">
-                    <UserPlus className="size-4 text-sky-600 mt-0.5 shrink-0" />
-                    <div>
-                      <div className="text-sm font-medium text-sky-800">{newThisMonth} new hire(s) this month</div>
-                    </div>
-                  </div>
-                )}
-                {punchedInNow > 0 && (
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200">
-                    <UserCheck className="size-4 text-emerald-600 mt-0.5 shrink-0" />
-                    <div>
-                      <div className="text-sm font-medium text-emerald-800">{punchedInNow} employee(s) currently active</div>
-                    </div>
-                  </div>
-                )}
-                {absentToday.length === 0 && newThisMonth === 0 && (
-                  <div className="text-sm text-zinc-400 text-center py-4">No new notifications</div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-xl bg-white border border-zinc-200 shadow-xs p-5 dark:bg-zinc-900 dark:border-zinc-800">
-              <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="size-4 text-zinc-500" />
-                <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">This Week</h3>
-              </div>
-              <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-                {formatDuration(myWeekHours || 0)}
-              </div>
-              <div className="text-sm text-zinc-500 mt-1 dark:text-zinc-400">Total hours worked</div>
-              {mySessions && (
-                <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-zinc-500 dark:text-zinc-400">Sessions this week</span>
-                    <span className="font-semibold text-zinc-800 dark:text-zinc-100">
-                      {mySessions.filter((s) => getWeekDates().includes(s.dateKey)).length}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm mt-2">
-                    <span className="text-zinc-500 dark:text-zinc-400">Today completed</span>
-                    <span className="font-semibold text-zinc-800 dark:text-zinc-100">
-                      {todaySession?.punchOutAt ? 'Yes' : todaySession ? 'In progress' : 'No'}
-                    </span>
+                  <div className="flex h-full items-center justify-center rounded-[24px] border border-white/70 bg-white/70 p-3 dark:border-white/10 dark:bg-white/5">
+                    <ResponsiveContainer width="100%" height={240}>
+                      <PieChart>
+                        <Tooltip
+                          contentStyle={{
+                            borderRadius: 16,
+                            border: '1px solid rgba(148,163,184,0.22)',
+                            background: 'rgba(255,255,255,0.96)',
+                            boxShadow: '0 18px 50px rgba(15,23,42,0.12)',
+                          }}
+                        />
+                        <Pie
+                          data={deptDistribution}
+                          dataKey="value"
+                          nameKey="name"
+                          innerRadius={58}
+                          outerRadius={94}
+                          paddingAngle={4}
+                        >
+                          {deptDistribution.map((entry) => (
+                            <Cell key={entry.name} fill={entry.color} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               )}
-            </div>
-          )}
+            </SectionCard>
 
-          {/* Employee Type Distribution (admin only) */}
-          {isAdmin && typeDistribution.length > 1 && (
-            <div className="rounded-xl bg-white border border-zinc-200 shadow-xs p-5 dark:bg-zinc-900 dark:border-zinc-800">
-              <div className="flex items-center gap-2 mb-4">
-                <Users className="size-4 text-zinc-500" />
-                <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Employee Types</h3>
-              </div>
-              <div className="space-y-2.5">
-                {typeDistribution.map((t) => (
-                  <div key={t.name} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="size-2.5 rounded-full" style={{ backgroundColor: t.color }} />
-                      <span className="text-sm text-zinc-600 dark:text-zinc-300">{t.name}</span>
-                    </div>
-                    <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">{t.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Quick employee stats (admin) */}
-          {isAdmin && (
-            <div className="rounded-xl bg-white border border-zinc-200 shadow-xs p-5 dark:bg-zinc-900 dark:border-zinc-800">
-              <div className="flex items-center gap-2 mb-4">
-                <Medal className="size-4 text-zinc-500" />
-                <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Snapshot</h3>
-              </div>
+            <SectionCard title="People intelligence" icon={UserCheck}>
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-500 dark:text-zinc-400">Largest department</span>
-                  <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">{topDept.name} ({topDept.count})</span>
+                <div className="rounded-[22px] border border-white/70 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">Largest department</p>
+                      <p className="mt-1 text-lg font-semibold text-zinc-950 dark:text-white">{topDept.name}</p>
+                    </div>
+                    <GraduationCap className="size-5 text-indigo-500" />
+                  </div>
+                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-white/10">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500"
+                      style={{ width: `${Math.min(Math.max((topDept.count / Math.max(totalEmployees, 1)) * 100, 8), 100)}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="border-t border-zinc-100 dark:border-zinc-800" />
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-500 dark:text-zinc-400">Monthly payroll</span>
-                  <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">{formatCurrency(monthlyPayroll)}</span>
+
+                <div className="rounded-[22px] border border-white/70 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">Current clock-ins</p>
+                      <p className="mt-1 text-lg font-semibold text-zinc-950 dark:text-white">
+                        {punchedInNow}/{totalEmployees}
+                      </p>
+                    </div>
+                    <Clock3 className="size-5 text-cyan-500" />
+                  </div>
+                  <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+                    Real-time presence for the active workday.
+                  </p>
                 </div>
-                <div className="border-t border-zinc-100 dark:border-zinc-800" />
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-500 dark:text-zinc-400">Attendance rate</span>
-                  <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
-                    {totalEmployees > 0
-                      ? `${Math.round((presentToday / totalEmployees) * 100)}%`
-                      : '—'}
-                  </span>
+
+                <div className="rounded-[22px] border border-white/70 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">Weekly hours</p>
+                      <p className="mt-1 text-lg font-semibold text-zinc-950 dark:text-white">{formatDuration(myWeekHours)}</p>
+                    </div>
+                    <TrendingUp className="size-5 text-emerald-500" />
+                  </div>
+                  <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">Only completed sessions are counted.</p>
                 </div>
-                <div className="border-t border-zinc-100 dark:border-zinc-800" />
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-500 dark:text-zinc-400">Currently clocked in</span>
-                  <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">{punchedInNow}/{totalEmployees}</span>
-                </div>
+
+                {absentToday.length > 0 && (
+                  <div className="rounded-[22px] border border-amber-200/70 bg-amber-50/80 p-4 text-amber-900 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-100">
+                    <div className="flex items-start gap-3">
+                      <UserX className="mt-0.5 size-5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-semibold">{absentToday.length} employee(s) absent today</p>
+                        <p className="mt-1 text-sm text-amber-700 dark:text-amber-200/80">
+                          {absentToday.slice(0, 3).map((employee) => employee.fullName).join(', ')}
+                          {absentToday.length > 3 ? ` +${absentToday.length - 3} more` : ''}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            </SectionCard>
+
+            {typeDistribution.length > 1 ? (
+              <SectionCard title="Employee types" icon={Users}>
+                <div className="space-y-2">
+                  {typeDistribution.map((entry) => (
+                    <div
+                      key={entry.name}
+                      className="flex items-center justify-between rounded-[18px] border border-white/70 bg-white/70 px-4 py-3 dark:border-white/10 dark:bg-white/5"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="size-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">{entry.name}</span>
+                      </div>
+                      <span className="text-sm font-semibold text-zinc-950 dark:text-white">{entry.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </SectionCard>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>

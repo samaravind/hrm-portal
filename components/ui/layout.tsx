@@ -1,7 +1,7 @@
 import "./globals.css";
-import { AppSidebar } from "@/components/ui/app-sidebar";
+import { AppSidebar } from "./app-sidebar";
 // Import AppHeader with corrected path - updated to match actual component location in project structure
-import { AppHeader } from "@/components/ui/app-header";
+import { AppHeader } from "./app-header";
 
 export default function RootLayout({
   children,

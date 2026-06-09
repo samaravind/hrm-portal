@@ -32,6 +32,7 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_userTokenIdentifier_and_dateKey", ["userTokenIdentifier", "dateKey"])
+    .index("by_dateKey", ["dateKey"])
     .index("by_userEmail", ["userEmail"]),
 
   employees: defineTable({

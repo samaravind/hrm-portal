@@ -32,7 +32,7 @@ function DatePicker({
         <button
           type="button"
           className={cn(
-            "flex h-11 w-full items-center justify-between rounded-2xl border border-black bg-[#FFFFFF] px-3.5 text-sm font-medium text-black transition hover:bg-black hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-0 dark:border-zinc-800 dark:bg-[#050505] dark:text-white dark:hover:bg-[#111111] dark:hover:text-white dark:focus-visible:ring-zinc-700",
+            "[color-scheme:light] flex h-11 w-full items-center justify-between rounded-2xl border border-zinc-200 bg-white px-3.5 text-sm font-medium text-black transition hover:bg-zinc-50 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:[color-scheme:dark] dark:border-zinc-800 dark:bg-[#050505] dark:text-white dark:hover:bg-[#111111] dark:hover:text-white dark:focus-visible:ring-zinc-700 dark:focus-visible:ring-offset-0",
             className,
           )}
         >
@@ -45,7 +45,7 @@ function DatePicker({
       <PopoverContent
         align="start"
         sideOffset={8}
-        className="w-auto rounded-2xl border border-black bg-[#FFFFFF] p-0 text-black shadow-[0_18px_45px_rgba(0,0,0,0.12)] dark:border-zinc-800 dark:bg-[#050505] dark:text-white dark:shadow-[0_18px_45px_rgba(0,0,0,0.45)]"
+        className="[color-scheme:light] w-auto rounded-2xl border border-zinc-200 bg-white p-0 text-black shadow-[0_18px_45px_rgba(0,0,0,0.12)] dark:[color-scheme:dark] dark:border-zinc-800 dark:bg-[#050505] dark:text-white dark:shadow-[0_18px_45px_rgba(0,0,0,0.45)]"
       >
         <Calendar
           mode="single"

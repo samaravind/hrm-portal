@@ -62,13 +62,13 @@ export function Calendar({
 
   return (
     <div
-      className={cn("rounded-2xl border border-black bg-[#FFFFFF] p-3 text-black dark:border-zinc-800 dark:bg-[#050505] dark:text-white", className)}
+      className={cn("[color-scheme:light] rounded-2xl border border-zinc-200 bg-white p-3 text-black dark:[color-scheme:dark] dark:border-zinc-800 dark:bg-[#050505] dark:text-white", className)}
     >
       <div className="mb-3 flex items-center gap-2">
         <button
           type="button"
           onClick={() => setMonth((current) => subMonths(current, 1))}
-          className="inline-flex size-8 items-center justify-center rounded-full border border-black bg-[#FFFFFF] text-black transition hover:bg-black hover:text-white dark:border-zinc-800 dark:bg-[#050505] dark:text-white dark:hover:bg-[#111111] dark:hover:text-white"
+          className="inline-flex size-8 items-center justify-center rounded-full border border-zinc-200 bg-white text-black transition hover:bg-zinc-100 hover:text-black dark:border-zinc-800 dark:bg-[#050505] dark:text-white dark:hover:bg-[#111111] dark:hover:text-white"
           aria-label="Previous month"
         >
           <ChevronLeft className="size-4" />
@@ -80,10 +80,10 @@ export function Calendar({
               setMonth(new Date(displayMonth.getFullYear(), Number(value), 1))
             }}
           >
-            <SelectTrigger className="h-8 flex-1 border-black bg-[#FFFFFF] text-black dark:border-zinc-800 dark:bg-[#050505] dark:text-white">
+            <SelectTrigger className="h-8 flex-1 border-zinc-200 bg-white text-black dark:border-zinc-800 dark:bg-[#050505] dark:text-white">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="border-black bg-[#FFFFFF] text-black dark:border-zinc-800 dark:bg-[#050505] dark:text-white">
+            <SelectContent className="border-zinc-200 bg-white text-black dark:border-zinc-800 dark:bg-[#050505] dark:text-white">
               {months.map((item) => (
                 <SelectItem key={item.value} value={String(item.value)}>
                   {item.label}
@@ -97,10 +97,10 @@ export function Calendar({
               setMonth(new Date(Number(value), displayMonth.getMonth(), 1))
             }}
           >
-            <SelectTrigger className="h-8 w-24 border-black bg-[#FFFFFF] text-black dark:border-zinc-800 dark:bg-[#050505] dark:text-white">
+            <SelectTrigger className="h-8 w-24 border-zinc-200 bg-white text-black dark:border-zinc-800 dark:bg-[#050505] dark:text-white">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="border-black bg-[#FFFFFF] text-black dark:border-zinc-800 dark:bg-[#050505] dark:text-white">
+            <SelectContent className="border-zinc-200 bg-white text-black dark:border-zinc-800 dark:bg-[#050505] dark:text-white">
               {years.map((year) => (
                 <SelectItem key={year} value={String(year)}>
                   {year}
@@ -112,14 +112,14 @@ export function Calendar({
         <button
           type="button"
           onClick={() => setMonth((current) => addMonths(current, 1))}
-          className="inline-flex size-8 items-center justify-center rounded-full border border-black bg-[#FFFFFF] text-black transition hover:bg-black hover:text-white dark:border-zinc-800 dark:bg-[#050505] dark:text-white dark:hover:bg-[#111111] dark:hover:text-white"
+          className="inline-flex size-8 items-center justify-center rounded-full border border-zinc-200 bg-white text-black transition hover:bg-zinc-100 hover:text-black dark:border-zinc-800 dark:bg-[#050505] dark:text-white dark:hover:bg-[#111111] dark:hover:text-white"
           aria-label="Next month"
         >
           <ChevronRight className="size-4" />
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-black dark:text-zinc-500">
+      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-500">
         {weekDays.map((day) => (
           <div key={day} className="py-1">
             {day}
@@ -139,7 +139,8 @@ export function Calendar({
               className={cn(
                 "h-9 rounded-full text-sm font-medium transition",
                 outside ? "text-black/35 dark:text-zinc-700" : "text-black dark:text-zinc-200",
-                active && "bg-black text-white hover:bg-black dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-900",
+                active && "bg-zinc-950 text-white hover:bg-zinc-950 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-900",
+                !active && "hover:bg-zinc-100 dark:hover:bg-zinc-900",
               )}
             >
               {format(day, "d")}

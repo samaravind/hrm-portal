@@ -261,41 +261,41 @@ function MyAttendanceContent() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_2fr]">
+    <div className="w-full max-w-none px-1 py-1 sm:px-2 md:px-3 lg:px-4 xl:px-6">
+      <div className="grid gap-4 xl:grid-cols-[minmax(360px,0.92fr)_minmax(0,1.95fr)] 2xl:gap-6">
         
         {/* Left Column: Live Punch Status */}
-        <section className="rounded-3xl border border-zinc-200 dark:border-black bg-white dark:bg-black p-6 shadow-xs flex flex-col justify-between min-h-[480px]">
+        <section className="flex min-h-[min(78vh,860px)] flex-col justify-between rounded-[32px] border border-zinc-200/80 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.08)] dark:border-zinc-900 dark:bg-black dark:shadow-[0_18px_50px_rgba(0,0,0,0.35)] sm:p-6">
           <div>
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-zinc-950 inline-block"></span>
-              <h2 className="text-lg font-bold text-zinc-900">Live Punch Status</h2>
+              <h2 className="text-lg font-semibold tracking-tight text-zinc-950 dark:text-white">Live Punch Status</h2>
             </div>
-            <p className="mt-1 text-sm text-zinc-500" suppressHydrationWarning>
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400" suppressHydrationWarning>
               {mounted ? todayDateString : 'Loading date...'}
             </p>
           </div>
 
-          <div className="my-8 flex justify-center items-center">
+          <div className="my-10 flex min-h-[220px] items-center justify-center lg:min-h-[280px]">
             {!isComplete ? (
               <span 
-                className="text-5xl font-bold tracking-tight text-zinc-900 font-mono"
+                className="font-mono text-5xl font-semibold tracking-tight text-zinc-950 dark:text-white sm:text-6xl"
                 suppressHydrationWarning
               >
                 {mounted ? clockTimeString : '--:--:--'}
               </span>
             ) : (
-              <span className="text-lg font-semibold tracking-wide text-emerald-700">
+              <span className="text-lg font-semibold tracking-wide text-emerald-600 dark:text-emerald-300">
                 Shift Completed
               </span>
             )}
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between rounded-2xl bg-zinc-50 border border-zinc-100 p-4">
+            <div className="flex items-center justify-between rounded-[24px] border border-zinc-200/80 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/80">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Start Time</p>
-                <p className="mt-1 text-sm font-semibold text-zinc-800">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">Start Time</p>
+                <p className="mt-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                   {punchInAt ? formatTimeWithSeconds(punchInAt) : '--:--:--'}
                 </p>
               </div>
@@ -303,7 +303,7 @@ function MyAttendanceContent() {
                 type="button"
                 onClick={togglePunch}
                 disabled={isSaving || isComplete}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 hover:bg-zinc-300 text-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-800 shadow-xs transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900"
                 title={isWorking ? "Punch Out" : "Punch In"}
               >
                 {isWorking ? (
@@ -315,54 +315,54 @@ function MyAttendanceContent() {
             </div>
 
             {isComplete ? (
-              <div className="rounded-2xl bg-[#edfcf2] p-5 text-center flex flex-col items-center justify-center border border-emerald-100">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100/60 text-emerald-600">
+              <div className="flex flex-col items-center justify-center rounded-[24px] border border-emerald-100 bg-emerald-50/60 p-5 text-center dark:border-zinc-800 dark:bg-zinc-950">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100/70 text-emerald-600 dark:bg-zinc-900 dark:text-emerald-300">
                   <ClipboardCheck className="size-6" />
                 </div>
-                <p className="mt-3 text-xs font-bold uppercase tracking-wider text-emerald-600">
+                <p className="mt-3 text-xs font-semibold uppercase tracking-[0.22em] text-emerald-600 dark:text-emerald-300">
                   Shift Completed
                 </p>
-                <p className="mt-1 text-xl font-extrabold text-emerald-700">
+                <p className="mt-1 text-xl font-bold text-emerald-700 dark:text-emerald-200">
                   {punchInAt && punchOutAt ? ((punchOutAt - punchInAt) / 3600000).toFixed(2) : '0.16'} Hours Logged
                 </p>
               </div>
             ) : isWorking ? (
-              <div className="rounded-2xl bg-blue-50/50 p-5 text-center flex flex-col items-center justify-center border border-blue-100">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 animate-pulse">
+              <div className="flex flex-col items-center justify-center rounded-[24px] border border-blue-100 bg-blue-50/60 p-5 text-center dark:border-zinc-800 dark:bg-zinc-950">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 animate-pulse dark:bg-zinc-900 dark:text-blue-300">
                   <Clock3 className="size-6 animate-spin" style={{ animationDuration: '3s' }} />
                 </div>
-                <p className="mt-3 text-xs font-bold uppercase tracking-wider text-blue-600">
+                <p className="mt-3 text-xs font-semibold uppercase tracking-[0.22em] text-blue-600 dark:text-blue-300">
                   Shift In Progress
                 </p>
-                <p className="mt-1 text-xl font-extrabold text-blue-700">
+                <p className="mt-1 text-xl font-bold text-blue-700 dark:text-blue-200">
                   {liveHours} Hours Logged
                 </p>
                 <button
                   type="button"
                   onClick={handlePunchOut}
                   disabled={isSaving}
-                  className="mt-4 w-full max-w-[200px] inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white px-5 py-2.5 text-xs font-bold transition cursor-pointer shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mt-4 inline-flex w-full max-w-[220px] items-center justify-center gap-2 rounded-2xl bg-rose-600 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer shadow-sm"
                 >
                   <LogOut className="size-3.5" />
                   Punch Out
                 </button>
               </div>
             ) : (
-              <div className="rounded-2xl bg-zinc-50 p-5 text-center flex flex-col items-center justify-center border border-zinc-100">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-zinc-400">
+              <div className="flex flex-col items-center justify-center rounded-[24px] border border-zinc-200/80 bg-zinc-50/80 p-5 text-center dark:border-zinc-800 dark:bg-zinc-950">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-zinc-400 dark:bg-zinc-900 dark:text-zinc-500">
                   <UserX className="size-6" />
                 </div>
-                <p className="mt-3 text-xs font-bold uppercase tracking-wider text-zinc-500">
+                <p className="mt-3 text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">
                   Ready to Start
                 </p>
-                <p className="mt-1 text-xl font-extrabold text-zinc-400">
+                <p className="mt-1 text-xl font-bold text-zinc-400 dark:text-zinc-500">
                   0.00 Hours Logged
                 </p>
                 <button
                   type="button"
                   onClick={handlePunchIn}
                   disabled={isSaving}
-                  className="mt-4 w-full max-w-[200px] inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white px-5 py-2.5 text-xs font-bold transition cursor-pointer shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mt-4 inline-flex w-full max-w-[220px] items-center justify-center gap-2 rounded-2xl bg-zinc-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer shadow-sm dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
                 >
                   <LogIn className="size-3.5" />
                   Punch In
@@ -372,7 +372,7 @@ function MyAttendanceContent() {
           </div>
 
           {error && (
-            <p className="mt-4 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs text-rose-600 text-center">
+            <p className="mt-4 rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2 text-center text-xs text-rose-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-rose-300">
               {error}
             </p>
           )}
@@ -380,47 +380,47 @@ function MyAttendanceContent() {
         </section>
 
         {/* Right Column: Statistics & Logs */}
-        <div className="flex flex-col gap-6">
+        <div className="flex min-w-0 flex-col gap-6">
           {/* Top Statistics cards */}
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 xl:grid-cols-2">
             
             {/* Life-Time Contribution Card */}
-            <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-xs">
+            <div className="rounded-[28px] border border-zinc-200/80 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.06)] dark:border-zinc-900 dark:bg-zinc-950 dark:shadow-[0_14px_40px_rgba(0,0,0,0.25)]">
               <div className="flex items-center gap-2">
-                <div className="text-blue-500 bg-blue-50/50 p-1.5 rounded-lg">
+                <div className="rounded-xl bg-blue-50/70 p-1.5 text-blue-500 dark:bg-zinc-900 dark:text-blue-300">
                   <TrendingUp className="size-4" />
                 </div>
-                <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
+                <h3 className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">
                   Life-Time Contribution
                 </h3>
               </div>
               <div className="mt-4 flex items-baseline gap-1.5">
-                <span className="text-4xl font-extrabold text-zinc-900">{totalHours}</span>
-                <span className="text-xs text-zinc-500">Total Hours</span>
+                <span className="text-4xl font-bold tracking-tight text-zinc-950 dark:text-white">{totalHours}</span>
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">Total Hours</span>
               </div>
-              <div className="mt-4 flex items-center gap-1.5 text-xs text-zinc-500 border-t border-zinc-50 pt-3">
-                <Calendar className="size-3.5 text-zinc-400" />
+              <div className="mt-4 flex items-center gap-1.5 border-t border-zinc-100 pt-3 text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+                <Calendar className="size-3.5 text-zinc-400 dark:text-zinc-500" />
                 <span>Since Joining:</span>
-                <span className="font-bold text-zinc-800">{sinceJoiningDate}</span>
+                <span className="font-semibold text-zinc-800 dark:text-zinc-100">{sinceJoiningDate}</span>
               </div>
             </div>
 
             {/* This Month's Activity Card */}
-            <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-xs">
+            <div className="rounded-[28px] border border-zinc-200/80 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.06)] dark:border-zinc-900 dark:bg-zinc-950 dark:shadow-[0_14px_40px_rgba(0,0,0,0.25)]">
               <div className="flex items-center gap-2">
-                <div className="text-emerald-500 bg-emerald-50/50 p-1.5 rounded-lg">
+                <div className="rounded-xl bg-emerald-50/70 p-1.5 text-emerald-500 dark:bg-zinc-900 dark:text-emerald-300">
                   <Timer className="size-4" />
                 </div>
-                <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
+                <h3 className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">
                   This Month&apos;s Activity
                 </h3>
               </div>
               <div className="mt-4 flex items-baseline gap-1.5">
-                <span className="text-4xl font-extrabold text-zinc-900">{daysPresent}</span>
-                <span className="text-xs text-zinc-500">Days Present</span>
+                <span className="text-4xl font-bold tracking-tight text-zinc-950 dark:text-white">{daysPresent}</span>
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">Days Present</span>
               </div>
               <div className="mt-6">
-                <div className="h-1.5 w-full bg-zinc-100 rounded-full overflow-hidden">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-900">
                   <div 
                     className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
                     style={{ width: `${progressPercent || 5}%` }}
@@ -431,17 +431,19 @@ function MyAttendanceContent() {
           </div>
 
           {/* Attendance History */}
-          <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-xs flex-1 flex flex-col">
-            <div>
-              <h2 className="text-lg font-bold text-zinc-900">Attendance History</h2>
-              <p className="mt-0.5 text-sm text-zinc-400">
-                Your daily punch records and working hours.
-              </p>
+          <section className="flex min-h-0 flex-1 flex-col rounded-[32px] border border-zinc-200/80 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.08)] dark:border-zinc-900 dark:bg-zinc-950 dark:shadow-[0_18px_50px_rgba(0,0,0,0.35)] sm:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold tracking-tight text-zinc-950 dark:text-white">Attendance History</h2>
+                <p className="mt-1 text-sm text-zinc-400 dark:text-zinc-500">
+                  Your daily punch records and working hours.
+                </p>
+              </div>
             </div>
 
-            <div className="mt-4 flex items-center gap-4">
-              <Calendar className="size-4 text-zinc-400 shrink-0" />
-              <div className="w-full max-w-[220px]">
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <Calendar className="size-4 shrink-0 text-zinc-400 dark:text-zinc-500" />
+              <div className="w-full max-w-[260px]">
                 <DatePicker
                   value={from}
                   onChange={setFrom}
@@ -450,28 +452,28 @@ function MyAttendanceContent() {
               {from && (
                 <button
                   onClick={() => setFrom('')}
-                  className="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-50 transition cursor-pointer"
+                  className="rounded-2xl border border-zinc-200/80 px-3 py-2 text-xs font-medium text-zinc-500 transition hover:bg-zinc-50 cursor-pointer dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
                 >
                   Clear
                 </button>
               )}
             </div>
 
-            <div className="mt-6 overflow-x-auto">
-              <table className="w-full text-left text-sm border-collapse">
+            <div className="mt-6 min-h-0 overflow-x-auto">
+              <table className="min-w-[780px] w-full border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-200 dark:border-black text-xs font-semibold text-zinc-800 dark:text-white">
-                    <th className="py-3 px-2 w-8">S.No</th>
-                    <th className="py-3 px-2">Date & Day</th>
-                    <th className="py-3 px-2">Check In</th>
-                    <th className="py-3 px-2">Check Out</th>
-                    <th className="py-3 px-2 text-right">Work Hours</th>
+                  <tr className="border-b border-zinc-200/80 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:text-zinc-200">
+                    <th className="w-12 px-2 py-3">S.No</th>
+                    <th className="px-2 py-3">Date & Day</th>
+                    <th className="px-2 py-3">Check In</th>
+                    <th className="px-2 py-3">Check Out</th>
+                    <th className="px-2 py-3 text-right">Work Hours</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-200 dark:divide-black">
+                <tbody className="divide-y divide-zinc-200/80 dark:divide-zinc-800">
                   {filteredRecords.length === 0 ? (
                     <tr>
-                      <td className="py-8 px-2 text-center text-zinc-400 font-medium" colSpan={5}>
+                      <td className="px-2 py-10 text-center font-medium text-zinc-400 dark:text-zinc-500" colSpan={5}>
                         No attendance records yet. Click the start button to punch in.
                       </td>
                     </tr>
@@ -484,25 +486,25 @@ function MyAttendanceContent() {
                       const hoursStr = (diff / (1000 * 60 * 60)).toFixed(2)
 
                       return (
-                        <tr key={record._id} className="hover:bg-zinc-50/50 transition-colors dark:hover:bg-black">
-                          <td className="py-4 px-2 text-xs text-zinc-400 font-mono">{sno}</td>
-                          <td className="py-4 px-2">
-                            <div className="font-semibold text-zinc-800">{dateStr}</div>
-                            <div className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase mt-0.5">
+                        <tr key={record._id} className="transition-colors hover:bg-zinc-50/80 dark:hover:bg-zinc-900/60">
+                          <td className="px-2 py-4 font-mono text-xs text-zinc-400 dark:text-zinc-500">{sno}</td>
+                          <td className="px-2 py-4">
+                            <div className="font-semibold text-zinc-900 dark:text-zinc-100">{dateStr}</div>
+                            <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">
                               {dayStr}
                             </div>
                           </td>
-                          <td className="py-4 px-2 font-medium text-zinc-700">
+                          <td className="px-2 py-4 font-medium text-zinc-700 dark:text-zinc-300">
                             <span className="flex items-center gap-2">
                               <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" />
                               {formatTime(record.punchInAt)}
                             </span>
                           </td>
-                          <td className="py-4 px-2 font-medium text-zinc-700">
+                          <td className="px-2 py-4 font-medium text-zinc-700 dark:text-zinc-300">
                             {isRecordActive ? (
                               <span className="flex items-center gap-2">
                                 <span className="h-2 w-2 rounded-full bg-amber-500 inline-block animate-pulse" />
-                                <span className="text-amber-600 font-semibold">Active</span>
+                                <span className="font-semibold text-amber-600 dark:text-amber-300">Active</span>
                               </span>
                             ) : (
                               <span className="flex items-center gap-2">
@@ -511,7 +513,7 @@ function MyAttendanceContent() {
                               </span>
                             )}
                           </td>
-                          <td className="py-4 px-2 font-bold text-zinc-950 text-right">
+                          <td className="px-2 py-4 text-right font-bold text-zinc-950 dark:text-zinc-100">
                             {hoursStr}h
                           </td>
                         </tr>
