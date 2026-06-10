@@ -1,3 +1,4 @@
+import { internal } from "./_generated/api"
 import { mutation, query } from "./_generated/server"
 import { v } from "convex/values"
 
@@ -47,6 +48,24 @@ async function getLeaveIdentity(
   }
 
   throw new Error("Not authenticated. Please sign in.")
+}
+
+function getDurationLabel(request: {
+  durationType?: string | null
+  halfDay?: boolean
+  periodWise?: boolean
+  session?: "AM" | "PM" | null
+  selectedPeriod?: string | null
+}) {
+  if (request.durationType === "halfDay" || request.halfDay) {
+    return `Half Day${request.session ? ` (${request.session})` : ""}`
+  }
+
+  if (request.durationType === "periodWise" || request.periodWise) {
+    return `Period Wise${request.selectedPeriod ? ` (${request.selectedPeriod})` : ""}`
+  }
+
+  return "Full Day"
 }
 
 export const getMyLeaveRequests = query({
@@ -212,6 +231,7 @@ export const createLeaveRequest = mutation({
 export const approveLeaveRequest = mutation({
   args: {
     requestId: v.id("leaveRequests"),
+    baseUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity()
@@ -233,12 +253,27 @@ export const approveLeaveRequest = mutation({
       status: "approved",
       updatedAt: Date.now(),
     })
+
+    if (request.userEmail) {
+      await ctx.scheduler.runAfter(0, internal.employeeMail.sendLeaveStatusEmail, {
+        fullName: request.userName ?? request.userEmail,
+        email: request.userEmail,
+        leaveType: request.leaveType,
+        startDate: request.startDate,
+        endDate: request.endDate,
+        durationLabel: getDurationLabel(request),
+        reason: request.reason,
+        status: "approved",
+        appUrl: args.baseUrl,
+      })
+    }
   },
 })
 
 export const declineLeaveRequest = mutation({
   args: {
     requestId: v.id("leaveRequests"),
+    baseUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity()
@@ -260,5 +295,19 @@ export const declineLeaveRequest = mutation({
       status: "rejected",
       updatedAt: Date.now(),
     })
+
+    if (request.userEmail) {
+      await ctx.scheduler.runAfter(0, internal.employeeMail.sendLeaveStatusEmail, {
+        fullName: request.userName ?? request.userEmail,
+        email: request.userEmail,
+        leaveType: request.leaveType,
+        startDate: request.startDate,
+        endDate: request.endDate,
+        durationLabel: getDurationLabel(request),
+        reason: request.reason,
+        status: "rejected",
+        appUrl: args.baseUrl,
+      })
+    }
   },
 })

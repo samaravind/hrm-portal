@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { useMutation, useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
-import type { Id } from '@/convex/_generated/dataModel'
+import type { Doc, Id } from '@/convex/_generated/dataModel'
 import { ArrowLeft, CheckCircle2, XCircle, Bell, Sparkles, Users, CalendarRange, Eye, ExternalLink, X } from 'lucide-react'
 
 type LeaveDocument =
@@ -23,6 +23,8 @@ type DocumentPreview = {
   url: string
   contentType?: string | null
 }
+
+type LeaveRequestCard = Doc<'leaveRequests'>
 
 function isImageDocument(name: string, contentType?: string | null) {
   return (
@@ -158,20 +160,20 @@ export default function ApprovalsPage() {
     }
   }
 
-  const handleApproveLeave = async (requestId: Id<'leaveRequests'>) => {
-    setWorkingLeaveId(requestId)
+  const handleApproveLeave = async (request: LeaveRequestCard) => {
+    setWorkingLeaveId(request._id)
     try {
-      await approveLeaveRequest({ requestId })
+      await approveLeaveRequest({ requestId: request._id, baseUrl: window.location.origin })
       router.refresh()
     } finally {
       setWorkingLeaveId(null)
     }
   }
 
-  const handleDeclineLeave = async (requestId: Id<'leaveRequests'>) => {
-    setWorkingLeaveId(requestId)
+  const handleDeclineLeave = async (request: LeaveRequestCard) => {
+    setWorkingLeaveId(request._id)
     try {
-      await declineLeaveRequest({ requestId })
+      await declineLeaveRequest({ requestId: request._id, baseUrl: window.location.origin })
       router.refresh()
     } finally {
       setWorkingLeaveId(null)
@@ -331,6 +333,9 @@ export default function ApprovalsPage() {
                             {request.leaveType}
                           </p>
                           <p className="mt-1 truncate text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                            {request.userEmail || 'Email pending'}
+                          </p>
+                          <p className="mt-1 truncate text-xs font-medium text-zinc-500 dark:text-zinc-400">
                             {formatLeaveDuration(request)}
                           </p>
                         </div>
@@ -373,7 +378,7 @@ export default function ApprovalsPage() {
                       <div className="mt-4 flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={() => handleApproveLeave(request._id)}
+                          onClick={() => handleApproveLeave(request)}
                           disabled={workingLeaveId === request._id}
                           className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-zinc-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-900 disabled:text-white disabled:opacity-100 dark:bg-zinc-950 dark:text-white dark:hover:bg-zinc-800"
                         >
@@ -382,7 +387,7 @@ export default function ApprovalsPage() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDeclineLeave(request._id)}
+                          onClick={() => handleDeclineLeave(request)}
                           disabled={workingLeaveId === request._id}
                           className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-200 dark:hover:bg-rose-500/15"
                         >

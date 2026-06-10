@@ -179,6 +179,9 @@ export default function LeavePage() {
                 >
                   <div className="min-w-0">
                     <p className="truncate font-semibold text-zinc-950 dark:text-white">{request.leaveType}</p>
+                    <p className="mt-1 truncate text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                      {request.userEmail || 'Email pending'}
+                    </p>
                   </div>
                   <div className="text-zinc-600 dark:text-zinc-300">{formatDateRange(request.startDate, request.endDate)}</div>
                   <div className="min-w-0">
