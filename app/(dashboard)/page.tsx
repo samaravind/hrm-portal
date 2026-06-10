@@ -8,20 +8,6 @@ import { api } from '@/convex/_generated/api'
 import { useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
 import {
-  Area,
-  AreaChart,
-  Bar,
-  CartesianGrid,
-  Cell,
-  ComposedChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
-import {
   ArrowUpRight,
   BarChart3,
   Bell,
@@ -87,6 +73,17 @@ function getInitials(name: string) {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('')
+}
+
+function getSparklinePoints(values: number[]) {
+  const max = Math.max(...values, 1)
+  return values
+    .map((value, index) => {
+      const x = values.length <= 1 ? 50 : (index / (values.length - 1)) * 100
+      const y = 100 - (value / max) * 100
+      return `${x},${y}`
+    })
+    .join(' ')
 }
 
 function MetricCard({
@@ -743,44 +740,26 @@ export default function DashboardPage() {
 
             <SectionCard title="Weekly attendance pulse" icon={TrendingUp}>
               <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.85fr)]">
-                <div className="min-w-0 h-[320px] rounded-[24px] border border-white/70 bg-white/70 p-2 dark:border-white/10 dark:bg-white/5">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={weeklyTrend} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="weeklyFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3b638c" stopOpacity={0.38} />
-                          <stop offset="95%" stopColor="#3b638c" stopOpacity={0.03} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="4 8" stroke="rgba(148,163,184,0.22)" vertical={false} />
-                      <XAxis
-                        dataKey="label"
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={10}
-                        stroke="#94a3b8"
-                        fontSize={12}
-                      />
-                      <YAxis
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={10}
-                        stroke="#94a3b8"
-                        fontSize={12}
-                        allowDecimals={false}
-                      />
-                      <Tooltip
-                        cursor={{ stroke: 'rgba(59,99,140,0.12)', strokeWidth: 16 }}
-                        contentStyle={{
-                          borderRadius: 16,
-                          border: '1px solid rgba(148,163,184,0.22)',
-                          background: 'rgba(255,255,255,0.96)',
-                          boxShadow: '0 18px 50px rgba(15,23,42,0.12)',
-                        }}
-                      />
-                      <Area type="monotone" dataKey="value" stroke="#3b638c" strokeWidth={3} fill="url(#weeklyFill)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                <div className="min-w-0 rounded-[24px] border border-white/70 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                  <div className="flex h-[320px] items-end gap-3">
+                    {weeklyTrend.map((entry) => {
+                      const height = `${Math.max((entry.value / peakWeekValue) * 100, entry.value ? 12 : 0)}%`
+                      return (
+                        <div key={entry.date} className="flex min-h-0 flex-1 flex-col items-center justify-end gap-2">
+                          <div className="flex min-h-[220px] w-full items-end justify-center rounded-[20px] bg-white/40 p-2 dark:bg-white/5">
+                            <div
+                              className="w-full rounded-full bg-[linear-gradient(180deg,_#3b82f6,_#1e3a5f)] shadow-[0_14px_30px_rgba(59,130,246,0.16)] transition-all duration-500"
+                              style={{ height }}
+                            />
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{entry.label}</p>
+                            <p className="mt-0.5 text-[11px] text-zinc-500 dark:text-zinc-400">{entry.value}</p>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
 
                 <div className="space-y-3 rounded-[24px] border border-white/70 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
@@ -866,35 +845,52 @@ export default function DashboardPage() {
                 </span>
               }
             >
-              <div className="min-w-0 h-[280px] rounded-[24px] border border-white/70 bg-white/70 p-2 dark:border-white/10 dark:bg-white/5">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={weeklyTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="4 8" stroke="rgba(148,163,184,0.18)" vertical={false} />
-                    <XAxis
-                      dataKey="label"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={10}
-                      stroke="#94a3b8"
-                      fontSize={12}
-                    />
-                    <YAxis tickLine={false} axisLine={false} stroke="#94a3b8" fontSize={12} allowDecimals={false} />
-                    <Tooltip
-                      cursor={{ fill: 'rgba(59,99,140,0.08)' }}
-                      contentStyle={{
-                        borderRadius: 16,
-                        border: '1px solid rgba(148,163,184,0.22)',
-                        background: 'rgba(255,255,255,0.96)',
-                        boxShadow: '0 18px 50px rgba(15,23,42,0.12)',
-                      }}
-                    />
-                    <Bar dataKey="value" radius={[14, 14, 6, 6]} barSize={24}>
-                      {weeklyTrend.map((entry, index) => (
-                        <Cell key={entry.date} fill={DEPT_COLORS[index % DEPT_COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </ComposedChart>
-                </ResponsiveContainer>
+              <div className="min-w-0 rounded-[24px] border border-white/70 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                <div className="flex h-[280px] flex-col justify-between gap-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Trend line</p>
+                      <p className="mt-1 text-2xl font-semibold tracking-tight text-zinc-950 dark:text-white">
+                        {weeklyTrend.reduce((sum, entry) => sum + entry.value, 0)} punch-ins
+                      </p>
+                    </div>
+                    <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-200">
+                      Last 7 days
+                    </span>
+                  </div>
+                  <div className="h-[160px] rounded-[22px] bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(255,255,255,0.48))] p-4 dark:bg-white/5">
+                    <svg viewBox="0 0 100 100" className="h-full w-full overflow-visible">
+                      <defs>
+                        <linearGradient id="weeklySpark" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#1d4ed8" />
+                          <stop offset="50%" stopColor="#3b82f6" />
+                          <stop offset="100%" stopColor="#0f766e" />
+                        </linearGradient>
+                      </defs>
+                      <polyline
+                        fill="none"
+                        stroke="url(#weeklySpark)"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        points={getSparklinePoints(weeklyTrend.map((entry) => entry.value))}
+                      />
+                      <polygon
+                        fill="url(#weeklySpark)"
+                        fillOpacity="0.12"
+                        points={`0,100 ${getSparklinePoints(weeklyTrend.map((entry) => entry.value))} 100,100`}
+                      />
+                    </svg>
+                  </div>
+                  <div className="grid grid-cols-7 gap-2">
+                    {weeklyTrend.map((entry) => (
+                      <div key={entry.date} className="rounded-[18px] bg-white/60 px-2 py-3 text-center dark:bg-white/5">
+                        <p className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">{entry.label}</p>
+                        <p className="mt-1 text-sm font-semibold text-zinc-950 dark:text-white">{entry.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </SectionCard>
 
@@ -931,30 +927,29 @@ export default function DashboardPage() {
                     ))}
                   </div>
                   <div className="flex min-w-0 h-full items-center justify-center rounded-[24px] border border-white/70 bg-white/70 p-3 dark:border-white/10 dark:bg-white/5">
-                    <ResponsiveContainer width="100%" height={240}>
-                      <PieChart>
-                        <Tooltip
-                          contentStyle={{
-                            borderRadius: 16,
-                            border: '1px solid rgba(148,163,184,0.22)',
-                            background: 'rgba(255,255,255,0.96)',
-                            boxShadow: '0 18px 50px rgba(15,23,42,0.12)',
-                          }}
-                        />
-                        <Pie
-                          data={deptDistribution}
-                          dataKey="value"
-                          nameKey="name"
-                          innerRadius={58}
-                          outerRadius={94}
-                          paddingAngle={4}
-                        >
-                          {deptDistribution.map((entry) => (
-                            <Cell key={entry.name} fill={entry.color} />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
+                    <div className="relative flex size-[240px] items-center justify-center">
+                      <div
+                        className="absolute inset-0 rounded-full"
+                        style={{
+                          background: `conic-gradient(${deptDistribution
+                            .map((entry, index) => {
+                              const total = deptDistribution.reduce((sum, item) => sum + item.value, 0) || 1
+                              const start = deptDistribution.slice(0, index).reduce((sum, item) => sum + item.value, 0)
+                              const from = (start / total) * 100
+                              const to = ((start + entry.value) / total) * 100
+                              return `${entry.color} ${from}% ${to}%`
+                            })
+                            .join(', ')})`,
+                        }}
+                      />
+                      <div className="absolute inset-4 rounded-full border border-white/70 bg-white/90 shadow-inner dark:border-white/10 dark:bg-zinc-950/90" />
+                      <div className="relative z-10 text-center">
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">Departments</p>
+                        <p className="mt-1 text-3xl font-semibold tracking-tight text-zinc-950 dark:text-white">
+                          {deptDistribution.length}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

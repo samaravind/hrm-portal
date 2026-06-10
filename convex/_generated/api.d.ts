@@ -11,6 +11,7 @@
 import type * as attendance from "../attendance.js";
 import type * as employeeMail from "../employeeMail.js";
 import type * as employees from "../employees.js";
+import type * as leave from "../leave.js";
 import type * as users from "../users.js";
 
 import type {
@@ -23,6 +24,7 @@ declare const fullApi: ApiFromModules<{
   attendance: typeof attendance;
   employeeMail: typeof employeeMail;
   employees: typeof employees;
+  leave: typeof leave;
   users: typeof users;
 }>;
 

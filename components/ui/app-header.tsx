@@ -17,8 +17,9 @@ const pathTitles: Record<string, string> = {
   '/staff-dashboard': 'Dashboard',
   '/employee': 'Employees',
   '/my-attendance': 'My Attendance',
+  '/leave': 'Leave',
   '/attendance': 'Employee Attendance',
-  '/approvals': 'Approvals',
+  '/approvals': 'Approval',
   '/settings': 'Settings',
   '/profile': 'Profile',
 }
@@ -29,6 +30,7 @@ export function AppHeader() {
   const clerk = useClerk()
   const viewer = useQuery(api.users.viewer)
   const pendingApprovals = useQuery(api.users.listPendingApprovals) ?? []
+  const pendingLeaveRequests = useQuery(api.leave.listPendingLeaveRequests) ?? []
   const approveUser = useMutation(api.users.approveUserByTokenIdentifier)
   const declineUser = useMutation(api.users.declineUserByTokenIdentifier)
   const [workingToken, setWorkingToken] = useState<string | null>(null)
@@ -43,6 +45,7 @@ export function AppHeader() {
   const isDark = theme === 'dark'
   const isAdmin = viewer?.role === 'admin'
   const latestApprovals = pendingApprovals.slice(0, 4)
+  const totalPendingApprovals = pendingApprovals.length + pendingLeaveRequests.length
 
   const handleApprove = async (tokenIdentifier: string) => {
     setWorkingToken(tokenIdentifier)
@@ -67,7 +70,7 @@ export function AppHeader() {
   return (
     <header className="flex items-center justify-between gap-4 rounded-[30px] border border-white/80 bg-white/80 px-4 py-3 shadow-[0_18px_60px_rgba(99,102,241,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-zinc-950/75 dark:shadow-[0_18px_60px_rgba(0,0,0,0.35)] md:px-6">
       <div className="flex min-w-0 items-center gap-3">
-        <SidebarTrigger className="rounded-full border border-zinc-200/80 bg-white/90 text-zinc-700 shadow-sm transition-all hover:-translate-y-px hover:bg-white dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900" />
+        <SidebarTrigger className="hidden rounded-full border border-zinc-200/80 bg-white/90 text-zinc-700 shadow-sm transition-all hover:-translate-y-px hover:bg-white md:inline-flex dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900" />
         <div className="hidden h-9 w-px bg-gradient-to-b from-transparent via-zinc-200 to-transparent dark:via-zinc-800 sm:block" />
         <div className="min-w-0">
           <p className="truncate text-[10px] font-semibold uppercase tracking-[0.28em] text-zinc-400 dark:text-zinc-500">
@@ -91,9 +94,9 @@ export function AppHeader() {
                 aria-label="Open approvals"
               >
                 <Bell className="size-4" />
-                {pendingApprovals.length > 0 ? (
+                {totalPendingApprovals > 0 ? (
                   <span className="absolute -right-0.5 -top-0.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-semibold leading-none text-white">
-                    {pendingApprovals.length}
+                    {totalPendingApprovals}
                   </span>
                 ) : null}
               </Button>
@@ -164,7 +167,7 @@ export function AppHeader() {
                           type="button"
                           onClick={() => handleApprove(entry.tokenIdentifier)}
                           disabled={workingToken === entry.tokenIdentifier}
-                          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-zinc-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+                          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-zinc-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-900 disabled:text-white disabled:opacity-100 dark:bg-zinc-950 dark:text-white dark:hover:bg-zinc-800"
                         >
                           <CheckCircle2 className="size-3.5" />
                           Approve

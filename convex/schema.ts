@@ -47,6 +47,46 @@ export default defineSchema({
     .index("by_dateKey", ["dateKey"])
     .index("by_userEmail", ["userEmail"]),
 
+  leaveRequests: defineTable({
+    userTokenIdentifier: v.string(),
+    userName: v.union(v.string(), v.null()),
+    userEmail: v.union(v.string(), v.null()),
+    leaveType: v.string(),
+    startDate: v.string(),
+    endDate: v.string(),
+    durationType: v.optional(v.union(
+      v.literal("fullDay"),
+      v.literal("halfDay"),
+      v.literal("periodWise"),
+    )),
+    halfDay: v.boolean(),
+    periodWise: v.boolean(),
+    partialDate: v.optional(v.union(v.string(), v.null())),
+    session: v.optional(v.union(v.literal("AM"), v.literal("PM"), v.null())),
+    selectedPeriod: v.optional(v.union(v.string(), v.null())),
+    reason: v.string(),
+    documents: v.array(v.union(
+      v.string(),
+      v.object({
+        name: v.string(),
+        storageId: v.id("_storage"),
+        contentType: v.optional(v.union(v.string(), v.null())),
+        size: v.optional(v.number()),
+      }),
+    )),
+    status: v.union(
+      v.literal("submitted"),
+      v.literal("approved"),
+      v.literal("rejected"),
+      v.literal("cancelled"),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_userTokenIdentifier_and_createdAt", ["userTokenIdentifier", "createdAt"])
+    .index("by_userEmail", ["userEmail"])
+    .index("by_status", ["status"]),
+
   employees: defineTable({
     fullName: v.string(),
     email: v.string(),

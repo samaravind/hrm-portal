@@ -29,7 +29,7 @@ export function MobileBottomNav() {
               }`}
             >
               <item.icon className={`size-5 ${active ? 'text-indigo-600 dark:text-indigo-300' : 'text-zinc-500 dark:text-zinc-400'}`} />
-              <span className="truncate leading-none">{item.title}</span>
+              <span className="sr-only">{item.title}</span>
             </Link>
           )
         })}

@@ -40,7 +40,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-background text-foreground antialiased">
         <ThemeProvider>
-          <ClerkProvider publishableKey={publishableKey}>
+          <ClerkProvider publishableKey={publishableKey} dynamic>
             <ConvexClientProvider>
               <AuthUserSync />
               <DashboardUserSync />
