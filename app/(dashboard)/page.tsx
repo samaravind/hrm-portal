@@ -46,7 +46,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 
-const DEPT_COLORS = ['#6366f1', '#06b6d4', '#8b5cf6', '#14b8a6', '#f97316', '#ec4899', '#3b82f6', '#22c55e']
+const DEPT_COLORS = ['#1e3a5f', '#3b638c', '#64748b', '#0f766e', '#475569', '#2563eb', '#7890a8', '#334155']
 
 function formatTime(ts: number) {
   return new Date(ts).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
@@ -106,7 +106,7 @@ function MetricCard({
 }) {
   return (
     <div
-      className="group relative overflow-hidden rounded-[28px] border border-white/75 bg-white/80 p-4 shadow-[0_20px_60px_rgba(99,102,241,0.08)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_26px_72px_rgba(99,102,241,0.14)] dark:border-white/10 dark:bg-zinc-950/72"
+      className="group relative overflow-hidden rounded-2xl border border-white/80 bg-white/82 p-4 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-zinc-950/72"
     >
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r opacity-90"
@@ -115,7 +115,7 @@ function MetricCard({
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <div
-            className="flex size-11 shrink-0 items-center justify-center rounded-2xl text-white shadow-[0_18px_35px_rgba(99,102,241,0.28)] ring-1 ring-white/20"
+            className="flex size-11 shrink-0 items-center justify-center rounded-xl text-white shadow-[0_16px_32px_rgba(15,23,42,0.18)] ring-1 ring-white/20"
             style={{ backgroundImage: accent }}
           >
             <Icon className="size-5" />
@@ -154,11 +154,11 @@ function SectionCard({
 }) {
   return (
     <section
-      className={`overflow-hidden rounded-[32px] border border-white/75 bg-white/78 shadow-[0_22px_70px_rgba(99,102,241,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-zinc-950/72 ${className}`}
+      className={`overflow-hidden rounded-2xl border border-white/80 bg-white/78 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-zinc-950/72 ${className}`}
     >
       <div className="flex items-center justify-between gap-4 border-b border-white/70 px-5 py-4 dark:border-white/10">
         <div className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/15 to-fuchsia-500/15 text-indigo-600 ring-1 ring-white/60 dark:text-indigo-300 dark:ring-white/10">
+          <div className="flex size-8 items-center justify-center rounded-xl bg-slate-100/80 text-slate-700 ring-1 ring-white/70 dark:bg-white/10 dark:text-slate-200 dark:ring-white/10">
             <Icon className="size-4" />
           </div>
           <h2 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-white">{title}</h2>
@@ -393,11 +393,11 @@ export default function DashboardPage() {
 
   if (!isLoaded) {
     return (
-      <div className="relative overflow-hidden rounded-[34px] border border-white/70 bg-white/75 p-8 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/70">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.10),_transparent_35%),radial-gradient(circle_at_top_right,_rgba(236,72,153,0.10),_transparent_30%)]" />
+      <div className="relative overflow-hidden rounded-2xl border border-white/80 bg-white/80 p-8 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/70">
+        <div className="absolute inset-0 bg-[linear-gradient(135deg,_rgba(248,250,252,0.95),_rgba(226,232,240,0.36))]" />
         <div className="relative flex min-h-[60vh] items-center justify-center">
           <div className="flex items-center gap-3 rounded-full border border-white/70 bg-white/75 px-5 py-3 text-sm font-medium text-zinc-500 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/70 dark:text-zinc-300">
-            <Sparkles className="size-4 animate-pulse text-indigo-500" />
+            <Sparkles className="size-4 animate-pulse text-slate-500" />
             Loading dashboard...
           </div>
         </div>
@@ -406,23 +406,22 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="relative isolate overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.16),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(236,72,153,0.14),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(20,184,166,0.10),_transparent_22%)]" />
-      <div className="pointer-events-none absolute inset-x-16 top-10 -z-10 h-40 rounded-full bg-gradient-to-r from-indigo-400/20 via-fuchsia-400/20 to-cyan-400/20 blur-3xl" />
+    <div className="relative isolate overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,_#f8fafc_0%,_#eef3f8_46%,_#f6f7f9_100%)] p-1 dark:bg-[linear-gradient(135deg,_#020617_0%,_#111827_55%,_#0f172a_100%)]">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(241,245,249,0.74))] dark:bg-[linear-gradient(180deg,_rgba(2,6,23,0.8),_rgba(15,23,42,0.9))]" />
 
       <div className="space-y-6">
-        <section className="grid gap-5 rounded-[36px] border border-white/70 bg-gradient-to-br from-white/90 via-indigo-50/70 to-fuchsia-50/70 p-6 shadow-[0_24px_90px_rgba(99,102,241,0.10)] backdrop-blur-xl dark:border-white/10 dark:from-zinc-950/85 dark:via-zinc-950/75 dark:to-zinc-900/70 lg:grid-cols-[1.35fr_0.95fr] lg:p-8">
+        <section className="grid gap-6 rounded-[28px] border border-white/85 bg-white/72 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.10)] backdrop-blur-2xl dark:border-white/10 dark:bg-zinc-950/72 lg:grid-cols-[1.35fr_0.95fr] lg:p-8">
           <div className="flex flex-col justify-between gap-6">
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-indigo-600 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-indigo-300">
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/82 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
                 <Sparkles className="size-3.5" />
                 Premium HR workspace
               </div>
               <div className="space-y-3">
-                <h1 className="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-white sm:text-4xl xl:text-5xl">
+                <h1 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl xl:text-5xl">
                   {viewer?.name ? `Welcome back, ${viewer.name.split(' ')[0]}` : 'Welcome back'}
                 </h1>
-                <p className="max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-300 sm:text-base">
+                <p className="max-w-2xl text-sm leading-7 text-slate-600 dark:text-zinc-300 sm:text-base">
                   Manage headcount, attendance flow, and payroll signals from a calm, polished command center built for
                   modern HR teams.
                 </p>
@@ -430,19 +429,19 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-4">
-              <div className="rounded-3xl border border-white/70 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+              <div className="rounded-2xl border border-white/80 bg-white/76 px-4 py-3 shadow-[0_10px_28px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
                 <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400">Employees</p>
                 <p className="mt-2 text-xl font-semibold text-zinc-950 dark:text-white">{totalEmployees}</p>
               </div>
-              <div className="rounded-3xl border border-white/70 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+              <div className="rounded-2xl border border-white/80 bg-white/76 px-4 py-3 shadow-[0_10px_28px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
                 <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400">Attendance</p>
                 <p className="mt-2 text-xl font-semibold text-zinc-950 dark:text-white">{attendanceRate}%</p>
               </div>
-              <div className="rounded-3xl border border-white/70 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+              <div className="rounded-2xl border border-white/80 bg-white/76 px-4 py-3 shadow-[0_10px_28px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
                 <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400">Departments</p>
                 <p className="mt-2 text-xl font-semibold text-zinc-950 dark:text-white">{totalDepartments}</p>
               </div>
-              <div className="rounded-3xl border border-white/70 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+              <div className="rounded-2xl border border-white/80 bg-white/76 px-4 py-3 shadow-[0_10px_28px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
                 <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-400">Active now</p>
                 <p className="mt-2 text-xl font-semibold text-zinc-950 dark:text-white">{punchedInNow}</p>
               </div>
@@ -471,7 +470,7 @@ export default function DashboardPage() {
                   type="button"
                   onClick={handlePunchIn}
                   disabled={punching}
-                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_38px_rgba(99,102,241,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_45px_rgba(99,102,241,0.34)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(15,23,42,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-[0_20px_45px_rgba(15,23,42,0.18)] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
                 >
                   <LogIn className="size-4" />
                   {punching ? 'Punching in...' : 'Punch In'}
@@ -495,29 +494,29 @@ export default function DashboardPage() {
             ) : null}
           </div>
 
-          <div className="grid gap-4 rounded-[30px] border border-white/70 bg-white/60 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5 lg:grid-rows-[auto_auto]">
-            <div className="relative overflow-hidden rounded-[28px] border border-white/70 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.25),_transparent_45%),linear-gradient(135deg,_rgba(79,70,229,0.92),_rgba(217,70,239,0.86))] p-5 text-white shadow-[0_22px_50px_rgba(79,70,229,0.32)] dark:border-white/10">
-              <div className="absolute -right-10 -top-10 size-36 rounded-full bg-white/15 blur-2xl" />
+          <div className="grid gap-4 rounded-2xl border border-white/80 bg-white/58 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.76)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/5 lg:grid-rows-[auto_auto]">
+            <div className="relative overflow-hidden rounded-2xl border border-slate-700/10 bg-[linear-gradient(135deg,_#102033_0%,_#1e3a5f_54%,_#54718f_100%)] p-5 text-white shadow-[0_22px_50px_rgba(15,23,42,0.22)] dark:border-white/10">
+              <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(255,255,255,0.12),_transparent_44%,_rgba(255,255,255,0.08))]" />
               <div className="relative flex items-start justify-between gap-4">
                 <div className="space-y-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">Today&apos;s pulse</p>
                   <p className="text-3xl font-semibold tracking-tight">{attendanceRate}%</p>
                   <p className="text-sm text-white/75">Attendance rate across your current workforce.</p>
                 </div>
-                <div className="rounded-2xl border border-white/20 bg-white/10 p-3 backdrop-blur-xl">
+                <div className="rounded-xl border border-white/20 bg-white/10 p-3 backdrop-blur-xl">
                   <Gauge className="size-6" />
                 </div>
               </div>
               <div className="relative mt-5 grid grid-cols-3 gap-3">
-                <div className="rounded-2xl bg-white/12 px-3 py-3">
+                <div className="rounded-xl bg-white/12 px-3 py-3">
                   <p className="text-[11px] uppercase tracking-[0.18em] text-white/65">Present</p>
                   <p className="mt-1 text-lg font-semibold">{presentToday}</p>
                 </div>
-                <div className="rounded-2xl bg-white/12 px-3 py-3">
+                <div className="rounded-xl bg-white/12 px-3 py-3">
                   <p className="text-[11px] uppercase tracking-[0.18em] text-white/65">On leave</p>
                   <p className="mt-1 text-lg font-semibold">{onLeave}</p>
                 </div>
-                <div className="rounded-2xl bg-white/12 px-3 py-3">
+                <div className="rounded-xl bg-white/12 px-3 py-3">
                   <p className="text-[11px] uppercase tracking-[0.18em] text-white/65">Active</p>
                   <p className="mt-1 text-lg font-semibold">{punchedInNow}</p>
                 </div>
@@ -580,7 +579,7 @@ export default function DashboardPage() {
                       type="button"
                       onClick={() => handleApproveUser(user.tokenIdentifier)}
                       disabled={approvingToken === user.tokenIdentifier}
-                      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_16px_38px_rgba(99,102,241,0.22)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
                     >
                       <CheckCircle2 className="size-4" />
                       {approvingToken === user.tokenIdentifier ? 'Approving...' : 'Approve access'}
@@ -611,7 +610,7 @@ export default function DashboardPage() {
             label="Total employees"
             value={String(totalEmployees)}
             change="12% growth vs last month"
-            accent="linear-gradient(135deg, #4f46e5, #8b5cf6)"
+            accent="linear-gradient(135deg, #102033, #3b638c)"
             sparkle="Live"
           />
           <MetricCard
@@ -619,35 +618,35 @@ export default function DashboardPage() {
             label="Present today"
             value={String(presentToday)}
             change="Attendance is tracking well"
-            accent="linear-gradient(135deg, #0ea5e9, #14b8a6)"
+            accent="linear-gradient(135deg, #2563eb, #0f766e)"
           />
           <MetricCard
             icon={UserX}
             label="On leave"
             value={String(onLeave)}
             change="A small daily gap"
-            accent="linear-gradient(135deg, #f97316, #f43f5e)"
+            accent="linear-gradient(135deg, #64748b, #334155)"
           />
           <MetricCard
             icon={Building2}
             label="Departments"
             value={String(totalDepartments)}
             change="Org structure is stable"
-            accent="linear-gradient(135deg, #8b5cf6, #ec4899)"
+            accent="linear-gradient(135deg, #475569, #7890a8)"
           />
           <MetricCard
             icon={Wallet}
             label="Average salary"
             value={avgSalary ? formatCurrency(avgSalary) : '—'}
             change="Payroll visibility at a glance"
-            accent="linear-gradient(135deg, #06b6d4, #3b82f6)"
+            accent="linear-gradient(135deg, #3b638c, #2563eb)"
           />
           <MetricCard
             icon={Medal}
             label="New hires"
             value={String(newThisMonth)}
             change="Fresh talent joined this month"
-            accent="linear-gradient(135deg, #22c55e, #14b8a6)"
+            accent="linear-gradient(135deg, #0f766e, #3b638c)"
           />
         </section>
 
@@ -656,7 +655,7 @@ export default function DashboardPage() {
             href="/employee"
             className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-4 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/10"
           >
-            <UserPlus className="size-4 text-indigo-500" />
+            <UserPlus className="size-4 text-slate-600" />
             Create employee
           </Link>
           <Link
@@ -681,7 +680,7 @@ export default function DashboardPage() {
               title="Today's attendance"
               icon={BarChart3}
               action={
-                <Link href="/attendance" className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 transition hover:text-indigo-500 dark:text-indigo-300">
+                <Link href="/attendance" className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 transition hover:text-blue-600 dark:text-blue-300">
                   View all
                   <ChevronRight className="size-3.5" />
                 </Link>
@@ -715,7 +714,7 @@ export default function DashboardPage() {
                           className="grid grid-cols-[1.4fr_0.8fr_0.8fr_0.8fr_0.7fr] items-center px-4 py-4 transition-all duration-300 hover:bg-white/70 dark:hover:bg-white/5"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-sm font-semibold text-white shadow-[0_16px_30px_rgba(99,102,241,0.24)]">
+                            <div className="flex size-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,_#102033,_#3b638c)] text-sm font-semibold text-white shadow-[0_14px_28px_rgba(15,23,42,0.16)]">
                               {getInitials(row.employee.fullName)}
                             </div>
                             <div className="min-w-0">
@@ -743,14 +742,14 @@ export default function DashboardPage() {
             </SectionCard>
 
             <SectionCard title="Weekly attendance pulse" icon={TrendingUp}>
-              <div className="grid gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.85fr)]">
-                <div className="h-[320px] rounded-[24px] border border-white/70 bg-white/70 p-2 dark:border-white/10 dark:bg-white/5">
+              <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.85fr)]">
+                <div className="min-w-0 h-[320px] rounded-[24px] border border-white/70 bg-white/70 p-2 dark:border-white/10 dark:bg-white/5">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={weeklyTrend} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="weeklyFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.45} />
-                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0.03} />
+                          <stop offset="5%" stopColor="#3b638c" stopOpacity={0.38} />
+                          <stop offset="95%" stopColor="#3b638c" stopOpacity={0.03} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="4 8" stroke="rgba(148,163,184,0.22)" vertical={false} />
@@ -771,7 +770,7 @@ export default function DashboardPage() {
                         allowDecimals={false}
                       />
                       <Tooltip
-                        cursor={{ stroke: 'rgba(99,102,241,0.12)', strokeWidth: 16 }}
+                        cursor={{ stroke: 'rgba(59,99,140,0.12)', strokeWidth: 16 }}
                         contentStyle={{
                           borderRadius: 16,
                           border: '1px solid rgba(148,163,184,0.22)',
@@ -779,7 +778,7 @@ export default function DashboardPage() {
                           boxShadow: '0 18px 50px rgba(15,23,42,0.12)',
                         }}
                       />
-                      <Area type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={3} fill="url(#weeklyFill)" />
+                      <Area type="monotone" dataKey="value" stroke="#3b638c" strokeWidth={3} fill="url(#weeklyFill)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -803,7 +802,7 @@ export default function DashboardPage() {
                           </div>
                           <div className="h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-white/10">
                             <div
-                              className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-500"
+                              className="h-full rounded-full bg-[linear-gradient(90deg,_#1e3a5f,_#3b638c,_#7890a8)] transition-all duration-500"
                               style={{ width }}
                             />
                           </div>
@@ -867,7 +866,7 @@ export default function DashboardPage() {
                 </span>
               }
             >
-              <div className="h-[280px] rounded-[24px] border border-white/70 bg-white/70 p-2 dark:border-white/10 dark:bg-white/5">
+              <div className="min-w-0 h-[280px] rounded-[24px] border border-white/70 bg-white/70 p-2 dark:border-white/10 dark:bg-white/5">
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={weeklyTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="4 8" stroke="rgba(148,163,184,0.18)" vertical={false} />
@@ -881,7 +880,7 @@ export default function DashboardPage() {
                     />
                     <YAxis tickLine={false} axisLine={false} stroke="#94a3b8" fontSize={12} allowDecimals={false} />
                     <Tooltip
-                      cursor={{ fill: 'rgba(99,102,241,0.08)' }}
+                      cursor={{ fill: 'rgba(59,99,140,0.08)' }}
                       contentStyle={{
                         borderRadius: 16,
                         border: '1px solid rgba(148,163,184,0.22)',
@@ -905,7 +904,7 @@ export default function DashboardPage() {
                   No department data yet.
                 </div>
               ) : (
-                <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_170px]">
+                <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_170px]">
                   <div className="space-y-3">
                     {deptDistribution.map((entry) => (
                       <div
@@ -931,7 +930,7 @@ export default function DashboardPage() {
                       </div>
                     ))}
                   </div>
-                  <div className="flex h-full items-center justify-center rounded-[24px] border border-white/70 bg-white/70 p-3 dark:border-white/10 dark:bg-white/5">
+                  <div className="flex min-w-0 h-full items-center justify-center rounded-[24px] border border-white/70 bg-white/70 p-3 dark:border-white/10 dark:bg-white/5">
                     <ResponsiveContainer width="100%" height={240}>
                       <PieChart>
                         <Tooltip
@@ -969,11 +968,11 @@ export default function DashboardPage() {
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">Largest department</p>
                       <p className="mt-1 text-lg font-semibold text-zinc-950 dark:text-white">{topDept.name}</p>
                     </div>
-                    <GraduationCap className="size-5 text-indigo-500" />
+                    <GraduationCap className="size-5 text-blue-700" />
                   </div>
                   <div className="mt-4 h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-white/10">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500"
+                      className="h-full rounded-full bg-[linear-gradient(90deg,_#1e3a5f,_#3b638c,_#7890a8)]"
                       style={{ width: `${Math.min(Math.max((topDept.count / Math.max(totalEmployees, 1)) * 100, 8), 100)}%` }}
                     />
                   </div>
