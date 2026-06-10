@@ -7,6 +7,7 @@ import { useUser } from '@clerk/nextjs'
 import { useMutation, useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
+import { DatePicker } from '@/components/ui/date-picker'
 import { ArrowLeft, FileText, Paperclip, Save, RotateCcw, X, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -210,11 +211,10 @@ export default function ApplyLeavePage() {
                   <label className="mb-2 block text-base font-medium text-zinc-950 dark:text-zinc-100">
                     Partial date <span className="text-rose-500">*</span>
                   </label>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={partialDate}
-                    onChange={(e) => setPartialDate(e.target.value)}
-                    className="h-14 w-full rounded-md border border-zinc-200 bg-white px-4 text-base text-zinc-600 outline-none transition focus:border-rose-300 focus:ring-2 focus:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:focus:border-rose-500/40 dark:focus:ring-rose-500/10"
+                    onChange={setPartialDate}
+                    className="h-14 rounded-2xl border-zinc-200 bg-white px-4 text-base text-zinc-600 shadow-sm transition hover:bg-zinc-50 focus-visible:ring-2 focus-visible:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900 dark:focus-visible:ring-rose-500/10"
                   />
                 </div>
                 <div>
@@ -244,22 +244,20 @@ export default function ApplyLeavePage() {
                   <label className="mb-2 block text-base font-medium text-zinc-950 dark:text-zinc-100">
                     Start Date <span className="text-rose-500">*</span>
                   </label>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="h-14 w-full rounded-md border border-zinc-200 bg-white px-4 text-base text-zinc-600 outline-none transition focus:border-rose-300 focus:ring-2 focus:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:focus:border-rose-500/40 dark:focus:ring-rose-500/10"
+                    onChange={setStartDate}
+                    className="h-14 rounded-2xl border-zinc-200 bg-white px-4 text-base text-zinc-600 shadow-sm transition hover:bg-zinc-50 focus-visible:ring-2 focus-visible:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900 dark:focus-visible:ring-rose-500/10"
                   />
                 </div>
                 <div>
                   <label className="mb-2 block text-base font-medium text-zinc-950 dark:text-zinc-100">
                     To Date <span className="text-rose-500">*</span>
                   </label>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="h-14 w-full rounded-md border border-zinc-200 bg-white px-4 text-base text-zinc-600 outline-none transition focus:border-rose-300 focus:ring-2 focus:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:focus:border-rose-500/40 dark:focus:ring-rose-500/10"
+                    onChange={setEndDate}
+                    className="h-14 rounded-2xl border-zinc-200 bg-white px-4 text-base text-zinc-600 shadow-sm transition hover:bg-zinc-50 focus-visible:ring-2 focus-visible:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900 dark:focus-visible:ring-rose-500/10"
                   />
                 </div>
               </div>
