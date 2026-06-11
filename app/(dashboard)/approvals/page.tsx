@@ -8,6 +8,7 @@ import { useMutation, useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import type { Doc, Id } from '@/convex/_generated/dataModel'
 import { ArrowLeft, CheckCircle2, XCircle, Bell, Sparkles, Users, CalendarRange, Eye, ExternalLink, X } from 'lucide-react'
+import { toast } from 'sonner'
 
 type LeaveDocument =
   | string
@@ -163,7 +164,12 @@ export default function ApprovalsPage() {
   const handleApproveLeave = async (request: LeaveRequestCard) => {
     setWorkingLeaveId(request._id)
     try {
-      await approveLeaveRequest({ requestId: request._id, baseUrl: window.location.origin })
+      const result = await approveLeaveRequest({ requestId: request._id, baseUrl: window.location.origin })
+      if (result.emailQueued && result.email) {
+        toast.success(`Leave approved. Email queued to ${result.email}.`)
+      } else {
+        toast.warning('Leave approved, but no employee email was saved for this request.')
+      }
       router.refresh()
     } finally {
       setWorkingLeaveId(null)
@@ -173,7 +179,12 @@ export default function ApprovalsPage() {
   const handleDeclineLeave = async (request: LeaveRequestCard) => {
     setWorkingLeaveId(request._id)
     try {
-      await declineLeaveRequest({ requestId: request._id, baseUrl: window.location.origin })
+      const result = await declineLeaveRequest({ requestId: request._id, baseUrl: window.location.origin })
+      if (result.emailQueued && result.email) {
+        toast.success(`Leave declined. Email queued to ${result.email}.`)
+      } else {
+        toast.warning('Leave declined, but no employee email was saved for this request.')
+      }
       router.refresh()
     } finally {
       setWorkingLeaveId(null)

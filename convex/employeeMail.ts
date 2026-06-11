@@ -440,12 +440,18 @@ export const sendLeaveStatusEmail = internalAction({
     appUrl: v.optional(v.string()),
   },
   handler: async (_ctx, args) => {
-    return await sendResendEmail({
+    const result = await sendResendEmail({
       email: args.email,
       subject: buildLeaveStatusSubject(args.status),
       text: buildLeaveStatusText(args),
       html: buildLeaveStatusHtml(args),
     })
+
+    if (!result.sent) {
+      throw new Error("Leave status email was not sent because Resend is not configured.")
+    }
+
+    return result
   },
 })
 

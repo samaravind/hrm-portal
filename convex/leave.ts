@@ -267,6 +267,12 @@ export const approveLeaveRequest = mutation({
         appUrl: args.baseUrl,
       })
     }
+
+    return {
+      emailQueued: Boolean(request.userEmail),
+      email: request.userEmail,
+      status: "approved",
+    }
   },
 })
 
@@ -308,6 +314,12 @@ export const declineLeaveRequest = mutation({
         status: "rejected",
         appUrl: args.baseUrl,
       })
+    }
+
+    return {
+      emailQueued: Boolean(request.userEmail),
+      email: request.userEmail,
+      status: "rejected",
     }
   },
 })
