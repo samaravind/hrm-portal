@@ -2,17 +2,33 @@
 
 import { SignUp } from '@clerk/nextjs'
 import { AuthArtwork } from '@/components/auth/auth-artwork'
+import { Sparkles } from 'lucide-react'
 
 export default function SignUpPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#eef6ff_0%,#f7fbff_46%,#ffffff_100%)] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <main className="relative min-h-[100dvh] overflow-x-auto bg-[linear-gradient(180deg,#eef6ff_0%,#f7fbff_46%,#ffffff_100%)] px-2 py-2 sm:px-4 sm:py-4 lg:px-8">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.16),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(129,140,248,0.12),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(14,165,233,0.08),_transparent_24%)]" />
 
-      <div className="relative mx-auto grid w-full max-w-7xl gap-6 lg:min-h-[calc(100vh-3rem)] lg:grid-cols-[1.08fr_0.92fr]">
-        <AuthArtwork />
+      <div className="relative mx-auto grid min-h-[calc(100dvh-1rem)] w-[calc(200vw-1rem)] min-w-[42rem] max-w-none grid-cols-[minmax(20rem,calc(100vw-1rem))_minmax(20rem,calc(100vw-1rem))] gap-4 md:min-h-[calc(100dvh-2rem)] md:w-full md:min-w-0 md:max-w-7xl md:grid-cols-[minmax(20rem,0.95fr)_minmax(24rem,1.05fr)] md:gap-7 xl:grid-cols-[minmax(24rem,1fr)_minmax(30rem,1fr)] xl:gap-10">
+        <div className="min-w-0">
+          <AuthArtwork />
+        </div>
 
-        <section className="flex items-start lg:pt-6">
-          <div className="w-full rounded-[40px] border border-white/80 bg-white/92 p-5 shadow-[0_30px_90px_rgba(15,23,42,0.10)] backdrop-blur-2xl sm:p-8">
+        <section className="flex min-w-0 items-center justify-center py-1 sm:py-3 md:py-6">
+          <div className="w-full min-w-0 max-w-[32rem] space-y-4 sm:space-y-6">
+            <div className="mx-auto max-w-[28rem] text-center md:max-w-none">
+              <div className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-sky-700 sm:text-[11px] sm:tracking-[0.2em]">
+                <Sparkles className="size-3.5" />
+                SAM MARKET
+              </div>
+              <h1 className="mt-3 text-[1.35rem] font-semibold tracking-tight text-slate-950 sm:mt-4 sm:text-3xl">
+                Create your account
+              </h1>
+              <p className="mt-2 text-xs leading-5 text-slate-500 sm:text-sm sm:leading-6 sm:text-[0.98rem]">
+                Start here and we will route your access based on approval status after sign-up.
+              </p>
+            </div>
+
             <SignUp
               signInUrl="/sign-in"
               fallbackRedirectUrl="/pending-approval"
@@ -27,9 +43,9 @@ export default function SignUpPage() {
                   borderRadius: '1rem',
                 },
                 elements: {
-                  rootBox: 'w-full',
+                  rootBox: 'w-full min-w-0 [&>*]:min-w-0 [&>*]:w-full',
                   card:
-                    'w-full border border-sky-100/80 bg-white/95 shadow-[0_24px_70px_rgba(14,165,233,0.12)] backdrop-blur-xl',
+                    '!w-full !min-w-0 !max-w-full border border-sky-100/80 bg-white/95 shadow-[0_24px_70px_rgba(14,165,233,0.12)] backdrop-blur-xl sm:!max-w-[31.5rem] [&_*]:min-w-0 [&_*]:max-w-full',
                   header: 'hidden',
                   headerTitle: 'hidden',
                   headerSubtitle: 'hidden',
