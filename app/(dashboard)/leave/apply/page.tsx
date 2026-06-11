@@ -8,11 +8,11 @@ import { useMutation, useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
 import { DatePicker } from '@/components/ui/date-picker'
+import { TimePicker } from '@/components/ui/time-picker'
 import { ArrowLeft, FileText, Paperclip, Save, RotateCcw, X, ChevronDown } from 'lucide-react'
 import { toast } from 'sonner'
 
 const leaveTypes = ['Sick Leave', 'Casual Leave', 'Earned Leave', 'Comp Off', 'Other']
-const periodOptions = ['1st Period', '2nd Period', '3rd Period', '4th Period', '5th Period']
 type LeaveDurationType = 'fullDay' | 'halfDay' | 'periodWise'
 
 export default function ApplyLeavePage() {
@@ -25,13 +25,13 @@ export default function ApplyLeavePage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [documents, setDocuments] = useState<File[]>([])
   const [leaveType, setLeaveType] = useState('')
+  const [leaveDate, setLeaveDate] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [reason, setReason] = useState('')
   const [durationType, setDurationType] = useState<LeaveDurationType>('fullDay')
   const [partialDate, setPartialDate] = useState('')
   const [session, setSession] = useState<'AM' | 'PM' | ''>('')
-  const [selectedPeriod, setSelectedPeriod] = useState('')
   const [saving, setSaving] = useState(false)
   const halfDay = durationType === 'halfDay'
   const periodWise = durationType === 'periodWise'
@@ -71,11 +71,36 @@ export default function ApplyLeavePage() {
     setDocuments(Array.from(files))
   }
 
+  const handleDurationChange = (nextDurationType: LeaveDurationType) => {
+    setDurationType(nextDurationType)
+    setLeaveType(nextDurationType === 'periodWise' ? 'Permission' : '')
+    setLeaveDate('')
+    setStartDate('')
+    setEndDate('')
+    setPartialDate('')
+    setSession('')
+  }
+
   const handleSave = async () => {
     if (saving) return
 
-    setSaving(true)
+      setSaving(true)
     try {
+      if (durationType === 'fullDay' && (!startDate.trim() || !endDate.trim())) {
+        toast.error('Please select from date and to date.')
+        return
+      }
+
+      if (durationType === 'halfDay' && (!partialDate.trim() || !session)) {
+        toast.error('Please select date and AM/PM session.')
+        return
+      }
+
+      if (durationType === 'periodWise' && (!leaveDate.trim() || !startDate.trim() || !endDate.trim())) {
+        toast.error('Please select permission date, start time, and to time.')
+        return
+      }
+
       const uploadedDocuments = await Promise.all(
         documents.map(async (file) => {
           const uploadUrl = await generateUploadUrl()
@@ -99,23 +124,36 @@ export default function ApplyLeavePage() {
         }),
       )
 
+      const startDateValue =
+        durationType === 'halfDay'
+          ? partialDate.trim()
+          : durationType === 'periodWise'
+            ? `${leaveDate.trim()}T${startDate.trim()}`
+            : startDate.trim()
+      const endDateValue =
+        durationType === 'halfDay'
+          ? partialDate.trim()
+          : durationType === 'periodWise'
+            ? `${leaveDate.trim()}T${endDate.trim()}`
+            : endDate.trim()
+
       await createLeaveRequest({
         viewerId: user?.id ?? null,
         viewerName: user?.fullName ?? user?.username ?? null,
         viewerEmail: user?.primaryEmailAddress?.emailAddress ?? null,
-        leaveType,
-        startDate,
-        endDate,
+        leaveType: durationType === 'periodWise' ? 'Permission' : leaveType,
+        startDate: startDateValue,
+        endDate: endDateValue,
         durationType,
         halfDay,
         periodWise,
         partialDate: partialDate || null,
         session: session || null,
-        selectedPeriod: selectedPeriod || null,
+        selectedPeriod: null,
         reason,
         documents: uploadedDocuments,
       })
-      toast.success('Leave request saved.')
+      toast.success(durationType === 'periodWise' ? 'Permission saved.' : 'Leave request saved.')
       router.push('/leave')
       router.refresh()
     } catch (error) {
@@ -125,6 +163,28 @@ export default function ApplyLeavePage() {
       setSaving(false)
     }
   }
+
+  const summaryRows =
+    durationType === 'fullDay'
+      ? [
+          ['Leave Type', leaveType || 'Select'],
+          ['Duration', 'Full Day'],
+          ['From Date', startDate || 'Select from date'],
+          ['To Date', endDate || 'Select to date'],
+        ]
+      : durationType === 'halfDay'
+        ? [
+            ['Leave Type', leaveType || 'Select'],
+            ['Duration', 'Half Day'],
+            ['Date', partialDate || 'Select date'],
+            ['Session', session || 'AM / PM'],
+          ]
+        : [
+            ['Duration', 'Permission'],
+            ['Date', leaveDate || 'Select date'],
+            ['Start Time', startDate || 'Start time'],
+            ['To Time', endDate || 'To time'],
+          ]
 
   return (
     <div className="space-y-6">
@@ -146,36 +206,38 @@ export default function ApplyLeavePage() {
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
         <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] dark:border-zinc-800 dark:bg-zinc-950/80">
           <div className="space-y-5">
-            <div>
-              <label className="mb-2 block text-base font-medium text-zinc-950 dark:text-zinc-100">
-                Leave Type <span className="text-rose-500">*</span>
-              </label>
-              <div className="relative">
-                <select
-                  value={leaveType}
-                  onChange={(e) => setLeaveType(e.target.value)}
-                  className="h-14 w-full appearance-none rounded-md border border-zinc-200 bg-white px-4 text-base text-zinc-600 outline-none transition focus:border-rose-300 focus:ring-2 focus:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:focus:border-rose-500/40 dark:focus:ring-rose-500/10"
-                >
-                  <option value="">Select</option>
-                  {leaveTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-zinc-300 dark:text-zinc-600" />
+            {!periodWise ? (
+              <div>
+                <label className="mb-2 block text-base font-medium text-zinc-950 dark:text-zinc-100">
+                  Leave Type <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={leaveType}
+                    onChange={(e) => setLeaveType(e.target.value)}
+                    className="h-14 w-full appearance-none rounded-md border border-zinc-200 bg-white px-4 text-base text-zinc-600 outline-none transition focus:border-rose-300 focus:ring-2 focus:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:focus:border-rose-500/40 dark:focus:ring-rose-500/10"
+                  >
+                    <option value="">Select</option>
+                    {leaveTypes.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-zinc-300 dark:text-zinc-600" />
+                </div>
               </div>
-            </div>
+            ) : null}
 
             <div>
               <label className="mb-2 block text-base font-medium text-zinc-950 dark:text-zinc-100">
-                Leave Duration <span className="text-rose-500">*</span>
+                {periodWise ? 'Permission Duration' : 'Leave Duration'} <span className="text-rose-500">*</span>
               </label>
               <div className="grid gap-3 md:grid-cols-3">
                 {[
                   { value: 'fullDay', label: 'Full Day', helper: 'Regular full day leave' },
                   { value: 'halfDay', label: 'Half Day', helper: 'Choose partial date and AM/PM' },
-                  { value: 'periodWise', label: 'Period Wise', helper: 'Choose a specific period' },
+                  { value: 'periodWise', label: 'Permission', helper: 'Choose date and time range' },
                 ].map((option) => {
                   const selected = durationType === option.value
                   return (
@@ -192,7 +254,7 @@ export default function ApplyLeavePage() {
                         name="durationType"
                         value={option.value}
                         checked={selected}
-                        onChange={() => setDurationType(option.value as LeaveDurationType)}
+                        onChange={() => handleDurationChange(option.value as LeaveDurationType)}
                         className="mt-1 size-5 border-zinc-300 text-rose-600 focus:ring-rose-200 dark:border-zinc-700 dark:bg-zinc-900 dark:focus:ring-rose-500/20"
                       />
                       <span>
@@ -205,11 +267,34 @@ export default function ApplyLeavePage() {
               </div>
             </div>
 
-            {durationType === 'halfDay' ? (
+            {durationType === 'fullDay' ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-base font-medium text-zinc-950 dark:text-zinc-100">
+                    From date <span className="text-rose-500">*</span>
+                  </label>
+                  <DatePicker
+                    value={startDate}
+                    onChange={setStartDate}
+                    className="h-14 rounded-2xl border-zinc-200 bg-white px-4 text-base text-zinc-600 shadow-sm transition hover:bg-zinc-50 focus-visible:ring-2 focus-visible:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900 dark:focus-visible:ring-rose-500/10"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-base font-medium text-zinc-950 dark:text-zinc-100">
+                    To date <span className="text-rose-500">*</span>
+                  </label>
+                  <DatePicker
+                    value={endDate}
+                    onChange={setEndDate}
+                    className="h-14 rounded-2xl border-zinc-200 bg-white px-4 text-base text-zinc-600 shadow-sm transition hover:bg-zinc-50 focus-visible:ring-2 focus-visible:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900 dark:focus-visible:ring-rose-500/10"
+                  />
+                </div>
+              </div>
+            ) : durationType === 'halfDay' ? (
               <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(260px,0.55fr)]">
                 <div>
                   <label className="mb-2 block text-base font-medium text-zinc-950 dark:text-zinc-100">
-                    Partial date <span className="text-rose-500">*</span>
+                    Date <span className="text-rose-500">*</span>
                   </label>
                   <DatePicker
                     value={partialDate}
@@ -239,12 +324,22 @@ export default function ApplyLeavePage() {
                 </div>
               </div>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-3">
                 <div>
                   <label className="mb-2 block text-base font-medium text-zinc-950 dark:text-zinc-100">
-                    Start Date <span className="text-rose-500">*</span>
+                    Date <span className="text-rose-500">*</span>
                   </label>
                   <DatePicker
+                    value={leaveDate}
+                    onChange={setLeaveDate}
+                    className="h-14 rounded-2xl border-zinc-200 bg-white px-4 text-base text-zinc-600 shadow-sm transition hover:bg-zinc-50 focus-visible:ring-2 focus-visible:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900 dark:focus-visible:ring-rose-500/10"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-base font-medium text-zinc-950 dark:text-zinc-100">
+                    Start Time <span className="text-rose-500">*</span>
+                  </label>
+                  <TimePicker
                     value={startDate}
                     onChange={setStartDate}
                     className="h-14 rounded-2xl border-zinc-200 bg-white px-4 text-base text-zinc-600 shadow-sm transition hover:bg-zinc-50 focus-visible:ring-2 focus-visible:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900 dark:focus-visible:ring-rose-500/10"
@@ -252,9 +347,9 @@ export default function ApplyLeavePage() {
                 </div>
                 <div>
                   <label className="mb-2 block text-base font-medium text-zinc-950 dark:text-zinc-100">
-                    To Date <span className="text-rose-500">*</span>
+                    To Time <span className="text-rose-500">*</span>
                   </label>
-                  <DatePicker
+                  <TimePicker
                     value={endDate}
                     onChange={setEndDate}
                     className="h-14 rounded-2xl border-zinc-200 bg-white px-4 text-base text-zinc-600 shadow-sm transition hover:bg-zinc-50 focus-visible:ring-2 focus-visible:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900 dark:focus-visible:ring-rose-500/10"
@@ -263,38 +358,15 @@ export default function ApplyLeavePage() {
               </div>
             )}
 
-            {durationType === 'periodWise' ? (
-              <div>
-                <label className="mb-2 block text-base font-medium text-zinc-950 dark:text-zinc-100">
-                  Select period <span className="text-rose-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    value={selectedPeriod}
-                    onChange={(e) => setSelectedPeriod(e.target.value)}
-                    className="h-14 w-full appearance-none rounded-md border border-zinc-200 bg-white px-4 text-base text-zinc-600 outline-none transition focus:border-rose-300 focus:ring-2 focus:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:focus:border-rose-500/40 dark:focus:ring-rose-500/10"
-                  >
-                    <option value="">Select periods</option>
-                    {periodOptions.map((period) => (
-                      <option key={period} value={period}>
-                        {period}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-zinc-300 dark:text-zinc-600" />
-                </div>
-              </div>
-            ) : null}
-
             <div>
               <label className="mb-2 block text-base font-medium text-zinc-950 dark:text-zinc-100">
-                Reason for Leave <span className="text-rose-500">*</span>
+                {periodWise ? 'Reason for Permission' : 'Reason for Leave'} <span className="text-rose-500">*</span>
               </label>
               <input
                 type="text"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Reason for Leave"
+                placeholder={periodWise ? 'Reason for Permission' : 'Reason for Leave'}
                 className="h-14 w-full rounded-md border border-zinc-200 bg-white px-4 text-base text-zinc-600 outline-none transition placeholder:text-zinc-400 focus:border-rose-300 focus:ring-2 focus:ring-rose-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:placeholder:text-zinc-600 dark:focus:border-rose-500/40 dark:focus:ring-rose-500/10"
               />
             </div>
@@ -371,14 +443,7 @@ export default function ApplyLeavePage() {
             </div>
 
             <div className="mt-5 space-y-3">
-              {[
-                ['Leave Type', leaveType || 'Select'],
-                ['Duration', durationType === 'fullDay' ? 'Full Day' : durationType === 'halfDay' ? 'Half Day' : 'Period Wise'],
-                ['Start Date', halfDay ? partialDate || 'Partial Date' : startDate || 'Start Date'],
-                ['To Date', halfDay ? partialDate || 'Partial Date' : endDate || 'To Date'],
-                ['Session', halfDay ? session || 'AM / PM' : 'Not applicable'],
-                ['Period', periodWise ? selectedPeriod || 'Select period' : 'Not applicable'],
-              ].map(([label, value]) => (
+              {summaryRows.map(([label, value]) => (
                 <div key={label} className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-white/5">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{label}</p>
                   <p className="mt-1 text-sm font-medium text-zinc-700 dark:text-zinc-200">{value}</p>
@@ -412,13 +477,13 @@ export default function ApplyLeavePage() {
                 type="button"
                 onClick={() => {
                   setLeaveType('')
+                  setLeaveDate('')
                   setStartDate('')
                   setEndDate('')
                   setReason('')
                   setDurationType('fullDay')
                   setPartialDate('')
                   setSession('')
-                  setSelectedPeriod('')
                   setDocuments([])
                 }}
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-5 py-3 text-base font-semibold text-zinc-800 transition hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900"

@@ -403,10 +403,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="relative isolate overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,_#f8fafc_0%,_#eef3f8_46%,_#f6f7f9_100%)] p-1 dark:bg-[linear-gradient(135deg,_#020617_0%,_#111827_55%,_#0f172a_100%)]">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,_rgba(255,255,255,0.92),_rgba(241,245,249,0.74))] dark:bg-[linear-gradient(180deg,_rgba(2,6,23,0.8),_rgba(15,23,42,0.9))]" />
-
-      <div className="space-y-6">
+    <div className="space-y-6">
         <section className="grid gap-6 rounded-[28px] border border-white/85 bg-white/72 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.10)] backdrop-blur-2xl dark:border-white/10 dark:bg-zinc-950/72 lg:grid-cols-[1.35fr_0.95fr] lg:p-8">
           <div className="flex flex-col justify-between gap-6">
             <div className="space-y-4">
@@ -467,7 +464,7 @@ export default function DashboardPage() {
                   type="button"
                   onClick={handlePunchIn}
                   disabled={punching}
-                  className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(15,23,42,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-[0_20px_45px_rgba(15,23,42,0.18)] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+                  className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_34px_rgba(16,185,129,0.28)] ring-1 ring-emerald-300/40 transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-400 hover:shadow-[0_20px_45px_rgba(16,185,129,0.32)] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-emerald-400 dark:text-zinc-950 dark:shadow-[0_16px_34px_rgba(16,185,129,0.32)] dark:ring-emerald-200/40 dark:hover:bg-emerald-300"
                 >
                   <LogIn className="size-4" />
                   {punching ? 'Punching in...' : 'Punch In'}
@@ -1036,7 +1033,6 @@ export default function DashboardPage() {
             ) : null}
           </div>
         </div>
-      </div>
     </div>
   )
 }

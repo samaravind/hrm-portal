@@ -35,7 +35,7 @@ export function AppSidebar() {
       collapsible="icon"
       className="border-0 bg-transparent md:p-3"
     >
-      <div className="h-full overflow-hidden rounded-[30px] border border-white/80 bg-white/88 text-zinc-950 shadow-[0_24px_80px_rgba(99,102,241,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-zinc-950/80 dark:text-white dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+      <div className="h-full overflow-hidden rounded-[30px] border border-white/80 bg-white/88 text-zinc-950 shadow-[0_24px_80px_rgba(99,102,241,0.08)] backdrop-blur-2xl dark:border-transparent dark:bg-zinc-950/80 dark:text-white dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
         <SidebarHeader className="border-b border-zinc-200/70 px-4 py-4 dark:border-zinc-900 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:py-3">
           <SidebarMenu>
             <SidebarMenuItem>

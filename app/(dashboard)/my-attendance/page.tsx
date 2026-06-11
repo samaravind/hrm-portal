@@ -363,7 +363,7 @@ function MyAttendanceContent() {
                   type="button"
                   onClick={handlePunchIn}
                   disabled={isSaving}
-                  className="mt-4 inline-flex w-full max-w-[220px] items-center justify-center gap-2 rounded-2xl bg-zinc-950 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer shadow-sm dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+                  className="mt-4 inline-flex w-full max-w-[220px] items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-5 py-2.5 text-xs font-semibold text-white shadow-[0_14px_30px_rgba(16,185,129,0.28)] ring-1 ring-emerald-300/40 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer dark:bg-emerald-400 dark:text-zinc-950 dark:shadow-[0_14px_30px_rgba(16,185,129,0.32)] dark:ring-emerald-200/40 dark:hover:bg-emerald-300"
                 >
                   <LogIn className="size-3.5" />
                   Punch In

@@ -62,7 +62,7 @@ function getDurationLabel(request: {
   }
 
   if (request.durationType === "periodWise" || request.periodWise) {
-    return `Period Wise${request.selectedPeriod ? ` (${request.selectedPeriod})` : ""}`
+    return `Permission${request.selectedPeriod ? ` (${request.selectedPeriod})` : ""}`
   }
 
   return "Full Day"
@@ -86,6 +86,48 @@ export const getMyLeaveRequests = query({
       .take(100)
 
     return requests
+  },
+})
+
+export const deleteLeaveRequest = mutation({
+  args: {
+    requestId: v.id("leaveRequests"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity()
+    if (!identity) throw new Error("Not authenticated")
+
+    const viewer = await ctx.db
+      .query("users")
+      .withIndex("by_userTokenIdentifier", (q) =>
+        q.eq("userTokenIdentifier", identity.tokenIdentifier),
+      )
+      .unique()
+
+    const request = await ctx.db.get(args.requestId)
+    if (!request) throw new Error("Leave request not found.")
+
+    const canDelete = viewer?.role === "admin" || request.userTokenIdentifier === identity.tokenIdentifier
+    if (!canDelete) {
+      throw new Error("You can only delete your own leave requests.")
+    }
+
+    for (const document of request.documents) {
+      if (typeof document === "string") continue
+
+      try {
+        await ctx.storage.delete(document.storageId)
+      } catch {
+        // Best effort cleanup. The leave request itself is still removed.
+      }
+    }
+
+    await ctx.db.delete(args.requestId)
+
+    return {
+      deleted: true,
+      requestId: args.requestId,
+    }
   },
 })
 
@@ -186,11 +228,8 @@ export const createLeaveRequest = mutation({
       if (!args.partialDate?.trim()) throw new Error("Please select a partial date.")
       if (!args.session) throw new Error("Please select AM or PM session.")
     } else {
-      if (!args.startDate.trim()) throw new Error("Please select a start date.")
-      if (!args.endDate.trim()) throw new Error("Please select an end date.")
-    }
-    if (durationType === "periodWise" && !args.selectedPeriod?.trim()) {
-      throw new Error("Please select a period.")
+      if (!args.startDate.trim()) throw new Error("Please select a start date and time.")
+      if (!args.endDate.trim()) throw new Error("Please select an end date and time.")
     }
     if (!args.reason.trim()) throw new Error("Please add a reason for leave.")
     const startDate = durationType === "halfDay" ? args.partialDate!.trim() : args.startDate
@@ -216,7 +255,7 @@ export const createLeaveRequest = mutation({
       periodWise: durationType === "periodWise",
       partialDate: durationType === "halfDay" ? args.partialDate!.trim() : null,
       session: durationType === "halfDay" ? args.session! : null,
-      selectedPeriod: durationType === "periodWise" ? args.selectedPeriod!.trim() : null,
+      selectedPeriod: durationType === "periodWise" ? (args.selectedPeriod?.trim() || null) : null,
       reason: args.reason.trim(),
       documents: args.documents,
       status: "submitted",

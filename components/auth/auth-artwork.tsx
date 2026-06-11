@@ -64,8 +64,7 @@ function MiniPerson({ side }: { side: 'left' | 'right' }) {
 
 export function AuthArtwork() {
   return (
-    <section className="relative min-h-[30rem] overflow-hidden rounded-[28px] border border-white/80 bg-[linear-gradient(180deg,#cfe6ff_0%,#9fc8f6_52%,#72a8e9_100%)] shadow-[0_32px_110px_rgba(15,23,42,0.14)] backdrop-blur-2xl sm:min-h-[34rem] lg:min-h-full">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.66),transparent_16%),radial-gradient(circle_at_88%_10%,rgba(255,255,255,0.48),transparent_15%),linear-gradient(135deg,rgba(255,255,255,0.45),rgba(255,255,255,0.04)_45%,rgba(46,111,191,0.12))]" />
+    <div className="relative min-h-[30rem] overflow-hidden bg-[linear-gradient(180deg,#cfe6ff_0%,#9fc8f6_52%,#72a8e9_100%)] sm:min-h-[34rem] lg:min-h-full">
       <div className="absolute inset-x-0 bottom-0 h-36 bg-[linear-gradient(180deg,transparent,rgba(239,246,255,0.82))]" />
       <div className="absolute bottom-14 left-0 h-40 w-full opacity-45">
         <div className="absolute bottom-0 left-4 h-24 w-10 rounded-t-sm bg-white/36" />
@@ -237,6 +236,6 @@ export function AuthArtwork() {
           <LockKeyhole className="size-4" />
         </div>
       </div>
-    </section>
+    </div>
   )
 }

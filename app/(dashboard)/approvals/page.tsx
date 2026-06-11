@@ -27,6 +27,41 @@ type DocumentPreview = {
 
 type LeaveRequestCard = Doc<'leaveRequests'>
 
+function isTimeValue(value: string) {
+  return /^\d{1,2}:\d{2}(:\d{2})?$/.test(value)
+}
+
+function formatDisplayValue(value: string) {
+  if (isTimeValue(value)) {
+    return value.slice(0, 5)
+  }
+
+  if (value.includes('T')) {
+    const dateTime = new Date(value)
+    if (!Number.isNaN(dateTime.getTime())) {
+      return dateTime.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      })
+    }
+  }
+
+  const date = new Date(`${value}T00:00:00`)
+  if (!Number.isNaN(date.getTime())) {
+    return date.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+  }
+
+  return value
+}
+
 function isImageDocument(name: string, contentType?: string | null) {
   return (
     contentType?.startsWith('image/') ||
@@ -46,10 +81,23 @@ function formatLeaveDuration(request: {
   }
 
   if (request.durationType === 'periodWise' || request.periodWise) {
-    return `Period Wise${request.selectedPeriod ? ` (${request.selectedPeriod})` : ''}`
+    return `Permission${request.selectedPeriod ? ` (${request.selectedPeriod})` : ''}`
   }
 
   return 'Full Day'
+}
+
+function getApprovalLabel(request: {
+  durationType?: 'fullDay' | 'halfDay' | 'periodWise'
+  periodWise?: boolean
+  leaveType?: string | null
+}) {
+  const isPermission =
+    request.durationType === 'periodWise' ||
+    request.periodWise ||
+    request.leaveType?.trim().toLowerCase() === 'permission'
+
+  return isPermission ? 'Permission' : 'Leave'
 }
 
 function UploadedDocumentLink({
@@ -165,10 +213,11 @@ export default function ApprovalsPage() {
     setWorkingLeaveId(request._id)
     try {
       const result = await approveLeaveRequest({ requestId: request._id, baseUrl: window.location.origin })
+      const approvalLabel = getApprovalLabel(request)
       if (result.emailQueued && result.email) {
-        toast.success(`Leave approved. Email queued to ${result.email}.`)
+        toast.success(`${approvalLabel} approved. Email queued to ${result.email}.`)
       } else {
-        toast.warning('Leave approved, but no employee email was saved for this request.')
+        toast.warning(`${approvalLabel} approved, but no employee email was saved for this request.`)
       }
       router.refresh()
     } finally {
@@ -180,10 +229,11 @@ export default function ApprovalsPage() {
     setWorkingLeaveId(request._id)
     try {
       const result = await declineLeaveRequest({ requestId: request._id, baseUrl: window.location.origin })
+      const approvalLabel = getApprovalLabel(request)
       if (result.emailQueued && result.email) {
-        toast.success(`Leave declined. Email queued to ${result.email}.`)
+        toast.success(`${approvalLabel} declined. Email queued to ${result.email}.`)
       } else {
-        toast.warning('Leave declined, but no employee email was saved for this request.')
+        toast.warning(`${approvalLabel} declined, but no employee email was saved for this request.`)
       }
       router.refresh()
     } finally {
@@ -204,17 +254,15 @@ export default function ApprovalsPage() {
   }
 
   return (
-    <div className="relative isolate overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.16),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(236,72,153,0.14),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(20,184,166,0.10),_transparent_22%)]" />
-      <div className="space-y-6">
-        <section className="rounded-[36px] border border-white/70 bg-gradient-to-br from-white/90 via-rose-50/70 to-amber-50/70 p-6 shadow-[0_24px_90px_rgba(99,102,241,0.10)] backdrop-blur-xl dark:border-white/10 dark:from-zinc-950/85 dark:via-zinc-950/75 dark:to-zinc-900/70 lg:p-8">
+    <div className="space-y-6">
+      <section className="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 lg:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="space-y-3">
               <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-300">
                 <ArrowLeft className="size-4" />
                 Back to dashboard
               </Link>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-rose-600 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-rose-300">
+              <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-rose-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-rose-300">
                 <Sparkles className="size-3.5" />
                 Admin approvals
               </div>
@@ -226,7 +274,7 @@ export default function ApprovalsPage() {
               </p>
             </div>
 
-            <div className="inline-flex items-center gap-3 rounded-3xl border border-white/70 bg-white/80 px-4 py-3 shadow-sm dark:border-white/10 dark:bg-white/5">
+            <div className="inline-flex items-center gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
               <div className="flex size-10 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-300">
                 <Bell className="size-5" />
               </div>
@@ -239,7 +287,7 @@ export default function ApprovalsPage() {
           </div>
         </section>
 
-        <section className="rounded-[32px] border border-white/70 bg-white/75 p-4 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/70">
+      <section className="rounded-[28px] border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
           <div className="space-y-8">
             <div>
               <div className="flex items-center justify-between gap-3 px-2 pb-3">
@@ -261,7 +309,7 @@ export default function ApprovalsPage() {
                   {pendingApprovals.map((entry) => (
                     <div
                       key={entry.tokenIdentifier}
-                      className="rounded-[28px] border border-white/70 bg-white/80 p-5 shadow-sm transition hover:-translate-y-0.5 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                      className="rounded-[24px] border border-zinc-200 bg-zinc-50 p-5 shadow-sm transition hover:bg-white dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
@@ -313,8 +361,8 @@ export default function ApprovalsPage() {
             <div>
               <div className="flex items-center justify-between gap-3 px-2 pb-3">
                 <div>
-                  <h2 className="text-xl font-semibold tracking-tight text-zinc-950 dark:text-white">Leave approvals</h2>
-                  <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Staff leave requests waiting for admin action.</p>
+                  <h2 className="text-xl font-semibold tracking-tight text-zinc-950 dark:text-white">Leave and Permission Approvals</h2>
+                  <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Staff leave and permission requests waiting for admin action.</p>
                 </div>
                 <span className="rounded-full bg-sky-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">
                   {pendingLeaveRequests.length}
@@ -323,14 +371,14 @@ export default function ApprovalsPage() {
 
               {pendingLeaveRequests.length === 0 ? (
                 <div className="rounded-[24px] border border-dashed border-zinc-200 bg-zinc-50 px-4 py-16 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:bg-white/5 dark:text-zinc-400">
-                  No pending leave approvals right now.
+                  No pending leave or permission approvals right now.
                 </div>
               ) : (
                 <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
                   {pendingLeaveRequests.map((request) => (
                     <div
                       key={request._id}
-                      className="rounded-[28px] border border-white/70 bg-white/80 p-5 shadow-sm transition hover:-translate-y-0.5 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                      className="rounded-[24px] border border-zinc-200 bg-zinc-50 p-5 shadow-sm transition hover:bg-white dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
@@ -352,12 +400,12 @@ export default function ApprovalsPage() {
                         </div>
                         <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">
                           <CalendarRange className="size-3.5" />
-                          Leave
+                          {getApprovalLabel(request)}
                         </span>
                       </div>
 
                       <div className="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
-                        {request.startDate} to {request.endDate}
+                        {formatDisplayValue(request.startDate)} to {formatDisplayValue(request.endDate)}
                       </div>
 
                       <div className="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">
@@ -413,8 +461,6 @@ export default function ApprovalsPage() {
             </div>
           </div>
         </section>
-      </div>
-
       {documentPreview ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/70 p-4 backdrop-blur-sm">
           <div className="flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-[28px] border border-white/20 bg-white shadow-[0_28px_90px_rgba(15,23,42,0.35)] dark:bg-zinc-950">

@@ -325,14 +325,14 @@ export default function StaffDashboardPage() {
                     </span>
                   )
                 ) : (
-                  <button
-                    onClick={handlePunchIn}
-                    disabled={punching}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-zinc-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-white"
-                  >
-                    <LogIn className="size-4" />
-                    {punching ? 'Punching in...' : 'Punch In'}
-                  </button>
+                <button
+                  onClick={handlePunchIn}
+                  disabled={punching}
+                  className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(16,185,129,0.28)] ring-1 ring-emerald-300/40 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-emerald-400 dark:text-zinc-950 dark:shadow-[0_14px_30px_rgba(16,185,129,0.32)] dark:ring-emerald-200/40 dark:hover:bg-emerald-300"
+                >
+                  <LogIn className="size-4" />
+                  {punching ? 'Punching in...' : 'Punch In'}
+                </button>
                 )}
               </div>
 

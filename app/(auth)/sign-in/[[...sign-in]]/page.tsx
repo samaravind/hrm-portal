@@ -12,8 +12,7 @@ export default function SignInPage() {
       <div className="relative mx-auto grid w-full max-w-7xl gap-6 lg:min-h-[calc(100vh-3rem)] lg:grid-cols-[1.08fr_0.92fr] xl:gap-7">
         <AuthArtwork />
 
-        <section className="relative flex min-h-[30rem] items-center justify-center overflow-hidden rounded-[28px] border border-white/80 bg-white/92 p-4 shadow-[0_30px_90px_rgba(15,23,42,0.10)] backdrop-blur-2xl sm:min-h-[34rem] sm:p-6 lg:min-h-full lg:p-8">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(14,165,233,0.12),transparent_26%),radial-gradient(circle_at_88%_82%,rgba(59,130,246,0.10),transparent_28%),linear-gradient(135deg,rgba(248,250,252,0.78),rgba(255,255,255,0.42))]" />
+        <div className="relative flex min-h-[30rem] items-center justify-center p-4 sm:min-h-[34rem] sm:p-6 lg:min-h-full lg:p-8">
           <div className="relative z-10 flex w-full max-w-[33rem] flex-col items-center gap-6">
             <div className="max-w-md text-center">
               <div className="mx-auto mb-3 flex size-11 items-center justify-center rounded-2xl border border-sky-100 bg-sky-50/80 text-sm font-bold text-sky-700 shadow-sm">
@@ -78,7 +77,7 @@ export default function SignInPage() {
               />
             </div>
           </div>
-        </section>
+        </div>
       </div>
     </main>
   )

@@ -1,24 +1,52 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
-import { useQuery } from 'convex/react'
+import { useMutation, useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
-import { CalendarRange, Clock3, FileText, Sparkles, TrendingUp, UserRoundCheck } from 'lucide-react'
+import type { Id } from '@/convex/_generated/dataModel'
+import { CalendarRange, Clock3, FileText, Sparkles, Trash2, TrendingUp, UserRoundCheck } from 'lucide-react'
+import { toast } from 'sonner'
 
-function formatDisplayDate(value: string) {
+function isTimeValue(value: string) {
+  return /^\d{1,2}:\d{2}(:\d{2})?$/.test(value)
+}
+
+function formatDisplayValue(value: string) {
+  if (isTimeValue(value)) {
+    return value.slice(0, 5)
+  }
+
+  if (value.includes('T')) {
+    const dateTime = new Date(value)
+    if (!Number.isNaN(dateTime.getTime())) {
+      return dateTime.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      })
+    }
+  }
+
   const date = new Date(`${value}T00:00:00`)
-  return date.toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
+  if (!Number.isNaN(date.getTime())) {
+    return date.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+  }
+
+  return value
 }
 
 function formatDateRange(startDate: string, endDate: string) {
-  return `${formatDisplayDate(startDate)} to ${formatDisplayDate(endDate)}`
+  return `${formatDisplayValue(startDate)} to ${formatDisplayValue(endDate)}`
 }
 
 function formatDuration(request: {
@@ -26,7 +54,7 @@ function formatDuration(request: {
   periodWise?: boolean
 }) {
   if (request.halfDay) return 'Half Day'
-  if (request.periodWise) return 'Period Wise'
+  if (request.periodWise) return 'Permission'
   return 'Full Day'
 }
 
@@ -35,6 +63,7 @@ export default function LeavePage() {
   const { isLoaded, user } = useUser()
   const viewer = useQuery(api.users.viewer)
   const isAdmin = viewer?.role === 'admin'
+  const deleteLeaveRequest = useMutation(api.leave.deleteLeaveRequest)
   const viewerIdentity =
     isLoaded && user
       ? {
@@ -44,6 +73,9 @@ export default function LeavePage() {
         }
       : null
   const leaveRequests = useQuery(api.leave.getMyLeaveRequests, viewerIdentity ?? 'skip') ?? []
+  const [deletingRequestId, setDeletingRequestId] = useState<Id<'leaveRequests'> | null>(null)
+  const [hiddenRequestIds, setHiddenRequestIds] = useState<Id<'leaveRequests'>[]>([])
+  const visibleLeaveRequests = leaveRequests.filter((request) => !hiddenRequestIds.includes(request._id))
 
   useEffect(() => {
     if (!isLoaded || viewer === undefined) return
@@ -75,8 +107,8 @@ export default function LeavePage() {
     )
   }
 
-  const submittedCount = leaveRequests.filter((request) => request.status === 'submitted').length
-  const approvedCount = leaveRequests.filter((request) => request.status === 'approved').length
+  const submittedCount = visibleLeaveRequests.filter((request) => request.status === 'submitted').length
+  const approvedCount = visibleLeaveRequests.filter((request) => request.status === 'approved').length
 
   const stats = [
     { label: 'Leaves taken', value: String(leaveRequests.length), helper: 'Saved requests', icon: UserRoundCheck },
@@ -84,6 +116,22 @@ export default function LeavePage() {
     { label: 'Upcoming leave', value: String(submittedCount), helper: 'Next requests', icon: CalendarRange },
     { label: 'Approved', value: String(approvedCount), helper: 'Completed', icon: TrendingUp },
   ]
+
+  const handleDeleteRequest = async (request: { _id: Id<'leaveRequests'>; periodWise?: boolean }) => {
+    const requestLabel = request.periodWise ? 'Permission' : 'Leave'
+    setHiddenRequestIds((current) => (current.includes(request._id) ? current : [...current, request._id]))
+    setDeletingRequestId(request._id)
+    try {
+      await deleteLeaveRequest({ requestId: request._id })
+      toast.success(`${requestLabel} request deleted successfully.`)
+      router.refresh()
+    } catch (error) {
+      setHiddenRequestIds((current) => current.filter((id) => id !== request._id))
+      toast.error(error instanceof Error ? error.message : 'Failed to delete request.')
+    } finally {
+      setDeletingRequestId(null)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -158,24 +206,25 @@ export default function LeavePage() {
         </div>
 
         <div className="mt-5 overflow-hidden rounded-[28px] border border-zinc-200/80 dark:border-zinc-800">
-          <div className="grid grid-cols-[1.1fr_1.15fr_1.15fr_1.7fr_0.8fr] gap-4 bg-zinc-50 px-5 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:bg-white/5 dark:text-zinc-400">
+          <div className="grid grid-cols-[1.1fr_1.15fr_1.15fr_1.7fr_0.8fr_0.56fr] gap-4 bg-zinc-50 px-5 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:bg-white/5 dark:text-zinc-400">
             <div>Leave Type</div>
-            <div>Date Range</div>
+            <div>Range</div>
             <div>Duration</div>
             <div>Reason</div>
             <div>Status</div>
+            <div className="text-right">Actions</div>
           </div>
 
-          {leaveRequests.length === 0 ? (
+          {visibleLeaveRequests.length === 0 ? (
             <div className="px-5 py-16 text-center text-sm text-zinc-500 dark:text-zinc-400">
               No leave requests saved yet. Use Apply Leave to create your first request.
             </div>
           ) : (
             <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
-              {leaveRequests.map((request) => (
+              {visibleLeaveRequests.map((request) => (
                 <div
                   key={request._id}
-                  className="grid grid-cols-[1.1fr_1.15fr_1.15fr_1.7fr_0.8fr] gap-4 px-5 py-4 text-sm transition hover:bg-zinc-50/80 dark:hover:bg-white/5"
+                  className="grid grid-cols-[1.1fr_1.15fr_1.15fr_1.7fr_0.8fr_0.56fr] gap-4 px-5 py-4 text-sm transition hover:bg-zinc-50/80 dark:hover:bg-white/5"
                 >
                   <div className="min-w-0">
                     <p className="truncate font-semibold text-zinc-950 dark:text-white">{request.leaveType}</p>
@@ -196,6 +245,18 @@ export default function LeavePage() {
                     <span className="inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] bg-amber-500/10 text-amber-700 border-amber-200/70 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20">
                       {request.status}
                     </span>
+                  </div>
+                  <div className="flex items-start justify-end">
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRequest(request)}
+                      disabled={deletingRequestId === request._id}
+                      className="inline-flex size-9 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-rose-500/20 dark:hover:bg-rose-500/10 dark:hover:text-rose-300"
+                      title="Delete request"
+                      aria-label="Delete request"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
                   </div>
                 </div>
               ))}

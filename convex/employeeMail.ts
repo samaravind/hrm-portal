@@ -216,21 +216,68 @@ function buildAccessRequestHtml(args: AccessRequestMessageArgs) {
   `
 }
 
-function buildLeaveStatusSubject(status: LeaveStatusMessageArgs["status"]) {
-  return status === "approved"
-    ? "Your leave request has been approved"
-    : "Your leave request has been declined"
+function buildLeaveStatusSubject(args: LeaveStatusMessageArgs) {
+  return args.status === "approved"
+    ? "Your request has been approved"
+    : "Your request has been declined"
+}
+
+function isTimeValue(value: string) {
+  return /^\d{1,2}:\d{2}(:\d{2})?$/.test(value)
+}
+
+function isDateTimeValue(value: string) {
+  return value.includes("T") && !Number.isNaN(new Date(value).getTime())
+}
+
+function formatRangeValue(value: string) {
+  if (isTimeValue(value)) {
+    return value.slice(0, 5)
+  }
+
+  if (isDateTimeValue(value)) {
+    return new Date(value).toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })
+  }
+
+  const date = new Date(`${value}T00:00:00`)
+  if (!Number.isNaN(date.getTime())) {
+    return date.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
+  }
+
+  return value
+}
+
+function getRangeLabel(startDate: string, endDate: string) {
+  if (isDateTimeValue(startDate) || isDateTimeValue(endDate)) {
+    return "Date & Time Range"
+  }
+
+  return isTimeValue(startDate) && isTimeValue(endDate) ? "Time Range" : "Date Range"
 }
 
 function buildLeaveStatusText(args: LeaveStatusMessageArgs) {
   const statusLabel = args.status === "approved" ? "Approved" : "Declined"
+  const rangeLabel = getRangeLabel(args.startDate, args.endDate)
+  const formattedStartDate = formatRangeValue(args.startDate)
+  const formattedEndDate = formatRangeValue(args.endDate)
 
   return [
     `Hi ${args.fullName},`,
     "",
-    `Your leave request has been ${args.status}.`,
-    `Leave Type: ${args.leaveType}`,
-    `Date Range: ${args.startDate} to ${args.endDate}`,
+    `Your request has been ${args.status}.`,
+    `Type: ${args.leaveType}`,
+    `${rangeLabel}: ${formattedStartDate} to ${formattedEndDate}`,
     `Duration: ${args.durationLabel}`,
     `Reason: ${args.reason}`,
     `Status: ${statusLabel}`,
@@ -244,8 +291,9 @@ function buildLeaveStatusText(args: LeaveStatusMessageArgs) {
 function buildLeaveStatusHtml(args: LeaveStatusMessageArgs) {
   const safeName = escapeHtml(args.fullName)
   const safeLeaveType = escapeHtml(args.leaveType)
-  const safeStartDate = escapeHtml(args.startDate)
-  const safeEndDate = escapeHtml(args.endDate)
+  const safeStartDate = escapeHtml(formatRangeValue(args.startDate))
+  const safeEndDate = escapeHtml(formatRangeValue(args.endDate))
+  const safeRangeLabel = escapeHtml(getRangeLabel(args.startDate, args.endDate))
   const safeDurationLabel = escapeHtml(args.durationLabel)
   const safeReason = escapeHtml(args.reason)
   const safeStatus = escapeHtml(args.status === "approved" ? "Approved" : "Declined")
@@ -264,18 +312,18 @@ function buildLeaveStatusHtml(args: LeaveStatusMessageArgs) {
                   <div style="height:8px;background:linear-gradient(90deg,#111827 0%,${args.status === "approved" ? "#10b981" : "#ef4444"} 100%);"></div>
                   <div style="padding:40px 36px 32px;color:#111827;">
                     <div style="display:inline-block;border-radius:999px;padding:8px 14px;background:${statusBackground};color:${statusColor};font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">
-                      Leave request ${safeStatus}
+                      Request ${safeStatus}
                     </div>
                     <h1 style="margin:18px 0 14px;font-size:28px;line-height:1.2;letter-spacing:-0.03em;color:#111827;">
                       Hi ${safeName},
                     </h1>
                     <p style="margin:0 0 18px;font-size:16px;line-height:1.7;color:#374151;">
-                      Your leave request has been ${escapeHtml(args.status)}. Here are the updated details:
+                      Your request has been ${escapeHtml(args.status)}. Here are the updated details:
                     </p>
                     <div style="margin:22px 0 28px;padding:22px;border:1px solid #e5e7eb;border-radius:18px;background:linear-gradient(180deg,#ffffff 0%,#f9fafb 100%);">
                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.8;color:#374151;">
-                        <tr><td><strong>Leave Type:</strong> ${safeLeaveType}</td></tr>
-                        <tr><td><strong>Date Range:</strong> ${safeStartDate} to ${safeEndDate}</td></tr>
+                        <tr><td><strong>Type:</strong> ${safeLeaveType}</td></tr>
+                        <tr><td><strong>${safeRangeLabel}:</strong> ${safeStartDate} to ${safeEndDate}</td></tr>
                         <tr><td><strong>Duration:</strong> ${safeDurationLabel}</td></tr>
                         <tr><td><strong>Reason:</strong> ${safeReason}</td></tr>
                         <tr><td><strong>Status:</strong> ${safeStatus}</td></tr>
@@ -283,7 +331,7 @@ function buildLeaveStatusHtml(args: LeaveStatusMessageArgs) {
                     </div>
                     <div style="text-align:center;margin:0 0 28px;">
                       <a href="${safeDashboardUrl}" style="display:inline-block;background:#111827;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 26px;border-radius:14px;box-shadow:0 10px 22px rgba(17,24,39,0.15);">
-                        View Leave Dashboard
+                        View dashboard
                       </a>
                     </div>
                     <p style="margin:0;font-size:13px;line-height:1.7;color:#6b7280;">
@@ -442,7 +490,7 @@ export const sendLeaveStatusEmail = internalAction({
   handler: async (_ctx, args) => {
     const result = await sendResendEmail({
       email: args.email,
-      subject: buildLeaveStatusSubject(args.status),
+      subject: buildLeaveStatusSubject(args),
       text: buildLeaveStatusText(args),
       html: buildLeaveStatusHtml(args),
     })
