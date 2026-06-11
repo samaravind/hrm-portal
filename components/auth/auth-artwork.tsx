@@ -64,7 +64,7 @@ function MiniPerson({ side }: { side: 'left' | 'right' }) {
 
 export function AuthArtwork() {
   return (
-    <div className="relative h-full min-h-0 w-full overflow-hidden bg-[linear-gradient(180deg,#cfe6ff_0%,#9fc8f6_52%,#72a8e9_100%)]">
+    <div className="relative min-h-[52rem] w-full overflow-hidden bg-[linear-gradient(180deg,#cfe6ff_0%,#9fc8f6_52%,#72a8e9_100%)] md:min-h-full">
       <div className="absolute inset-x-0 bottom-0 h-36 bg-[linear-gradient(180deg,transparent,rgba(239,246,255,0.82))]" />
       <div className="absolute bottom-14 left-0 h-40 w-full opacity-45">
         <div className="absolute bottom-0 left-4 h-24 w-10 rounded-t-sm bg-white/36" />
@@ -73,17 +73,17 @@ export function AuthArtwork() {
         <div className="absolute bottom-0 right-2 h-24 w-10 rounded-t-sm bg-white/34" />
       </div>
 
-      <div className="relative z-10 flex h-full min-h-0 flex-col px-3 py-3 text-slate-950 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-        <div className="max-w-[11rem] sm:max-w-[17rem] xl:max-w-[18rem]">
-          <h2 className="text-sm font-semibold leading-tight tracking-tight text-[#102a55] sm:text-2xl xl:text-[1.7rem]">
+      <div className="relative z-10 flex min-h-[52rem] flex-col px-5 py-6 text-slate-950 sm:px-6 md:min-h-full lg:px-8 lg:py-8">
+        <div className="max-w-[17rem] xl:max-w-[18rem]">
+          <h2 className="text-xl font-semibold leading-tight tracking-tight text-[#102a55] sm:text-2xl xl:text-[1.7rem]">
             Smart HR Management for a Better Workplace
           </h2>
-          <p className="mt-2 hidden max-w-[11.5rem] text-[8px] leading-4 text-[#17365f]/82 sm:block sm:mt-3 sm:max-w-[15.5rem] sm:text-xs sm:leading-5">
+          <p className="mt-3 max-w-[15.5rem] text-xs leading-5 text-[#17365f]/82">
             Streamline your HR processes, empower your team, and build a better workplace with one HRM solution.
           </p>
         </div>
 
-        <div className="relative mt-2 flex flex-1 items-center justify-center pb-10 pt-2 sm:pb-20 lg:pb-24">
+        <div className="relative mt-4 flex flex-1 items-center justify-center pb-[5.5rem] pt-5 sm:pb-24">
           <div className="absolute left-[8%] top-[7%] h-[68%] w-[84%] rounded-full border border-dashed border-white/70" />
 
           {featureCards.map(({ icon: Icon, label, className }) => (
@@ -98,11 +98,11 @@ export function AuthArtwork() {
             </div>
           ))}
 
-          <div className="relative w-[86%] max-w-[10.5rem] rounded-2xl border border-white/80 bg-white/88 p-2 shadow-[0_26px_70px_rgba(30,64,175,0.2)] backdrop-blur-2xl sm:w-[82%] sm:max-w-[23.5rem] sm:p-3.5 xl:max-w-[25rem]">
-            <div className="mb-2 flex items-center justify-between sm:mb-3">
+          <div className="relative w-[82%] max-w-[23.5rem] rounded-2xl border border-white/80 bg-white/88 p-3.5 shadow-[0_26px_70px_rgba(30,64,175,0.2)] backdrop-blur-2xl xl:max-w-[25rem]">
+            <div className="mb-3 flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-semibold text-[#102a55] sm:text-xs">HRM Dashboard</p>
-                <p className="hidden text-[10px] text-slate-400 sm:block">Workforce overview</p>
+                <p className="text-xs font-semibold text-[#102a55]">HRM Dashboard</p>
+                <p className="text-[10px] text-slate-400">Workforce overview</p>
               </div>
               <div className="flex gap-1">
                 <span className="size-1.5 rounded-full bg-slate-300" />
@@ -110,7 +110,7 @@ export function AuthArtwork() {
               </div>
             </div>
 
-            <div className="hidden grid-cols-2 gap-2 sm:grid sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {dashboardStats.map((stat) => (
                 <div key={stat.label} className="rounded-xl border border-slate-100 bg-blue-50/70 p-2">
                   <p className="text-[8px] font-semibold text-slate-500">{stat.label}</p>
@@ -120,7 +120,7 @@ export function AuthArtwork() {
               ))}
             </div>
 
-            <div className="mt-2 grid gap-2 sm:mt-3 sm:grid-cols-[1.05fr_0.95fr] sm:gap-3">
+            <div className="mt-3 grid gap-3 sm:grid-cols-[1.05fr_0.95fr]">
               <div className="rounded-xl border border-slate-100 bg-white p-2.5">
                 <div className="flex items-center justify-between">
                   <p className="text-[10px] font-semibold text-slate-600">Monthly Attendance</p>
@@ -164,8 +164,8 @@ export function AuthArtwork() {
               </div>
             </div>
 
-            <div className="mt-3 hidden gap-3 sm:grid sm:grid-cols-2">
-              <div className="hidden rounded-xl border border-slate-100 bg-white p-2.5 sm:block">
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-slate-100 bg-white p-2.5">
                 <p className="text-[10px] font-semibold text-slate-600">Upcoming Birthdays</p>
                 <div className="mt-3 space-y-2">
                   {['Aanya Mehta', 'Neha Sharma'].map((name) => (
@@ -197,7 +197,7 @@ export function AuthArtwork() {
           <MiniPerson side="right" />
         </div>
 
-        <div className="absolute inset-x-7 bottom-5 hidden rounded-2xl border border-white/70 bg-white/42 px-3 py-3 shadow-[0_22px_55px_rgba(30,64,175,0.22)] backdrop-blur-2xl sm:block">
+        <div className="absolute inset-x-7 bottom-5 rounded-2xl border border-white/70 bg-white/42 px-3 py-3 shadow-[0_22px_55px_rgba(30,64,175,0.22)] backdrop-blur-2xl">
           <div className="grid grid-cols-4 gap-2">
             {bottomFeatures.map(({ icon: Icon, label }) => (
               <div key={label} className="flex flex-col items-center gap-1.5 text-center text-[8px] font-medium text-[#17365f] sm:text-[10px]">
