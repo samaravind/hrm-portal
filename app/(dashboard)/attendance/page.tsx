@@ -4,10 +4,85 @@ import { useEffect, useMemo, useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useQuery } from 'convex/react'
 import { useRouter } from 'next/navigation'
-import { Printer, Search } from 'lucide-react'
+import { Eye, Printer, Search } from 'lucide-react'
 import { api } from '@/convex/_generated/api'
 import { Pagination } from '@/components/ui/pagination'
 import { hrmsSectionClass, hrmsTableClass, hrmsTableEmptyClass, hrmsTableHeadRowClass, hrmsTableRowClass } from '@/components/ui/hrms-table'
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+const ATTENDANCE_HISTORY_OPTIONS = [
+  { value: 'last-7-days', label: 'Last 7 Days' },
+  { value: 'last-30-days', label: 'Last 30 Days' },
+  { value: 'one-month-ago', label: '1 Month Ago' },
+  { value: 'this-month', label: 'Every Month' },
+  { value: 'overall', label: 'Overall' },
+] as const
+
+type AttendanceHistoryFilterValue = (typeof ATTENDANCE_HISTORY_OPTIONS)[number]['value']
+
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function getUtcDateKeyOffset(days: number) {
+  const now = new Date()
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + days))
+    .toISOString()
+    .slice(0, 10)
+}
+
+function getUtcMonthStartKey() {
+  const now = new Date()
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+    .toISOString()
+    .slice(0, 10)
+}
+
+function getUtcMonthOffsetKey(months: number) {
+  const now = new Date()
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + months, now.getUTCDate()))
+    .toISOString()
+    .slice(0, 10)
+}
+
+function getAttendanceHistoryRange(filter: AttendanceHistoryFilterValue) {
+  const todayKey = getTodayKey()
+
+  switch (filter) {
+    case 'last-7-days':
+      return { start: getUtcDateKeyOffset(-6), end: todayKey }
+    case 'last-30-days':
+      return { start: getUtcDateKeyOffset(-29), end: todayKey }
+    case 'one-month-ago':
+      return { start: getUtcMonthOffsetKey(-1), end: getUtcMonthOffsetKey(-1) }
+    case 'this-month':
+      return { start: getUtcMonthStartKey(), end: todayKey }
+    case 'overall':
+    default:
+      return { start: '', end: '' }
+  }
+}
+
+function EmployeeAttendanceActionButton({
+  entry,
+  onView,
+}: {
+  entry: PunchSheetEntry
+  onView: (entry: PunchSheetEntry) => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onView(entry)}
+      className="inline-flex size-9 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-600 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-indigo-500/20 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-300"
+      title="View attendance"
+      aria-label={`View attendance for ${entry.employee.fullName}`}
+    >
+      <Eye className="size-4" />
+    </button>
+  )
+}
 
 function formatTime(timestamp: number | null) {
   if (!timestamp) return '--:--'
@@ -68,10 +143,12 @@ function PunchSheetCardList({
   punchSheet,
   offset,
   now,
+  onView,
 }: {
   punchSheet: PunchSheetEntry[]
   offset: number
   now: number
+  onView: (entry: PunchSheetEntry) => void
 }) {
   if (punchSheet.length === 0) {
     return (
@@ -101,7 +178,7 @@ function PunchSheetCardList({
                 </p>
                 <button
                   type="button"
-                  onClick={() => window.open(`/employee-attendance?email=${encodeURIComponent(emp.email)}&name=${encodeURIComponent(emp.fullName)}`, '_blank')}
+                  onClick={() => onView(entry)}
                   className="mt-1 block text-left text-base font-semibold tracking-tight text-zinc-950 transition hover:text-indigo-600 dark:text-white dark:hover:text-indigo-300"
                 >
                   {emp.fullName}
@@ -148,21 +225,24 @@ function AdminPunchSheet({
   punchSheet,
   offset,
   now,
+  onView,
 }: {
   punchSheet: PunchSheetEntry[]
   offset: number
   now: number
+  onView: (entry: PunchSheetEntry) => void
 }) {
   return (
     <table className={hrmsTableClass}>
       <colgroup>
         <col className="w-[5%]" />
-        <col className="w-[30%]" />
-        <col className="w-[16%]" />
-        <col className="w-[16%]" />
+        <col className="w-[25%]" />
         <col className="w-[13%]" />
         <col className="w-[13%]" />
+        <col className="w-[12%]" />
+        <col className="w-[12%]" />
         <col className="w-[7%]" />
+        <col className="w-[13%]" />
       </colgroup>
       <thead>
         <tr className={hrmsTableHeadRowClass}>
@@ -173,12 +253,13 @@ function AdminPunchSheet({
           <th className="py-3 px-4">Check In</th>
           <th className="py-3 px-4">Check Out</th>
           <th className="py-3 px-4 text-right">Hours</th>
+          <th className="py-3 px-4 text-center">Actions</th>
         </tr>
       </thead>
       <tbody className="divide-y divide-zinc-200 dark:divide-zinc-900">
         {punchSheet.length === 0 ? (
           <tr>
-          <td className={hrmsTableEmptyClass} colSpan={7}>
+            <td className={hrmsTableEmptyClass} colSpan={8}>
               No employees found. Add employees in the Employee section first.
             </td>
           </tr>
@@ -195,7 +276,7 @@ function AdminPunchSheet({
                 <td className="px-4 py-4">
                   <button
                     type="button"
-                    onClick={() => window.open(`/employee-attendance?email=${encodeURIComponent(emp.email)}&name=${encodeURIComponent(emp.fullName)}`, '_blank')}
+                    onClick={() => onView(entry)}
                     className="block text-left font-semibold text-zinc-900 transition hover:text-[#6c47ff] dark:text-zinc-100"
                   >
                     {emp.fullName}
@@ -223,12 +304,194 @@ function AdminPunchSheet({
                 <td className="px-4 py-4 text-right font-bold text-zinc-950 dark:text-zinc-100">
                   {s ? `${diff.toFixed(2)}h` : <span className="text-zinc-300">—</span>}
                 </td>
+                <td className="px-4 py-4 text-center">
+                  <div className="flex justify-center">
+                    <EmployeeAttendanceActionButton entry={entry} onView={onView} />
+                  </div>
+                </td>
               </tr>
             )
           })
         )}
       </tbody>
     </table>
+  )
+}
+
+function AttendanceDetailsSheet({
+  entry,
+  now,
+  onClose,
+}: {
+  entry: PunchSheetEntry | null
+  now: number
+  onClose: () => void
+}) {
+  const emp = entry?.employee
+  const session = entry?.session ?? null
+  const hours = session ? ((session.punchOutAt ?? now) - session.punchInAt) / (1000 * 60 * 60) : 0
+  const [historyFilter, setHistoryFilter] = useState<AttendanceHistoryFilterValue>('last-30-days')
+
+  const historySessions = useQuery(
+    api.attendance.getEmployeeSessions,
+    emp?.email ? { email: emp.email } : 'skip',
+  ) ?? []
+
+  const filteredHistorySessions = useMemo(() => {
+    const { start, end } = getAttendanceHistoryRange(historyFilter)
+    if (!start && !end) return historySessions
+
+    return historySessions.filter((record) => {
+      if (start && record.dateKey < start) return false
+      if (end && record.dateKey > end) return false
+      return true
+    })
+  }, [historyFilter, historySessions])
+
+  useEffect(() => {
+    setHistoryFilter('last-30-days')
+  }, [emp?.email])
+
+  return (
+    <Sheet open={Boolean(entry)} onOpenChange={(open) => { if (!open) onClose() }}>
+      <SheetContent side="right" className="w-full max-w-md overflow-y-auto border-zinc-200 bg-white p-0 dark:border-zinc-900 dark:bg-black sm:max-w-md">
+        {emp ? (
+          <>
+            <SheetHeader className="border-b border-zinc-200 p-6 dark:border-zinc-900">
+              <div className="flex size-12 items-center justify-center rounded-2xl bg-indigo-500/10 text-lg font-bold text-indigo-600 dark:text-indigo-300">
+                {emp.fullName.slice(0, 1).toUpperCase()}
+              </div>
+              <SheetTitle className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-white">
+                {emp.fullName}
+              </SheetTitle>
+              <SheetDescription className="break-all text-sm text-zinc-500 dark:text-zinc-400">
+                {emp.email}
+              </SheetDescription>
+            </SheetHeader>
+
+            <div className="space-y-5 p-6">
+              <div className="rounded-3xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-900 dark:bg-zinc-950">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Status</p>
+                    <div className="mt-2">
+                      <PunchStatusBadge session={session} />
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Hours</p>
+                    <p className="mt-1 text-2xl font-semibold text-zinc-950 dark:text-white">
+                      {session ? `${hours.toFixed(2)}h` : '0.00h'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  ['Employee ID', emp.employeeId || '—'],
+                  ['Department', emp.department || '—'],
+                  ['Position', emp.position || '—'],
+                  ['Employee Type', emp.employeeType || '—'],
+                  ['Role', emp.role || '—'],
+                  ['Date', session?.dateKey || 'Today'],
+                  ['Check In', session ? formatTime(session.punchInAt) : '—'],
+                  ['Check Out', session ? (session.punchOutAt ? formatTime(session.punchOutAt) : 'Active') : '—'],
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-900 dark:bg-zinc-950">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{label}</p>
+                    <p className="mt-1 text-sm font-semibold text-zinc-800 dark:text-zinc-100">{value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-3xl border border-zinc-200 bg-white dark:border-zinc-900 dark:bg-zinc-950">
+                <div className="flex flex-col gap-3 border-b border-zinc-200 p-4 dark:border-zinc-900 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">
+                      Attendance History
+                    </p>
+                    <h3 className="mt-1 text-lg font-semibold tracking-tight text-zinc-950 dark:text-white">
+                      Recent records
+                    </h3>
+                  </div>
+
+                  <div className="w-full sm:w-[12.5rem]">
+                    <Select
+                      value={historyFilter}
+                      onValueChange={(value) => setHistoryFilter(value as AttendanceHistoryFilterValue)}
+                    >
+                      <SelectTrigger className="h-10 w-full rounded-2xl border-zinc-200 bg-zinc-50 px-3.5 text-sm font-medium text-zinc-950 shadow-none ring-0 transition hover:bg-zinc-100 focus:ring-0 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:hover:bg-zinc-900">
+                        <SelectValue placeholder="Select range" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl border-zinc-200 bg-white text-zinc-950 shadow-[0_18px_40px_rgba(15,23,42,0.12)] dark:border-zinc-800 dark:bg-zinc-950 dark:text-white">
+                        {ATTENDANCE_HISTORY_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="p-4">
+                  {filteredHistorySessions.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 px-4 py-8 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
+                      No attendance history found for this range.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full border-collapse text-left text-sm">
+                        <thead>
+                          <tr className="border-b border-zinc-100 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:border-zinc-900 dark:text-zinc-500">
+                            <th className="px-2 py-2">Date</th>
+                            <th className="px-2 py-2">Check In</th>
+                            <th className="px-2 py-2">Check Out</th>
+                            <th className="px-2 py-2 text-right">Hours</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-100 dark:divide-zinc-900">
+                          {filteredHistorySessions.slice(0, 6).map((record) => {
+                            const diff = ((record.punchOutAt ?? now) - record.punchInAt) / (1000 * 60 * 60)
+                            const date = new Date(`${record.dateKey}T00:00:00`)
+                            const dateLabel = new Intl.DateTimeFormat('en-US', {
+                              month: 'short',
+                              day: '2-digit',
+                              year: 'numeric',
+                            }).format(date)
+
+                            return (
+                              <tr key={record._id} className="transition-colors hover:bg-zinc-50/70 dark:hover:bg-zinc-900/50">
+                                <td className="px-2 py-3">
+                                  <div className="font-medium text-zinc-950 dark:text-zinc-100">{dateLabel}</div>
+                                  <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
+                                    {record.dateKey}
+                                  </div>
+                                </td>
+                                <td className="px-2 py-3 font-medium text-zinc-700 dark:text-zinc-200">
+                                  {formatTime(record.punchInAt)}
+                                </td>
+                                <td className="px-2 py-3 font-medium text-zinc-700 dark:text-zinc-200">
+                                  {record.punchOutAt ? formatTime(record.punchOutAt) : 'Active'}
+                                </td>
+                                <td className="px-2 py-3 text-right font-semibold text-zinc-950 dark:text-zinc-100">
+                                  {diff.toFixed(2)}h
+                                </td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </>
+        ) : null}
+      </SheetContent>
+    </Sheet>
   )
 }
 
@@ -261,6 +524,7 @@ export default function EmployeeAttendancePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = useState(1)
   const [now, setNow] = useState(() => Date.now())
+  const [selectedEntry, setSelectedEntry] = useState<PunchSheetEntry | null>(null)
 
   const punchSheet = useQuery(api.attendance.getPunchSheet, viewerIdentity ?? 'skip')
   const allPunchSheet = useMemo(() => punchSheet ?? [], [punchSheet])
@@ -354,17 +618,19 @@ export default function EmployeeAttendancePage() {
         className={hrmsSectionClass}
       >
         <div className="md:hidden">
-          <PunchSheetCardList punchSheet={paginatedPunchSheet} offset={(currentPage - 1) * PAGE_SIZE} now={now} />
+          <PunchSheetCardList punchSheet={paginatedPunchSheet} offset={(currentPage - 1) * PAGE_SIZE} now={now} onView={setSelectedEntry} />
         </div>
 
         <div className="hidden overflow-x-auto md:block">
-          <AdminPunchSheet punchSheet={paginatedPunchSheet} offset={(currentPage - 1) * PAGE_SIZE} now={now} />
+          <AdminPunchSheet punchSheet={paginatedPunchSheet} offset={(currentPage - 1) * PAGE_SIZE} now={now} onView={setSelectedEntry} />
         </div>
 
         <div className="border-t border-zinc-200/70 px-4 py-4 dark:border-zinc-900 sm:px-5">
           <Pagination current={currentPage} total={filteredPunchSheet.length} pageSize={PAGE_SIZE} onChange={setPage} />
         </div>
       </section>
+
+      <AttendanceDetailsSheet entry={selectedEntry} now={now} onClose={() => setSelectedEntry(null)} />
     </div>
   )
 }

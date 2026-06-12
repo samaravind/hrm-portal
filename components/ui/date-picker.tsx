@@ -11,10 +11,12 @@ function DatePicker({
   value,
   onChange,
   className,
+  placeholder = "dd-mm-yyyy",
 }: {
   value: string
   onChange: (value: string) => void
   className?: string
+  placeholder?: string
 }) {
   const [open, setOpen] = useState(false)
 
@@ -24,7 +26,7 @@ function DatePicker({
     return Number.isNaN(parsed.getTime()) ? undefined : parsed
   }, [value])
 
-  const displayValue = selectedDate ? format(selectedDate, "dd-MM-yyyy") : "dd-mm-yyyy"
+  const displayValue = selectedDate ? format(selectedDate, "dd-MM-yyyy") : placeholder
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

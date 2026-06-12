@@ -313,7 +313,7 @@ export default function StaffDashboardPage() {
                     <button
                       onClick={handlePunchOut}
                       disabled={punching}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-rose-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-rose-500 dark:hover:bg-rose-400"
+                      className="inline-flex items-center gap-2 rounded-2xl bg-rose-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:bg-rose-500 disabled:text-white disabled:opacity-100 dark:bg-rose-500 dark:hover:bg-rose-400"
                     >
                       <LogOut className="size-4" />
                       {punching ? 'Punching out...' : 'Punch Out'}

@@ -6,6 +6,20 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { api } from '@/convex/_generated/api'
 import { Calendar, TrendingUp, Timer } from 'lucide-react'
 import { Pagination } from '@/components/ui/pagination'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+const ATTENDANCE_FILTER_OPTIONS = [
+  { value: 'today', label: 'Today' },
+  { value: 'yesterday', label: 'Yesterday' },
+  { value: 'two-days-ago', label: '2 Days Ago' },
+  { value: 'last-7-days', label: 'Last 7 Days' },
+  { value: 'last-30-days', label: 'Last 30 Days' },
+  { value: 'one-month-ago', label: '1 Month Ago' },
+  { value: 'this-month', label: 'Every Month' },
+  { value: 'overall', label: 'Overall' },
+] as const
+
+type AttendanceFilterValue = (typeof ATTENDANCE_FILTER_OPTIONS)[number]['value']
 
 function formatTime(timestamp: number | null) {
   if (!timestamp) return '--:--'
@@ -26,6 +40,61 @@ function formatDate(dateKey: string) {
   }).format(d)
 }
 
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function getUtcDateKeyOffset(days: number) {
+  const now = new Date()
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + days))
+    .toISOString()
+    .slice(0, 10)
+}
+
+function getUtcMonthStartKey() {
+  const now = new Date()
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+    .toISOString()
+    .slice(0, 10)
+}
+
+function getUtcMonthOffsetKey(months: number) {
+  const now = new Date()
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + months, now.getUTCDate()))
+    .toISOString()
+    .slice(0, 10)
+}
+
+function getFilterRange(filter: AttendanceFilterValue) {
+  const todayKey = getTodayKey()
+
+  switch (filter) {
+    case 'today':
+      return { start: todayKey, end: todayKey }
+    case 'yesterday': {
+      const key = getUtcDateKeyOffset(-1)
+      return { start: key, end: key }
+    }
+    case 'two-days-ago': {
+      const key = getUtcDateKeyOffset(-2)
+      return { start: key, end: key }
+    }
+    case 'last-7-days':
+      return { start: getUtcDateKeyOffset(-6), end: todayKey }
+    case 'last-30-days':
+      return { start: getUtcDateKeyOffset(-29), end: todayKey }
+    case 'one-month-ago': {
+      const key = getUtcMonthOffsetKey(-1)
+      return { start: key, end: key }
+    }
+    case 'this-month':
+      return { start: getUtcMonthStartKey(), end: todayKey }
+    case 'overall':
+    default:
+      return { start: '', end: '' }
+  }
+}
+
 export default function EmployeeAttendanceHistoryPage() {
   return (
     <Suspense fallback={<div className="p-6 text-zinc-500">Loading...</div>}>
@@ -39,7 +108,10 @@ function EmployeeAttendanceContent() {
   const searchParams = useSearchParams()
   const email = searchParams.get('email')
   const name = searchParams.get('name')
-  const from = searchParams.get('from') ?? ''
+  const filterParam = searchParams.get('filter')
+  const selectedFilter: AttendanceFilterValue = ATTENDANCE_FILTER_OPTIONS.some((option) => option.value === filterParam)
+    ? (filterParam as AttendanceFilterValue)
+    : 'last-7-days'
   const [now] = useState(() => Date.now())
   const [page, setPage] = useState(1)
 
@@ -50,17 +122,18 @@ function EmployeeAttendanceContent() {
   const sessions = employeeSessions
 
   const filteredSessions = useMemo(() => {
-    if (!from) return sessions
-    return sessions.filter((s) => s.dateKey >= from)
-  }, [sessions, from])
+    const { start, end } = getFilterRange(selectedFilter)
+    if (!start && !end) return sessions
+    return sessions.filter((session) => {
+      if (start && session.dateKey < start) return false
+      if (end && session.dateKey > end) return false
+      return true
+    })
+  }, [sessions, selectedFilter])
 
-  const setFrom = (value: string) => {
+  const setFilter = (value: AttendanceFilterValue) => {
     const params = new URLSearchParams(searchParams.toString())
-    if (value) {
-      params.set('from', value)
-    } else {
-      params.delete('from')
-    }
+    params.set('filter', value)
     setPage(1)
     router.replace(`/employee-attendance?${params.toString()}`, { scroll: false })
   }
@@ -126,24 +199,22 @@ function EmployeeAttendanceContent() {
           <Calendar className="size-4 shrink-0 text-zinc-400" />
           <div className="min-w-0 flex-1">
             <label className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">
-              Filter from
+              Filter
             </label>
-            <input
-              type="date"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              className="w-full min-w-0 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 outline-none transition focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
-            />
+            <Select value={selectedFilter} onValueChange={(value) => setFilter(value as AttendanceFilterValue)}>
+              <SelectTrigger className="h-11 w-full rounded-xl border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-900 shadow-sm ring-0 focus:ring-0 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100">
+                <SelectValue placeholder="Last 7 Days" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-zinc-200 bg-white text-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white">
+                {ATTENDANCE_FILTER_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
-        {from && (
-          <button
-            onClick={() => setFrom('')}
-            className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500 transition hover:bg-zinc-50 dark:border-zinc-900 dark:hover:bg-zinc-900 sm:w-auto"
-          >
-            Clear
-          </button>
-        )}
       </div>
 
       <section className="min-w-0 overflow-hidden rounded-[28px] border border-zinc-200 bg-white shadow-xs dark:border-zinc-900 dark:bg-zinc-950">

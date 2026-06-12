@@ -731,45 +731,6 @@ function ViewEmployeePanel({ employee, onClose }: {
             </div>
           </div>
 
-          {/* Attendance History */}
-          <div className="border-t border-zinc-200 pt-4 dark:border-zinc-900">
-            <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
-              Attendance History ({sessions.length} records)
-            </h3>
-            {sessions.length === 0 ? (
-              <p className="py-4 text-center text-sm text-zinc-400 dark:text-zinc-500">No attendance records found.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-zinc-200 text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400 dark:border-neutral-950 dark:text-zinc-500">
-                      <th className="py-2 pr-2">Date</th>
-                      <th className="py-2 px-2">In</th>
-                      <th className="py-2 px-2">Out</th>
-                      <th className="py-2 pl-2 text-right">Hours</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-200 dark:divide-neutral-950">
-                    {sessions.map((s) => {
-                      const diff = s.punchOutAt
-                        ? (s.punchOutAt - s.punchInAt) / (1000 * 60 * 60)
-                        : (now - s.punchInAt) / (1000 * 60 * 60)
-                      return (
-                        <tr key={s._id} className="hover:bg-zinc-50 dark:hover:bg-black">
-                          <td className="py-2.5 pr-2 font-medium text-zinc-800 dark:text-white/80">{s.dateKey}</td>
-                          <td className="py-2.5 px-2 text-zinc-600 dark:text-white/65">{formatTime(s.punchInAt)}</td>
-                          <td className="py-2.5 px-2 text-zinc-600 dark:text-white/65">
-                            {s.punchOutAt ? formatTime(s.punchOutAt) : <span className="font-medium text-zinc-700 dark:text-zinc-300">Active</span>}
-                          </td>
-                          <td className="py-2.5 pl-2 text-right font-semibold text-zinc-900 dark:text-white">{diff.toFixed(2)}h</td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
         </div>
 
         <div className="border-t border-zinc-200 px-6 py-4 dark:border-zinc-900">

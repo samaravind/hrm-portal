@@ -448,7 +448,7 @@ export default function DashboardPage() {
                     type="button"
                     onClick={handlePunchOut}
                     disabled={punching}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_32px_rgba(15,23,42,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-5 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_32px_rgba(15,23,42,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-950 disabled:text-white disabled:opacity-100 sm:w-auto sm:px-5 dark:bg-zinc-950 dark:text-white dark:hover:bg-zinc-800 dark:disabled:bg-zinc-950 dark:disabled:text-white"
                   >
                     <LogOut className="size-4" />
                     {punching ? 'Punching out...' : 'Punch Out'}

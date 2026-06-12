@@ -18,9 +18,23 @@ import type { Doc } from '@/convex/_generated/dataModel'
 import { api } from '@/convex/_generated/api'
 import { Pagination } from '@/components/ui/pagination'
 import { DatePicker } from '@/components/ui/date-picker'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { hrmsSectionClass, hrmsTableClass, hrmsTableEmptyClass, hrmsTableHeadRowClass, hrmsTableRowClass, hrmsTableViewportClass } from '@/components/ui/hrms-table'
 
 const DATE_LOCALE = 'en-US'
+const DATE_FILTER_OPTIONS = [
+  { value: 'today', label: 'Today' },
+  { value: 'yesterday', label: 'Yesterday' },
+  { value: 'two-days-ago', label: '2 Days Ago' },
+  { value: 'last-7-days', label: 'Last 7 Days' },
+  { value: 'last-30-days', label: 'Last 30 Days' },
+  { value: 'one-month-ago', label: '1 Month Ago' },
+  { value: 'this-month', label: 'Every Month' },
+  { value: 'custom', label: 'Custom Range' },
+] as const
+
+type DateFilterValue = (typeof DATE_FILTER_OPTIONS)[number]['value']
+type AttendanceView = 'live' | 'month' | 'overall'
 
 function getOrdinalSuffix(day: number) {
   if (day > 3 && day < 21) return 'th'
@@ -72,6 +86,164 @@ function formatDateAndDay(timestamp: number) {
   return { dateStr, dayStr }
 }
 
+function getTodayKey() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function getUtcDateKeyOffset(days: number) {
+  const now = new Date()
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + days))
+    .toISOString()
+    .slice(0, 10)
+}
+
+function getUtcMonthStartKey() {
+  const now = new Date()
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+    .toISOString()
+    .slice(0, 10)
+}
+
+function getUtcMonthOffsetKey(months: number) {
+  const now = new Date()
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + months, now.getUTCDate()))
+    .toISOString()
+    .slice(0, 10)
+}
+
+function getPresetRange(preset: DateFilterValue, from: string, to: string) {
+  const todayKey = getTodayKey()
+
+  switch (preset) {
+    case 'today':
+      return { start: todayKey, end: todayKey }
+    case 'yesterday': {
+      const key = getUtcDateKeyOffset(-1)
+      return { start: key, end: key }
+    }
+    case 'two-days-ago': {
+      const key = getUtcDateKeyOffset(-2)
+      return { start: key, end: key }
+    }
+    case 'last-7-days':
+      return { start: getUtcDateKeyOffset(-6), end: todayKey }
+    case 'last-30-days':
+      return { start: getUtcDateKeyOffset(-29), end: todayKey }
+    case 'one-month-ago': {
+      const key = getUtcMonthOffsetKey(-1)
+      return { start: key, end: key }
+    }
+    case 'this-month':
+      return { start: getUtcMonthStartKey(), end: todayKey }
+    case 'custom':
+    default: {
+      if (!from && !to) return { start: '', end: '' }
+      const start = from && to ? (from <= to ? from : to) : from || ''
+      const end = from && to ? (from >= to ? from : to) : to || ''
+      return { start, end }
+    }
+  }
+}
+
+function getMonthLabel(date: Date) {
+  return new Intl.DateTimeFormat(DATE_LOCALE, {
+    month: 'short',
+    year: 'numeric',
+  }).format(date).replace(' ', '-')
+}
+
+function getMonthLabelFromKey(monthKey: string) {
+  const [year, month] = monthKey.split('-').map(Number)
+  if (!year || !month) return monthKey
+  return getMonthLabel(new Date(year, month - 1, 1))
+}
+
+function getMonthDayCount(monthKey: string, todayKey: string) {
+  const [year, month] = monthKey.split('-').map(Number)
+  if (!year || !month) return 0
+  const lastDay = new Date(year, month, 0).getDate()
+  const currentMonthKey = todayKey.slice(0, 7)
+  if (monthKey === currentMonthKey) {
+    return new Date(`${todayKey}T00:00:00`).getDate()
+  }
+  return lastDay
+}
+
+function getInclusiveDayCount(startKey: string, endKey: string) {
+  if (!startKey || !endKey) return 0
+  const start = new Date(`${startKey}T00:00:00Z`).getTime()
+  const end = new Date(`${endKey}T00:00:00Z`).getTime()
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return 0
+  return Math.floor((end - start) / 86_400_000) + 1
+}
+
+function AttendanceDonut({
+  percentage,
+  present,
+  total,
+  periodLabel,
+  monthOptions,
+  selectedMonth,
+  onMonthChange,
+}: {
+  percentage: number
+  present: number
+  total: number
+  periodLabel?: string
+  monthOptions?: Array<{ value: string; label: string }>
+  selectedMonth?: string
+  onMonthChange?: (value: string) => void
+}) {
+  const safePercentage = Math.max(0, Math.min(100, Math.round(percentage)))
+  const recordedLabel = present > 0 && total > 0 ? `${present}/${total}` : 'Not Recorded'
+
+  return (
+    <section className="rounded-[32px] border border-zinc-200/80 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.08)] dark:border-zinc-900 dark:bg-black dark:shadow-[0_18px_50px_rgba(0,0,0,0.35)] sm:p-8">
+      <div className="grid min-h-[420px] items-center gap-8 lg:grid-cols-[minmax(16rem,24rem)_1fr]">
+        <div className="mx-auto flex aspect-square w-full max-w-[24rem] items-center justify-center rounded-full"
+          style={{
+            background: `conic-gradient(#0f96d4 0 ${safePercentage}%, #cfd8dd ${safePercentage}% 100%)`,
+          }}
+        >
+          <div className="flex size-[52%] items-center justify-center rounded-full bg-white text-3xl font-semibold text-sky-300 dark:bg-black dark:text-sky-300">
+            {safePercentage}%
+          </div>
+        </div>
+
+        <div className="text-center text-zinc-950 dark:text-white lg:text-left">
+          <p className="text-2xl leading-10">
+            Employee attendance percentage: <span className="font-bold">{safePercentage}%</span>
+          </p>
+          <p className="text-2xl leading-10">
+            Present: <span className="font-bold">{recordedLabel}</span>
+          </p>
+          {periodLabel ? (
+            <div className="mt-1 flex flex-col items-center gap-3 text-2xl leading-10 sm:flex-row lg:justify-start">
+              <span>Current month :</span>
+              {monthOptions && selectedMonth && onMonthChange ? (
+                <Select value={selectedMonth} onValueChange={onMonthChange}>
+                  <SelectTrigger className="h-11 w-[12rem] rounded-xl border-zinc-200 bg-white px-3 text-lg font-bold text-zinc-950 shadow-sm ring-0 focus:ring-0 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white">
+                    <SelectValue placeholder="Select month" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-zinc-200 bg-white text-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white">
+                    {monthOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <span className="font-bold">{periodLabel}</span>
+              )}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function MyAttendancePage() {
   return (
     <Suspense fallback={<div className="p-6 text-zinc-500">Loading...</div>}>
@@ -84,7 +256,14 @@ function MyAttendanceContent() {
   const { user, isLoaded } = useUser()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const selectedFilterParam = searchParams.get('filter')
   const from = searchParams.get('from') ?? ''
+  const to = searchParams.get('to') ?? ''
+  const selectedFilter: DateFilterValue = DATE_FILTER_OPTIONS.some((option) => option.value === selectedFilterParam)
+    ? (selectedFilterParam as DateFilterValue)
+    : 'custom'
+  const selectedFilterLabel =
+    DATE_FILTER_OPTIONS.find((option) => option.value === selectedFilter)?.label ?? 'Custom Range'
 
   const viewerIdentity = isLoaded && user ? {
     viewerId: user.id,
@@ -100,23 +279,54 @@ function MyAttendanceContent() {
     api.attendance.getMySessions,
     viewerIdentity ?? 'skip'
   ) ?? []
+  const viewer = useQuery(api.users.viewer)
 
-  const setFrom = (value: string) => {
+  const setFilterPreset = (value: DateFilterValue) => {
     const params = new URLSearchParams(searchParams.toString())
-    if (value) {
-      params.set('from', value)
-    } else {
+    params.set('filter', value)
+    if (value !== 'custom') {
       params.delete('from')
+      params.delete('to')
     }
-    router.replace(`/my-attendance?${params.toString()}`, { scroll: false })
+    const query = params.toString()
+    router.replace(query ? `/my-attendance?${query}` : '/my-attendance', { scroll: false })
+  }
+
+  const setRangeParam = (key: 'from' | 'to', value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('filter', 'custom')
+    if (value) {
+      params.set(key, value)
+    } else {
+      params.delete(key)
+    }
+    const query = params.toString()
+    router.replace(query ? `/my-attendance?${query}` : '/my-attendance', { scroll: false })
+  }
+
+  const clearRange = () => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('filter')
+    params.delete('from')
+    params.delete('to')
+    const query = params.toString()
+    router.replace(query ? `/my-attendance?${query}` : '/my-attendance', { scroll: false })
   }
 
   const filteredRecords = useMemo(() => {
-    if (!from) return attendanceRecords
-    return attendanceRecords.filter((r) => r.dateKey >= from)
-  }, [attendanceRecords, from])
+    const { start, end } = getPresetRange(selectedFilter, from, to)
+    if (!start && !end) return attendanceRecords
+
+    return attendanceRecords.filter((record) => {
+      if (start && record.dateKey < start) return false
+      if (end && record.dateKey > end) return false
+      return true
+    })
+  }, [attendanceRecords, from, to, selectedFilter])
 
   const [page, setPage] = useState(1)
+  const [activeView, setActiveView] = useState<AttendanceView>('live')
+  const [selectedMonthKey, setSelectedMonthKey] = useState(() => getTodayKey().slice(0, 7))
   const PAGE_SIZE = 10
   const totalRecords = filteredRecords.length
   const paginatedRecords = filteredRecords.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -126,7 +336,7 @@ function MyAttendanceContent() {
   const [error, setError] = useState<string | null>(null)
   const [localSession, setLocalSession] = useState<Doc<'attendanceSessions'> | null>(null)
 
-  useEffect(() => { setPage(1) }, [from])
+  useEffect(() => { setPage(1) }, [from, to, selectedFilter])
 
   const activeSession = localSession ?? session ?? null
   const punchInAt = activeSession ? activeSession.punchInAt : null
@@ -246,12 +456,67 @@ function MyAttendanceContent() {
     })
     const uniqueDays = new Set(thisMonthSessions.map(s => s.dateKey))
     return uniqueDays.size
-  }, [attendanceRecords])
+  }, [filteredRecords])
 
   const progressPercent = useMemo(() => {
     if (daysPresent === 0) return 0
     return Math.min((daysPresent / 30) * 100, 100)
   }, [daysPresent])
+
+  const staffAttendanceSummary = useMemo(() => {
+    const todayKey = getTodayKey()
+    const currentMonthKey = selectedMonthKey || todayKey.slice(0, 7)
+    const currentMonthLabel = getMonthLabelFromKey(currentMonthKey)
+
+    const monthRecords = attendanceRecords.filter((record) => record.dateKey.startsWith(currentMonthKey))
+    const monthPresent = new Set(monthRecords.map((record) => record.dateKey)).size
+    const monthTotal = getMonthDayCount(currentMonthKey, todayKey)
+    const monthPercentage = monthTotal > 0 ? (monthPresent / monthTotal) * 100 : 0
+
+    const allPresentDates = new Set(attendanceRecords.map((record) => record.dateKey))
+    const firstDateKey = attendanceRecords.reduce<string>((first, record) => {
+      if (!first || record.dateKey < first) return record.dateKey
+      return first
+    }, '')
+    const overallTotal = firstDateKey ? getInclusiveDayCount(firstDateKey, todayKey) : 0
+    const overallPresent = allPresentDates.size
+    const overallPercentage = overallTotal > 0 ? (overallPresent / overallTotal) * 100 : 0
+
+    return {
+      currentMonthLabel,
+      monthPresent,
+      monthTotal,
+      monthPercentage,
+      overallPresent,
+      overallTotal,
+      overallPercentage,
+    }
+  }, [attendanceRecords, selectedMonthKey])
+
+  const monthOptions = useMemo(() => {
+    const todayKey = getTodayKey()
+    const currentYear = Number(todayKey.slice(0, 4))
+    const options = new Set<string>()
+
+    for (let month = 1; month <= 12; month += 1) {
+      options.add(`${currentYear}-${String(month).padStart(2, '0')}`)
+    }
+
+    attendanceRecords.forEach((record) => {
+      options.add(record.dateKey.slice(0, 7))
+    })
+
+    options.add(selectedMonthKey)
+
+    return Array.from(options)
+      .sort((a, b) => b.localeCompare(a))
+      .map((value) => ({
+        value,
+        label: getMonthLabelFromKey(value),
+      }))
+  }, [attendanceRecords, selectedMonthKey])
+
+  const showStaffTabs = viewer !== undefined && viewer?.role !== 'admin'
 
   if (!isLoaded) {
     return (
@@ -263,6 +528,30 @@ function MyAttendanceContent() {
 
   return (
     <div className="w-full max-w-none px-1 py-1 sm:px-2 md:px-3 lg:px-4 xl:px-6">
+      {showStaffTabs ? (
+        <div className="mb-5 flex flex-wrap items-center gap-6 text-xl sm:text-2xl">
+          {[
+            { value: 'live', label: 'Live' },
+            { value: 'month', label: 'Every Month' },
+            { value: 'overall', label: 'Overall' },
+          ].map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => setActiveView(tab.value as AttendanceView)}
+              className={`font-medium transition ${
+                activeView === tab.value
+                  ? 'text-zinc-950 dark:text-white'
+                  : 'text-slate-500 hover:text-zinc-950 dark:text-zinc-500 dark:hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      {!showStaffTabs || activeView === 'live' ? (
       <div className="grid gap-4 xl:grid-cols-[minmax(360px,0.92fr)_minmax(0,1.95fr)] 2xl:gap-6">
         
         {/* Left Column: Live Punch Status */}
@@ -342,7 +631,7 @@ function MyAttendanceContent() {
                   type="button"
                   onClick={handlePunchOut}
                   disabled={isSaving}
-                  className="mt-4 inline-flex w-full max-w-[220px] items-center justify-center gap-2 rounded-2xl bg-rose-600 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer shadow-sm"
+                  className="mt-4 inline-flex w-full max-w-[220px] items-center justify-center gap-2 rounded-2xl bg-rose-600 px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-rose-600 disabled:text-white disabled:opacity-100 cursor-pointer"
                 >
                   <LogOut className="size-3.5" />
                   Punch Out
@@ -442,22 +731,70 @@ function MyAttendanceContent() {
               </div>
             </div>
 
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <Calendar className="size-4 shrink-0 text-zinc-400 dark:text-zinc-500" />
-              <div className="w-full max-w-[260px]">
-                <DatePicker
-                  value={from}
-                  onChange={setFrom}
-                />
+            <div className="mt-5 space-y-3">
+              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">
+                <Calendar className="size-4 shrink-0 text-zinc-400 dark:text-zinc-500" />
+                Date filter
               </div>
-              {from && (
-                <button
-                  onClick={() => setFrom('')}
-                  className="rounded-2xl border border-zinc-200/80 px-3 py-2 text-xs font-medium text-zinc-500 transition hover:bg-zinc-50 cursor-pointer dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
-                >
-                  Clear
-                </button>
-              )}
+              <div className="grid gap-3 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)_auto]">
+                <div className="space-y-2">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">
+                    Quick selector
+                  </div>
+                  <Select value={selectedFilter} onValueChange={(value) => setFilterPreset(value as DateFilterValue)}>
+                    <SelectTrigger className="h-11 w-full rounded-2xl border-zinc-200 bg-white/95 px-4 text-sm font-medium text-zinc-950 shadow-sm ring-0 transition hover:bg-zinc-50 focus:ring-0 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:hover:bg-zinc-900">
+                      <SelectValue placeholder="Select a range" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-2xl border-zinc-200 bg-white text-zinc-950 shadow-[0_18px_40px_rgba(15,23,42,0.12)] dark:border-zinc-800 dark:bg-zinc-950 dark:text-white">
+                      {DATE_FILTER_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {selectedFilter === 'custom' ? (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">
+                        Start date
+                      </div>
+                      <DatePicker
+                        value={from}
+                        onChange={(value) => setRangeParam('from', value)}
+                        placeholder="dd-mm-yyyy"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500">
+                        End date
+                      </div>
+                      <DatePicker
+                        value={to}
+                        onChange={(value) => setRangeParam('to', value)}
+                        placeholder="dd-mm-yyyy"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex min-h-11 items-center rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 px-4 text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
+                    Showing <span className="ml-1 font-semibold text-zinc-900 dark:text-zinc-100">{selectedFilterLabel}</span>
+                  </div>
+                )}
+
+                <div className="flex items-end">
+                  {(selectedFilter !== 'custom' || from || to) && (
+                    <button
+                      onClick={clearRange}
+                      className="inline-flex h-11 items-center justify-center rounded-2xl border border-zinc-200/80 px-4 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500 transition hover:bg-zinc-50 cursor-pointer dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className={`${hrmsTableViewportClass} mt-6 min-h-0`}>
@@ -528,6 +865,23 @@ function MyAttendanceContent() {
           </section>
         </div>
       </div>
+      ) : activeView === 'month' ? (
+        <AttendanceDonut
+          percentage={staffAttendanceSummary.monthPercentage}
+          present={staffAttendanceSummary.monthPresent}
+          total={staffAttendanceSummary.monthTotal}
+          periodLabel={staffAttendanceSummary.currentMonthLabel}
+          monthOptions={monthOptions}
+          selectedMonth={selectedMonthKey}
+          onMonthChange={setSelectedMonthKey}
+        />
+      ) : (
+        <AttendanceDonut
+          percentage={staffAttendanceSummary.overallPercentage}
+          present={staffAttendanceSummary.overallPresent}
+          total={staffAttendanceSummary.overallTotal}
+        />
+      )}
     </div>
   )
 }
