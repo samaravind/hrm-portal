@@ -68,10 +68,10 @@ export function AppHeader() {
   }
 
   return (
-    <header className="flex items-center justify-between gap-4 rounded-[30px] border border-white/80 bg-white/80 px-4 py-3 shadow-[0_18px_60px_rgba(99,102,241,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-zinc-950/75 dark:shadow-[0_18px_60px_rgba(0,0,0,0.35)] md:px-6">
+    <header className="flex items-center justify-between gap-4 rounded-[30px] border border-white/80 bg-white/80 px-4 py-3 shadow-[0_18px_60px_rgba(99,102,241,0.08)] backdrop-blur-2xl dark:border-neutral-900/80 dark:bg-[#07070b]/92 dark:shadow-[0_18px_60px_rgba(0,0,0,0.45)] md:px-6">
       <div className="flex min-w-0 items-center gap-3">
-        <SidebarTrigger className="hidden rounded-full border border-zinc-200/80 bg-white/90 text-zinc-700 shadow-sm transition-all hover:-translate-y-px hover:bg-white md:inline-flex dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900" />
-        <div className="hidden h-9 w-px bg-gradient-to-b from-transparent via-zinc-200 to-transparent dark:via-zinc-800 sm:block" />
+        <SidebarTrigger className="hidden rounded-full border border-zinc-200/80 bg-white/90 text-zinc-700 shadow-sm transition-all hover:-translate-y-px hover:bg-white md:inline-flex dark:border-neutral-900 dark:bg-[#09090d] dark:text-zinc-200 dark:hover:bg-zinc-900" />
+        <div className="hidden h-9 w-px bg-gradient-to-b from-transparent via-zinc-200 to-transparent dark:via-neutral-900 sm:block" />
         <div className="min-w-0">
           <p className="truncate text-[10px] font-semibold uppercase tracking-[0.28em] text-zinc-400 dark:text-zinc-500">
             SAM MARKET
@@ -90,7 +90,7 @@ export function AppHeader() {
                 type="button"
                 variant="ghost"
                 size="icon-sm"
-                className="relative rounded-full border border-zinc-200/80 bg-white/90 text-zinc-700 shadow-sm transition-all hover:-translate-y-px hover:bg-white dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+                className="relative rounded-full border border-zinc-200/80 bg-white/90 text-zinc-700 shadow-sm transition-all hover:-translate-y-px hover:bg-white dark:border-neutral-900 dark:bg-[#09090d] dark:text-zinc-300 dark:hover:bg-zinc-900"
                 aria-label="Open approvals"
               >
                 <Bell className="size-4" />
@@ -101,7 +101,7 @@ export function AppHeader() {
                 ) : null}
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-[24rem] rounded-[28px] border border-zinc-200/80 bg-white/95 p-0 shadow-[0_24px_90px_rgba(15,23,42,0.18)] backdrop-blur-2xl dark:border-zinc-800 dark:bg-zinc-950/95">
+            <PopoverContent align="end" className="w-[24rem] rounded-[28px] border border-zinc-200/80 bg-white/95 p-0 shadow-[0_24px_90px_rgba(15,23,42,0.18)] backdrop-blur-2xl dark:border-neutral-900/80 dark:bg-[#08080c]/96">
               <div className="border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
                 <div className="flex items-center justify-between gap-3">
                   <div>
@@ -195,7 +195,7 @@ export function AppHeader() {
           variant="ghost"
           size="icon-sm"
           onClick={toggleTheme}
-          className="rounded-full border border-zinc-200/80 bg-white/90 text-zinc-600 shadow-sm transition-all hover:-translate-y-px hover:bg-white dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+          className="rounded-full border border-zinc-200/80 bg-white/90 text-zinc-600 shadow-sm transition-all hover:-translate-y-px hover:bg-white dark:border-neutral-900 dark:bg-[#09090d] dark:text-zinc-300 dark:hover:bg-zinc-900"
           aria-label="Toggle theme"
         >
           {isDark ? <SunMedium className="size-4" /> : <MoonStar className="size-4" />}

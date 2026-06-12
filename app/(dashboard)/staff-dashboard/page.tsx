@@ -222,7 +222,7 @@ export default function StaffDashboardPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.12),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(16,185,129,0.10),_transparent_24%),linear-gradient(180deg,_#f8fafc_0%,_#eef2ff_100%)] px-4 py-6 text-zinc-950 sm:px-6 dark:bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.16),_transparent_24%),radial-gradient(circle_at_top_right,_rgba(16,185,129,0.12),_transparent_20%),linear-gradient(180deg,_#030712_0%,_#111827_100%)] dark:text-zinc-100">
+    <div className="min-h-[calc(100vh-4rem)] px-4 py-6 text-zinc-950 sm:px-6 dark:text-zinc-100">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         <section className="overflow-hidden rounded-[30px] border border-white/70 bg-white/90 shadow-[0_30px_80px_rgba(15,23,42,0.10)] backdrop-blur dark:border-black dark:bg-zinc-950/85 dark:shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
           <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.35fr_0.85fr]">

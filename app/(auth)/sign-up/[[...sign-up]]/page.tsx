@@ -6,11 +6,11 @@ import { Sparkles } from 'lucide-react'
 
 export default function SignUpPage() {
   return (
-    <main className="relative min-h-[100dvh] overflow-x-auto bg-[linear-gradient(180deg,#eef6ff_0%,#f7fbff_46%,#ffffff_100%)] px-2 py-2 sm:px-4 sm:py-4 lg:px-8">
+    <main className="relative min-h-[100dvh] overflow-x-hidden bg-[linear-gradient(180deg,#eef6ff_0%,#f7fbff_46%,#ffffff_100%)] px-4 py-4 lg:px-8">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.16),_transparent_34%),radial-gradient(circle_at_top_right,_rgba(129,140,248,0.12),_transparent_28%),radial-gradient(circle_at_bottom_left,_rgba(14,165,233,0.08),_transparent_24%)]" />
 
-      <div className="relative mx-auto grid min-h-[calc(100dvh-1rem)] w-[calc(200vw-1rem)] min-w-[42rem] max-w-none grid-cols-[minmax(20rem,calc(100vw-1rem))_minmax(20rem,calc(100vw-1rem))] gap-4 md:min-h-[calc(100dvh-2rem)] md:w-full md:min-w-0 md:max-w-7xl md:grid-cols-[minmax(20rem,0.95fr)_minmax(24rem,1.05fr)] md:gap-7 xl:grid-cols-[minmax(24rem,1fr)_minmax(30rem,1fr)] xl:gap-10">
-        <div className="min-w-0">
+      <div className="relative mx-auto grid min-h-[calc(100dvh-2rem)] w-full max-w-7xl grid-cols-1 gap-4 md:grid-cols-[minmax(20rem,0.95fr)_minmax(24rem,1.05fr)] md:gap-7 xl:grid-cols-[minmax(24rem,1fr)_minmax(30rem,1fr)] xl:gap-10">
+        <div className="hidden min-w-0 md:block">
           <AuthArtwork />
         </div>
 
