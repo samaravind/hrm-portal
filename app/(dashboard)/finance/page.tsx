@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useMutation, useQuery } from 'convex/react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
@@ -41,6 +41,11 @@ type EmployeeSalaryHistoryResponse = {
   }>
 }
 
+type StatusFilter = 'all' | 'paid' | 'pending'
+
+const PAGE_SIZE = 8
+const STATUS_OPTIONS: StatusFilter[] = ['all', 'paid', 'pending']
+
 const MONTHS = [
   'January',
   'February',
@@ -76,6 +81,28 @@ function formatMonthKey(monthKey: string) {
 
 function formatHours(hours: number) {
   return `${hours.toFixed(2)}h`
+}
+
+function getPaymentStatusLabel(status: 'paid' | 'pending') {
+  return status === 'paid' ? 'Paid' : 'Pending'
+}
+
+function getPaymentActionLabel(status: 'paid' | 'pending') {
+  return status === 'paid' ? 'Paid' : 'Completed'
+}
+
+function useDebouncedValue<T>(value: T, delayMs: number) {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedValue(value)
+    }, delayMs)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [value, delayMs])
+
+  return debouncedValue
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -209,7 +236,7 @@ function buildPrintWindow(record: FinanceDashboardRecord) {
                 <h1 class="title">Salary Slip</h1>
                 <p class="sub">${record.salary.monthKey}</p>
               </div>
-              <div class="pill">${record.salary.paymentStatus.toUpperCase()}</div>
+        <div class="pill">${getPaymentStatusLabel(record.salary.paymentStatus as 'paid' | 'pending').toUpperCase()}</div>
             </div>
 
             <div class="grid">
@@ -293,7 +320,7 @@ function downloadSalarySlip(record: FinanceDashboardRecord) {
     pdfLine('SAM MARKET', 40, 760, 16),
     pdfLine('Salary Slip', 40, 736, 22),
     pdfLine(`Month: ${record.salary.monthKey}`, 40, 714, 11),
-    pdfLine(`Status: ${record.salary.paymentStatus.toUpperCase()}`, 380, 714, 11),
+    pdfLine(`Status: ${getPaymentStatusLabel(record.salary.paymentStatus as 'paid' | 'pending').toUpperCase()}`, 380, 714, 11),
     pdfLine(`Employee: ${employeeName}`, 40, 676, 12),
     pdfLine(`Employee ID: ${employeeCode}`, 40, 658, 11),
     pdfLine(`Department: ${department}`, 40, 640, 11),
@@ -375,14 +402,97 @@ function DashboardCard({
   )
 }
 
+const FinanceTableRow = memo(function FinanceTableRow({
+  record,
+  isActionActive,
+  onView,
+  onDownload,
+  onMarkPaid,
+  onMarkPending,
+}: {
+  record: FinanceDashboardRecord
+  isActionActive: boolean
+  onView: (record: FinanceDashboardRecord) => void
+  onDownload: (record: FinanceDashboardRecord) => void
+  onMarkPaid: (record: FinanceDashboardRecord) => void
+  onMarkPending: (record: FinanceDashboardRecord) => void
+}) {
+  return (
+    <tr className="transition-colors hover:bg-zinc-50/70 dark:hover:bg-zinc-900/60">
+      <td className="px-5 py-4">
+        <div>
+          <p className="font-semibold text-zinc-950 dark:text-white">{record.employee?.fullName ?? record.salary.employeeName}</p>
+          <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">{record.employee?.email ?? record.salary.employeeEmail}</p>
+        </div>
+      </td>
+      <td className="px-5 py-4 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        {record.employee?.employeeId ?? record.salary.employeeCode}
+      </td>
+      <td className="px-5 py-4 text-sm text-zinc-600 dark:text-zinc-300">{record.attendanceSummary}</td>
+      <td className="px-5 py-4 font-semibold text-zinc-950 dark:text-white">{formatCurrency(record.salary.baseSalary)}</td>
+      <td className="px-5 py-4 text-zinc-700 dark:text-zinc-300">
+        {formatHours(record.salary.overtimeHours)} &middot; {formatCurrency(record.salary.overtimePay)}
+      </td>
+      <td className="px-5 py-4 text-zinc-700 dark:text-zinc-300">
+        {formatCurrency(record.salary.deductions + record.salary.absenceDeduction)}
+      </td>
+      <td className="px-5 py-4 font-semibold text-zinc-950 dark:text-white">{formatCurrency(record.salary.finalSalary)}</td>
+      <td className="px-5 py-4 text-sm text-zinc-600 dark:text-zinc-300">
+        {formatDate(record.salary.paymentDate ?? record.payment?.paidAt ?? null)}
+      </td>
+      <td className="px-5 py-4">
+        <div className="flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => onView(record)}
+            className="rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-900 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+          >
+            View
+          </button>
+          <button
+            type="button"
+            onClick={() => onDownload(record)}
+            className="inline-flex items-center gap-1 rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-900 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+          >
+            <Download className="size-3.5" />
+            PDF
+          </button>
+          {record.salary.paymentStatus === 'paid' ? (
+            <button
+              type="button"
+              onClick={() => onMarkPending(record)}
+              disabled={isActionActive}
+              className="inline-flex items-center gap-1 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 transition hover:bg-amber-100 disabled:opacity-50 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200"
+            >
+              {getPaymentActionLabel(record.salary.paymentStatus as 'paid' | 'pending')}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onMarkPaid(record)}
+              disabled={isActionActive}
+              className="inline-flex items-center gap-1 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200"
+            >
+              <BadgeDollarSign className="size-3.5" />
+              {getPaymentActionLabel(record.salary.paymentStatus as 'paid' | 'pending')}
+            </button>
+          )}
+        </div>
+      </td>
+    </tr>
+  )
+})
+
 export default function FinancePage() {
   const router = useRouter()
   const { isLoaded, user } = useUser()
   const viewer = useQuery(api.users.viewer)
   const [month, setMonth] = useState(() => new Date().getMonth() + 1)
   const [year, setYear] = useState(() => new Date().getFullYear())
-  const [search, setSearch] = useState('')
-  const [status, setStatus] = useState<'all' | 'paid' | 'pending'>('all')
+  const [searchInput, setSearchInput] = useState('')
+  const debouncedSearch = useDebouncedValue(searchInput, 300)
+  const querySearch = useMemo(() => debouncedSearch.trim(), [debouncedSearch])
+  const [status, setStatus] = useState<StatusFilter>('all')
   const [page, setPage] = useState(1)
   const [selectedRecord, setSelectedRecord] = useState<FinanceDashboardRecord | null>(null)
   const [isSyncing, setIsSyncing] = useState(false)
@@ -437,7 +547,7 @@ export default function FinancePage() {
           ...viewerIdentity,
           year,
           month,
-          search,
+          search: querySearch,
           status,
         }
       : 'skip',
@@ -453,27 +563,63 @@ export default function FinancePage() {
       : 'skip',
   ) as EmployeeSalaryHistoryResponse | null | undefined
 
-  const records = dashboard?.records ?? []
-  const totalPages = Math.max(1, Math.ceil(records.length / 8))
+  const records = useMemo(() => dashboard?.records ?? [], [dashboard?.records])
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(records.length / PAGE_SIZE)), [records.length])
   const currentPage = Math.min(page, totalPages)
-  const paginatedRecords = records.slice((currentPage - 1) * 8, currentPage * 8)
+  const paginatedRecords = useMemo(
+    () => records.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [records, currentPage],
+  )
+  const yearOptions = useMemo(() => [year - 2, year - 1, year, year + 1, year + 2], [year])
 
   const summaryCards = useMemo(() => {
     const totalRecords = dashboard?.totalRecords ?? 0
     const totalEmployees = dashboard?.totalEmployees ?? 0
     const totalPayroll = dashboard?.summary.totalPayroll ?? 0
+    const paidPayroll = dashboard?.summary.paidPayroll ?? 0
+    const pendingPayroll = dashboard?.summary.pendingPayroll ?? 0
     const paidCount = dashboard?.summary.paidCount ?? 0
     const pendingCount = dashboard?.summary.pendingCount ?? 0
     return {
       totalRecords,
       totalEmployees,
       totalPayroll,
+      paidPayroll,
+      pendingPayroll,
       paidCount,
       pendingCount,
     }
   }, [dashboard])
 
-  const handleMarkPaid = async (record: FinanceDashboardRecord) => {
+  const handleSearchChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(event.target.value)
+    setPage(1)
+  }, [])
+
+  const handleMonthChange = useCallback((value: string) => {
+    setMonth(Number(value))
+    setPage(1)
+  }, [])
+
+  const handleYearChange = useCallback((value: string) => {
+    setYear(Number(value))
+    setPage(1)
+  }, [])
+
+  const handleStatusChange = useCallback((nextStatus: StatusFilter) => {
+    setStatus(nextStatus)
+    setPage(1)
+  }, [])
+
+  const handleViewRecord = useCallback((record: FinanceDashboardRecord) => {
+    setSelectedRecord(record)
+  }, [])
+
+  const handleDownloadRecord = useCallback((record: FinanceDashboardRecord) => {
+    downloadSalarySlip(record)
+  }, [])
+
+  const handleMarkPaid = useCallback(async (record: FinanceDashboardRecord) => {
     if (actionId) return
     setActionId(record.salary._id)
     try {
@@ -483,15 +629,15 @@ export default function FinancePage() {
         status: 'paid',
         paymentMethod: record.payment?.paymentMethod ?? 'bank-transfer',
       })
-      toast.success('Salary marked as paid.')
+      toast.success('Salary marked as completed.')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to update salary status.')
     } finally {
       setActionId(null)
     }
-  }
+  }, [actionId, setSalaryPaymentStatus, viewerIdentity])
 
-  const handleMarkPending = async (record: FinanceDashboardRecord) => {
+  const handleMarkPending = useCallback(async (record: FinanceDashboardRecord) => {
     if (actionId) return
     setActionId(record.salary._id)
     try {
@@ -506,7 +652,7 @@ export default function FinancePage() {
     } finally {
       setActionId(null)
     }
-  }
+  }, [actionId, setSalaryPaymentStatus, viewerIdentity])
 
   if (viewer !== undefined && isLoaded && !isAdmin) {
     return null
@@ -564,8 +710,8 @@ export default function FinancePage() {
 
       <div className="grid gap-4 lg:grid-cols-4">
         <DashboardCard title="Total payroll" value={formatCurrency(summaryCards.totalPayroll)} subtitle="Across the selected month" icon={Wallet} />
-        <DashboardCard title="Paid salary" value={`${summaryCards.paidCount}`} subtitle={`Records paid: ${formatCurrency(dashboard.summary.paidPayroll)}`} icon={BadgeDollarSign} />
-        <DashboardCard title="Pending salary" value={`${summaryCards.pendingCount}`} subtitle={`Records pending: ${formatCurrency(dashboard.summary.pendingPayroll)}`} icon={Clock3} />
+        <DashboardCard title="Paid salary" value={`${summaryCards.paidCount}`} subtitle={`Records paid: ${formatCurrency(summaryCards.paidPayroll)}`} icon={BadgeDollarSign} />
+        <DashboardCard title="Pending salary" value={`${summaryCards.pendingCount}`} subtitle={`Records pending: ${formatCurrency(summaryCards.pendingPayroll)}`} icon={Clock3} />
         <DashboardCard title="Employees tracked" value={`${summaryCards.totalEmployees}`} subtitle={`${summaryCards.totalRecords} salary records available`} icon={Users} />
       </div>
 
@@ -575,22 +721,31 @@ export default function FinancePage() {
             <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value)
-                setPage(1)
-              }}
+              value={searchInput}
+              onChange={handleSearchChange}
               placeholder="Search employee name, email, or employee ID..."
+              spellCheck={false}
+              autoComplete="off"
+              autoCapitalize="off"
               className="w-full rounded-2xl border border-zinc-200 bg-white py-3 pl-11 pr-4 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 dark:border-zinc-900 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-zinc-700"
             />
+            {searchInput ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchInput('')
+                  setPage(1)
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-500 transition hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+              >
+                Clear
+              </button>
+            ) : null}
           </div>
 
           <Select
             value={String(month)}
-            onValueChange={(value) => {
-              setMonth(Number(value))
-              setPage(1)
-            }}
+            onValueChange={handleMonthChange}
           >
             <SelectTrigger className="h-12 rounded-2xl border-zinc-200 bg-white text-sm font-semibold text-zinc-900 dark:border-zinc-900 dark:bg-zinc-950 dark:text-white">
               <CalendarDays className="mr-2 size-4 text-zinc-400" />
@@ -607,17 +762,14 @@ export default function FinancePage() {
 
           <Select
             value={String(year)}
-            onValueChange={(value) => {
-              setYear(Number(value))
-              setPage(1)
-            }}
+            onValueChange={handleYearChange}
           >
             <SelectTrigger className="h-12 rounded-2xl border-zinc-200 bg-white text-sm font-semibold text-zinc-900 dark:border-zinc-900 dark:bg-zinc-950 dark:text-white">
               <ChevronDown className="mr-2 size-4 text-zinc-400" />
               <SelectValue placeholder="Year" />
             </SelectTrigger>
             <SelectContent className="rounded-2xl border-zinc-200 bg-white text-zinc-950 dark:border-zinc-900 dark:bg-zinc-950 dark:text-white">
-              {[year - 2, year - 1, year, year + 1, year + 2].map((optionYear) => (
+              {yearOptions.map((optionYear) => (
                 <SelectItem key={optionYear} value={String(optionYear)}>
                   {optionYear}
                 </SelectItem>
@@ -627,14 +779,11 @@ export default function FinancePage() {
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          {(['all', 'paid', 'pending'] as const).map((option) => (
+          {STATUS_OPTIONS.map((option) => (
             <button
               key={option}
               type="button"
-              onClick={() => {
-                setStatus(option)
-                setPage(1)
-              }}
+              onClick={() => handleStatusChange(option)}
               className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                 status === option
                   ? 'border-zinc-200 bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:ring-zinc-700'
@@ -672,7 +821,6 @@ export default function FinancePage() {
               <col className="w-[10%]" />
               <col className="w-[10%]" />
               <col className="w-[8%]" />
-              <col className="w-[8%]" />
             </colgroup>
             <thead>
               <tr className="border-b border-zinc-200 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500 dark:border-zinc-900 dark:text-zinc-400">
@@ -683,7 +831,6 @@ export default function FinancePage() {
                 <th className="px-5 py-4">Overtime</th>
                 <th className="px-5 py-4">Deductions</th>
                 <th className="px-5 py-4">Final Salary</th>
-                <th className="px-5 py-4">Status</th>
                 <th className="px-5 py-4">Payment Date</th>
                 <th className="px-5 py-4 text-right">Actions</th>
               </tr>
@@ -691,94 +838,29 @@ export default function FinancePage() {
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-900">
               {paginatedRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-5 py-16 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                  <td colSpan={9} className="px-5 py-16 text-center text-sm text-zinc-500 dark:text-zinc-400">
                     No salary records found for this month.
                   </td>
                 </tr>
               ) : (
-                paginatedRecords.map((record) => {
-                  const statusTone = record.salary.paymentStatus === 'paid'
-                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300'
-                    : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200'
-
-                  return (
-                    <tr key={record.salary._id} className="transition-colors hover:bg-zinc-50/70 dark:hover:bg-zinc-900/60">
-                      <td className="px-5 py-4">
-                        <div>
-                          <p className="font-semibold text-zinc-950 dark:text-white">{record.employee?.fullName ?? record.salary.employeeName}</p>
-                          <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">{record.employee?.email ?? record.salary.employeeEmail}</p>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                        {record.employee?.employeeId ?? record.salary.employeeCode}
-                      </td>
-                      <td className="px-5 py-4 text-sm text-zinc-600 dark:text-zinc-300">{record.attendanceSummary}</td>
-                      <td className="px-5 py-4 font-semibold text-zinc-950 dark:text-white">{formatCurrency(record.salary.baseSalary)}</td>
-                      <td className="px-5 py-4 text-zinc-700 dark:text-zinc-300">
-                        {formatHours(record.salary.overtimeHours)} · {formatCurrency(record.salary.overtimePay)}
-                      </td>
-                      <td className="px-5 py-4 text-zinc-700 dark:text-zinc-300">
-                        {formatCurrency(record.salary.deductions + record.salary.absenceDeduction)}
-                      </td>
-                      <td className="px-5 py-4 font-semibold text-zinc-950 dark:text-white">{formatCurrency(record.salary.finalSalary)}</td>
-                      <td className="px-5 py-4">
-                        <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${statusTone}`}>
-                          <span className="size-1.5 rounded-full bg-current opacity-80" />
-                          {record.salary.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4 text-sm text-zinc-600 dark:text-zinc-300">
-                        {formatDate(record.salary.paymentDate ?? record.payment?.paidAt ?? null)}
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedRecord(record)}
-                            className="rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-900 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
-                          >
-                            View
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => downloadSalarySlip(record)}
-                            className="inline-flex items-center gap-1 rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-900 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
-                          >
-                            <Download className="size-3.5" />
-                            PDF
-                          </button>
-                          {record.salary.paymentStatus === 'paid' ? (
-                            <button
-                              type="button"
-                              onClick={() => handleMarkPending(record)}
-                              disabled={actionId === record.salary._id}
-                              className="inline-flex items-center gap-1 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 transition hover:bg-amber-100 disabled:opacity-50 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200"
-                            >
-                              Pending
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => handleMarkPaid(record)}
-                              disabled={actionId === record.salary._id}
-                              className="inline-flex items-center gap-1 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200"
-                            >
-                              <BadgeDollarSign className="size-3.5" />
-                              Mark Paid
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })
+                paginatedRecords.map((record) => (
+                  <FinanceTableRow
+                    key={record.salary._id}
+                    record={record}
+                    isActionActive={actionId === record.salary._id}
+                    onView={handleViewRecord}
+                    onDownload={handleDownloadRecord}
+                    onMarkPaid={handleMarkPaid}
+                    onMarkPending={handleMarkPending}
+                  />
+                ))
               )}
             </tbody>
           </table>
         </div>
 
         <div className="border-t border-zinc-200 px-5 py-4 dark:border-zinc-900">
-          <Pagination current={currentPage} total={records.length} pageSize={8} onChange={setPage} />
+          <Pagination current={currentPage} total={records.length} pageSize={PAGE_SIZE} onChange={setPage} />
         </div>
       </section>
 
@@ -805,7 +887,7 @@ export default function FinancePage() {
               <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-900 dark:bg-zinc-950">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">Payment Status</p>
                 <p className="mt-2 text-2xl font-semibold text-zinc-950 dark:text-white">
-                  {selectedRecord.salary.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
+                  {getPaymentStatusLabel(selectedRecord.salary.paymentStatus as 'paid' | 'pending')}
                 </p>
               </div>
             </div>
@@ -864,7 +946,7 @@ export default function FinancePage() {
                         ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300'
                         : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200'
                       }`}>
-                        {entry.salary.paymentStatus}
+                        {getPaymentStatusLabel(entry.salary.paymentStatus as 'paid' | 'pending')}
                       </span>
                     </div>
                     <div className="mt-2 flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
