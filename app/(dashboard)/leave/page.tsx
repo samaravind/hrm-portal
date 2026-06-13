@@ -7,6 +7,17 @@ import { useUser } from '@clerk/nextjs'
 import { useMutation, useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { CalendarRange, Clock3, FileText, Sparkles, Trash2, TrendingUp, UserRoundCheck } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -247,16 +258,37 @@ export default function LeavePage() {
                     </span>
                   </div>
                   <div className="flex items-start justify-end">
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteRequest(request)}
-                      disabled={deletingRequestId === request._id}
-                      className="inline-flex size-9 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-rose-500/20 dark:hover:bg-rose-500/10 dark:hover:text-rose-300"
-                      title="Delete request"
-                      aria-label="Delete request"
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button
+                          type="button"
+                          disabled={deletingRequestId === request._id}
+                          className="inline-flex size-9 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-rose-500/20 dark:hover:bg-rose-500/10 dark:hover:text-rose-300"
+                          title="Delete request"
+                          aria-label="Delete request"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete {request.periodWise ? 'permission' : 'leave'} request?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently remove this saved request from your leave table. This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel disabled={deletingRequestId === request._id}>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteRequest(request)}
+                            disabled={deletingRequestId === request._id}
+                            className="bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-500/30"
+                          >
+                            Delete request
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               ))}

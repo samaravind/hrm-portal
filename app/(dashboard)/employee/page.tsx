@@ -10,6 +10,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Pagination } from '@/components/ui/pagination'
 import { DatePicker } from '@/components/ui/date-picker'
 import { hrmsSectionClass, hrmsTableClass, hrmsTableEmptyClass, hrmsTableHeadCellClass, hrmsTableHeadRowClass, hrmsTableRowClass } from '@/components/ui/hrms-table'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { getPasswordStrength } from '@/lib/password'
@@ -456,6 +467,7 @@ function EmployeeRow({ employee, sno, role, formatDate, onView, onEdit }: {
   onEdit: (emp: Doc<'employees'>) => void
 }) {
   const [blocking, setBlocking] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const toggleBlock = useMutation(api.employees.toggleBlockEmployee)
   const initials = employee.fullName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
   const isBlocked = employee.blocked ?? false
@@ -475,8 +487,7 @@ function EmployeeRow({ employee, sno, role, formatDate, onView, onEdit }: {
   }
 
   const handleDelete = async () => {
-    if (!window.confirm(`Are you sure you want to delete ${employee.fullName}?`)) return
-
+    setDeleting(true)
     try {
       const res = await fetch('/api/delete-employee', {
         method: 'POST',
@@ -496,6 +507,8 @@ function EmployeeRow({ employee, sno, role, formatDate, onView, onEdit }: {
       )
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to delete employee.')
+    } finally {
+      setDeleting(false)
     }
   }
   return (
@@ -537,9 +550,31 @@ function EmployeeRow({ employee, sno, role, formatDate, onView, onEdit }: {
           <button type="button" onClick={() => onEdit(employee)} className="inline-flex size-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-amber-500/20 dark:hover:bg-amber-500/10 dark:hover:text-amber-300" title="Edit">
             <Edit className="size-3.5" />
           </button>
-          <button type="button" onClick={handleDelete} className="inline-flex size-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-rose-500/20 dark:hover:bg-rose-500/10 dark:hover:text-rose-300" title="Delete">
-            <Trash2 className="size-3.5" />
-          </button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button type="button" disabled={deleting} className="inline-flex size-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-rose-500/20 dark:hover:bg-rose-500/10 dark:hover:text-rose-300" title="Delete">
+                <Trash2 className="size-3.5" />
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete employee?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete {employee.fullName}? This removes the employee from Clerk and the employee list when a matching record exists.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-500/30"
+                >
+                  Delete employee
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <button type="button" onClick={handleBlock} disabled={blocking} className={`inline-flex size-8 items-center justify-center rounded-lg border transition disabled:opacity-50 ${isBlocked ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200 dark:hover:bg-emerald-500/15' : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-white/5'}`} title={isBlocked ? 'Unblock' : 'Block'}>
             <Ban className="size-3.5" />
           </button>
@@ -558,6 +593,7 @@ function EmployeeMobileCard({ employee, sno, role, formatDate, onView, onEdit }:
   onEdit: (emp: Doc<'employees'>) => void
 }) {
   const [blocking, setBlocking] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const toggleBlock = useMutation(api.employees.toggleBlockEmployee)
   const initials = employee.fullName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
   const isBlocked = employee.blocked ?? false
@@ -577,8 +613,7 @@ function EmployeeMobileCard({ employee, sno, role, formatDate, onView, onEdit }:
   }
 
   const handleDelete = async () => {
-    if (!window.confirm(`Are you sure you want to delete ${employee.fullName}?`)) return
-
+    setDeleting(true)
     try {
       const res = await fetch('/api/delete-employee', {
         method: 'POST',
@@ -598,6 +633,8 @@ function EmployeeMobileCard({ employee, sno, role, formatDate, onView, onEdit }:
       )
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to delete employee.')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -632,9 +669,31 @@ function EmployeeMobileCard({ employee, sno, role, formatDate, onView, onEdit }:
             <button type="button" onClick={() => onEdit(employee)} className="inline-flex size-7 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950" title="Edit">
               <Edit className="size-3.5" />
             </button>
-            <button type="button" onClick={handleDelete} className="inline-flex size-7 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950" title="Delete">
-              <Trash2 className="size-3.5" />
-            </button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button type="button" disabled={deleting} className="inline-flex size-7 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950" title="Delete">
+                  <Trash2 className="size-3.5" />
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete employee?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete {employee.fullName}? This removes the employee from Clerk and the employee list when a matching record exists.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-500/30"
+                  >
+                    Delete employee
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <button type="button" onClick={handleBlock} disabled={blocking} className={`inline-flex size-7 items-center justify-center rounded-md border transition disabled:opacity-50 ${isBlocked ? 'border-zinc-300 bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:border-zinc-900 dark:bg-black dark:text-white/70 dark:hover:bg-zinc-950' : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-100 dark:border-zinc-900 dark:bg-black dark:text-white/65 dark:hover:bg-zinc-950'}`} title={isBlocked ? 'Unblock' : 'Block'}>
               <Ban className="size-3.5" />
             </button>
