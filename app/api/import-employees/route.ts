@@ -21,7 +21,14 @@ type EmployeeInput = {
   position: string
   employeeType: string
   salary?: number
+  allowances?: number
+  overtimeRatePerHour?: number
+  salaryType?: 'monthly' | 'daily'
+  bankName?: string
+  accountNumber?: string
+  ifscCode?: string
   address?: string
+  joiningDate?: string
 }
 
 export async function POST(req: NextRequest) {
@@ -123,9 +130,15 @@ export async function POST(req: NextRequest) {
             department: emp.department,
             position: emp.position,
             employeeId: `EMP-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            joiningDate: new Date().toISOString().split('T')[0],
+            joiningDate: emp.joiningDate ?? new Date().toISOString().split('T')[0],
             employeeType: emp.employeeType,
             salary: emp.salary,
+            allowances: emp.allowances,
+            overtimeRatePerHour: emp.overtimeRatePerHour,
+            salaryType: emp.salaryType,
+            bankName: emp.bankName,
+            accountNumber: emp.accountNumber,
+            ifscCode: emp.ifscCode,
             dateOfBirth: emp.dateOfBirth,
             address: emp.address,
             password: emp.password,

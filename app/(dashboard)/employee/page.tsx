@@ -5,7 +5,7 @@ import { useMutation, useQuery } from 'convex/react'
 import { useUser } from '@clerk/nextjs'
 import { api } from '@/convex/_generated/api'
 import type { Doc } from '@/convex/_generated/dataModel'
-import { Search, Plus, X, Eye, EyeOff, Edit, Trash2, Ban, User, Shield, Users } from 'lucide-react'
+import { Search, Plus, X, Eye, EyeOff, Edit, Trash2, Ban, User, Shield, Users, Wallet } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Pagination } from '@/components/ui/pagination'
 import { DatePicker } from '@/components/ui/date-picker'
@@ -82,6 +82,14 @@ type FormData = {
   phone: string
   countryCode: string
   dateOfBirth: string
+  joiningDate: string
+  salary: string
+  allowances: string
+  overtimeRatePerHour: string
+  salaryType: 'monthly' | 'daily'
+  bankName: string
+  accountNumber: string
+  ifscCode: string
   role: 'staff' | 'admin'
 }
 
@@ -92,6 +100,14 @@ const EMPTY_FORM: FormData = {
   phone: '',
   countryCode: DEFAULT_COUNTRY_CODE,
   dateOfBirth: '',
+  joiningDate: new Date().toISOString().split('T')[0],
+  salary: '',
+  allowances: '',
+  overtimeRatePerHour: '',
+  salaryType: 'monthly',
+  bankName: '',
+  accountNumber: '',
+  ifscCode: '',
   role: 'staff',
 }
 
@@ -114,6 +130,13 @@ function Field({ label, required, children }: {
 
 const inputCls =
   'w-full rounded-md border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-zinc-400 dark:border-zinc-900 dark:bg-black dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-white'
+
+function parseOptionalNumber(value: string) {
+  const trimmed = value.trim()
+  if (!trimmed) return undefined
+  const parsed = Number(trimmed.replace(/,/g, ''))
+  return Number.isFinite(parsed) ? parsed : undefined
+}
 
 //  Slide-in Panel 
 
@@ -160,6 +183,9 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
     if (!form.password) return setPasswordError('Password is required.')
     if (!passwordStrength.isStrong) return setPasswordError('Password is weak. Use uppercase, lowercase, numbers, and symbols.')
     if (form.phone.length > 0 && form.phone.length !== 10) return setError('Phone must be exactly 10 digits')
+    if (!form.joiningDate) return setError('Joining date is required.')
+    if (!form.salary.trim()) return setError('Basic salary is required.')
+    if (parseOptionalNumber(form.salary) === undefined) return setError('Basic salary must be a valid number.')
 
     try {
       setIsSubmitting(true)
@@ -201,8 +227,15 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
         department: '',
         position: form.role === 'admin' ? 'Admin' : 'Staff',
         employeeId,
-        joiningDate: new Date().toISOString().split('T')[0],
+        joiningDate: form.joiningDate,
         employeeType: 'Employee',
+        salary: parseOptionalNumber(form.salary),
+        allowances: parseOptionalNumber(form.allowances),
+        overtimeRatePerHour: parseOptionalNumber(form.overtimeRatePerHour),
+        salaryType: form.salaryType,
+        bankName: form.bankName.trim() || undefined,
+        accountNumber: form.accountNumber.trim() || undefined,
+        ifscCode: form.ifscCode.trim() || undefined,
         dateOfBirth: form.dateOfBirth || undefined,
         password: form.password,
         appUrl: window.location.origin,
@@ -387,7 +420,7 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
               {phoneError && <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">{phoneError}</p>}
             </Field>
 
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid gap-2.5 sm:grid-cols-2">
               <Field label="Date of Birth">
                 <DatePicker
                   value={form.dateOfBirth}
@@ -396,6 +429,88 @@ function AddEmployeePanel({ open, onClose, onSuccess }: {
                     setError(null)
                   }}
                 />
+              </Field>
+              <Field label="Joining Date" required>
+                <DatePicker
+                  value={form.joiningDate}
+                  onChange={(val) => {
+                    setForm((prev) => ({ ...prev, joiningDate: val }))
+                    setError(null)
+                  }}
+                />
+              </Field>
+            </div>
+
+            <div className="border-t border-zinc-200 pt-1 dark:border-zinc-900" />
+
+            <div className="flex items-center gap-2 pb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <Wallet className="size-4" />
+              Salary Details
+            </div>
+
+            <div className="grid gap-2.5 sm:grid-cols-2">
+              <Field label="Salary Type" required>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['monthly', 'daily'] as const).map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev, salaryType: type }))}
+                      className={`rounded-md border px-3 py-2 text-sm font-medium transition cursor-pointer ${
+                        form.salaryType === type
+                          ? 'border-zinc-900 bg-zinc-900 text-white dark:border-zinc-900 dark:bg-black dark:text-white'
+                          : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-400 dark:border-zinc-900 dark:bg-black dark:text-zinc-300 dark:hover:border-white/25'
+                      }`}
+                    >
+                      {type === 'monthly' ? 'Monthly' : 'Daily'}
+                    </button>
+                  ))}
+                </div>
+              </Field>
+              <Field label="Basic Salary" required>
+                <input
+                  name="salary"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={form.salary}
+                  onChange={handleChange}
+                  placeholder="50000"
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Allowances">
+                <input
+                  name="allowances"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={form.allowances}
+                  onChange={handleChange}
+                  placeholder="5000"
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Overtime Rate Per Hour">
+                <input
+                  name="overtimeRatePerHour"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={form.overtimeRatePerHour}
+                  onChange={handleChange}
+                  placeholder="250"
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Bank Name">
+                <input name="bankName" type="text" value={form.bankName} onChange={handleChange} placeholder="HDFC Bank" className={inputCls} />
+              </Field>
+              <Field label="Account Number">
+                <input name="accountNumber" type="text" value={form.accountNumber} onChange={handleChange} placeholder="1234567890" className={inputCls} />
+              </Field>
+              <Field label="IFSC Code">
+                <input name="ifscCode" type="text" value={form.ifscCode} onChange={handleChange} placeholder="HDFC0001234" className={inputCls} />
               </Field>
             </div>
 
@@ -758,7 +873,13 @@ function ViewEmployeePanel({ employee, onClose }: {
     { label: 'Employee Type', value: employee.employeeType },
     { label: 'Date of Birth', value: employee.dateOfBirth ? formatDate(employee.dateOfBirth) : '' },
     { label: 'Joining Date', value: formatDate(employee.joiningDate) },
-    { label: 'Salary', value: employee.salary ? `${employee.salary.toLocaleString('en-IN')}` : '' },
+    { label: 'Basic Salary', value: employee.salary ? `${employee.salary.toLocaleString('en-IN')}` : '' },
+    { label: 'Allowances', value: employee.allowances ? `${employee.allowances.toLocaleString('en-IN')}` : '' },
+    { label: 'Overtime Rate', value: employee.overtimeRatePerHour ? `${employee.overtimeRatePerHour.toLocaleString('en-IN')}` : '' },
+    { label: 'Salary Type', value: employee.salaryType || '' },
+    { label: 'Bank Name', value: employee.bankName || '' },
+    { label: 'Account Number', value: employee.accountNumber || '' },
+    { label: 'IFSC Code', value: employee.ifscCode || '' },
     { label: 'Address', value: employee.address || '' },
   ]
 
@@ -827,7 +948,13 @@ function EditEmployeePanel({ employee, onClose }: {
     department: employee.department ?? '',
     position: employee.position,
     employeeType: employee.employeeType ?? '',
-    salary: employee.salary ?? undefined,
+    salary: employee.salary ? String(employee.salary) : '',
+    allowances: employee.allowances ? String(employee.allowances) : '',
+    overtimeRatePerHour: employee.overtimeRatePerHour ? String(employee.overtimeRatePerHour) : '',
+    salaryType: employee.salaryType ?? 'monthly',
+    bankName: employee.bankName ?? '',
+    accountNumber: employee.accountNumber ?? '',
+    ifscCode: employee.ifscCode ?? '',
     dateOfBirth: employee.dateOfBirth ?? '',
     address: employee.address ?? '',
     newPassword: '',
@@ -860,6 +987,12 @@ function EditEmployeePanel({ employee, onClose }: {
         employeeId: form.employeeId.trim(),
         phone: fullPhone,
         salary: form.salary ? Number(form.salary) : undefined,
+        allowances: form.allowances ? Number(form.allowances) : undefined,
+        overtimeRatePerHour: form.overtimeRatePerHour ? Number(form.overtimeRatePerHour) : undefined,
+        salaryType: form.salaryType,
+        bankName: form.bankName.trim() || undefined,
+        accountNumber: form.accountNumber.trim() || undefined,
+        ifscCode: form.ifscCode.trim() || undefined,
       })
 
       setSyncingLogin(true)
@@ -946,14 +1079,58 @@ function EditEmployeePanel({ employee, onClose }: {
                 </p>
               </div>
             </div>
-            {securityWarning && (
-              <p className="mt-3 rounded-md border border-zinc-200 bg-zinc-100 px-3 py-2 text-xs text-zinc-700 dark:border-zinc-900 dark:bg-black dark:text-zinc-300">
-                {securityWarning}
-              </p>
-            )}
-          </div>
+          {securityWarning && (
+            <p className="mt-3 rounded-md border border-zinc-200 bg-zinc-100 px-3 py-2 text-xs text-zinc-700 dark:border-zinc-900 dark:bg-black dark:text-zinc-300">
+              {securityWarning}
+            </p>
+          )}
+        </div>
 
+        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3.5 dark:border-zinc-900 dark:bg-black">
+          <div className="flex items-center gap-2 pb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <Wallet className="size-4" />
+            Salary Details
+          </div>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              {(['monthly', 'daily'] as const).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setForm((prev) => ({ ...prev, salaryType: type }))}
+                  className={`rounded-md border px-3 py-2 text-sm font-medium transition cursor-pointer ${
+                    form.salaryType === type
+                      ? 'border-zinc-900 bg-zinc-900 text-white dark:border-zinc-900 dark:bg-black dark:text-white'
+                      : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-400 dark:border-zinc-900 dark:bg-black dark:text-zinc-300 dark:hover:border-white/25'
+                  }`}
+                >
+                  {type === 'monthly' ? 'Monthly' : 'Daily'}
+                </button>
+              ))}
+            </div>
             {([
+              { label: 'Basic Salary', key: 'salary', type: 'number', placeholder: '50000' },
+              { label: 'Allowances', key: 'allowances', type: 'number', placeholder: '5000' },
+              { label: 'Overtime Rate Per Hour', key: 'overtimeRatePerHour', type: 'number', placeholder: '250' },
+              { label: 'Bank Name', key: 'bankName', type: 'text', placeholder: 'HDFC Bank' },
+              { label: 'Account Number', key: 'accountNumber', type: 'text', placeholder: '1234567890' },
+              { label: 'IFSC Code', key: 'ifscCode', type: 'text', placeholder: 'HDFC0001234' },
+            ] as const).map(({ label, key, type, placeholder }) => (
+              <div key={key}>
+                <label className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">{label}</label>
+                <input
+                  type={type}
+                  value={form[key]}
+                  onChange={(e) => setForm((prev) => ({ ...prev, [key]: e.target.value }))}
+                  placeholder={placeholder}
+                  className="mt-1 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-400 dark:border-zinc-900 dark:bg-black dark:text-white dark:focus:border-white"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+            {([ 
               { label: 'Full Name', key: 'fullName', type: 'text' },
               { label: 'Email', key: 'email', type: 'email' },
             { label: 'Phone', key: 'phone', type: 'phone' },
